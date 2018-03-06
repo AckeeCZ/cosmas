@@ -1,0 +1,13 @@
+{
+  "linters": {
+    "*.js": [
+      "npm run pretty",
+      "npm run lint",
+      "git add"
+    ]
+  },
+  "globOptions": {
+    "matchbase": true,
+    "nonegate": true
+  }
+}
