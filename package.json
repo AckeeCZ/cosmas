@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "lint-staged": "lint-staged",
-    "test": "jest",
-    "test-watch": "jest --watch",
+    "test": "jest --coverage",
+    "test-watch": "jest --watch --coverage",
     "lint": "eslint .",
     "pretty": "prettier --write '*.js'",
     "precommit": "lint-staged && npm test"
@@ -20,9 +20,11 @@
   "devDependencies": {
     "eslint": "4.17.0",
     "eslint-config-ackee": "^0.8.1",
+    "flush-write-stream": "^1.0.2",
     "husky": "^0.14.3",
     "jest": "^22.4.2",
     "lint-staged": "^7.0.0",
-    "prettier": "^1.11.0"
+    "prettier": "^1.11.0",
+    "split2": "^2.2.0"
   }
 }

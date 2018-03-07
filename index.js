@@ -11,13 +11,33 @@ pretty.pipe(process.stdout);
 const prettyErr = pino.pretty();
 prettyErr.pipe(process.stderr);
 
-const simpleStreams = [{ level: 'trace', stream: pretty }, { level: 'error', stream: prettyErr }];
+const loggerFactory = (moduleName, options = {}) => {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isTesting = process.env.NODE_ENV === 'test';
+    let defaultLevel = 'debug';
 
-const logger = pino({ level: 'trace' }, multistream(simpleStreams));
+    if (isTesting) {
+        defaultLevel = 'silent';
+    }
 
-logger.warning = logger.warn;
+    if (options.defaultLevel) {
+        defaultLevel = options.defaultLevel;
+    }
 
-const loggerFactory = moduleName => {
+    let streams;
+    if (isProduction) {
+        streams = [{ level: defaultLevel, stream: process.stdout }, { level: 'warn', stream: process.stderr }];
+    } else {
+        // dev behavior = default
+        streams = [{ level: defaultLevel, stream: pretty }, { level: 'warn', stream: prettyErr }];
+    }
+
+    if (options.streams) {
+        streams = options.streams;
+    }
+
+    const logger = pino({ level: defaultLevel, timestamp: false, base: {} }, multistream(streams));
+    logger.warning = logger.warn;
     if (!moduleName) {
         return logger;
     }
