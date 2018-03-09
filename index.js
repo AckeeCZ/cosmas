@@ -3,15 +3,38 @@
 // https://news.ycombinator.com/item?id=14209168
 // https://tools.ietf.org/html/rfc5424
 
+const _ = require('lodash');
 const pino = require('pino');
 const multistream = require('pino-multi-stream').multistream;
+const serializers = require('./serializers');
 
-const pretty = pino.pretty();
-pretty.pipe(process.stdout);
-const prettyErr = pino.pretty();
-prettyErr.pipe(process.stderr);
+// options.disableFields = ['error.stack'];
 
-const loggerFactory = (moduleName, options = {}) => {
+const defaultLogger = (options = {}) => {
+    const pretty = pino.pretty();
+    pretty.pipe(process.stdout);
+    const prettyErr = pino.pretty();
+    prettyErr.pipe(process.stderr);
+
+    if (options.disableFields) {
+        _.forEach(serializers, (value, key) => {
+            const matcher = new RegExp(`^${key}.(.*)`);
+            const affectedFields = [];
+            options.disableFields.forEach(field => {
+                field.replace(matcher, (match, p1) => {
+                    affectedFields.push(p1);
+                });
+            });
+
+            if (affectedFields.length > 0) {
+                const newSerializer = obj => {
+                    return _.omit(value(obj), affectedFields);
+                };
+                serializers[key] = newSerializer;
+            }
+        });
+    }
+
     const isProduction = process.env.NODE_ENV === 'production';
     const isTesting = process.env.NODE_ENV === 'test';
     let defaultLevel = 'debug';
@@ -36,12 +59,38 @@ const loggerFactory = (moduleName, options = {}) => {
         streams = options.streams;
     }
 
-    const logger = pino({ level: defaultLevel, timestamp: false, base: {} }, multistream(streams));
+    const logger = pino({ level: defaultLevel, timestamp: false, base: {}, serializers }, multistream(streams));
     logger.warning = logger.warn;
+
+    return logger;
+};
+
+let logger;
+
+const loggerFactory = data => {
+    let moduleName;
+    let options;
+    if (data) {
+        if (_.isString(data)) {
+            moduleName = data;
+        } else if (_.isObject(data)) {
+            options = data;
+        } else {
+            throw new TypeError(`Invalid argument of type ${typeof data}`);
+        }
+    }
+
+    if (!logger) {
+        logger = defaultLogger(options);
+    }
     if (!moduleName) {
         return logger;
     }
     return logger.child({ name: moduleName });
 };
 
-module.exports = loggerFactory;
+const factoryProxy = new Proxy(loggerFactory, {
+    get: (target, key) => target()[key],
+});
+
+module.exports = factoryProxy;

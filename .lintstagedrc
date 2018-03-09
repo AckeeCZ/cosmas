@@ -1,5 +1,4 @@
 {
-  "ignore": ['**/coverage/**/*.js'],
   "linters": {
     "*.js": [
       "npm run pretty",
