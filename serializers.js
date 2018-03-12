@@ -52,6 +52,7 @@ module.exports = {
     res(obj) {
         return {
             out: _.get(obj, 'out'),
+            time: _.get(obj, 'time'),
         };
     },
 };

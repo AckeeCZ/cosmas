@@ -5,6 +5,8 @@
 
 const _ = require('lodash');
 const pino = require('pino');
+const onFinished = require('on-finished');
+const onHeaders = require('on-headers');
 const multistream = require('pino-multi-stream').multistream;
 const serializers = require('./serializers');
 
@@ -19,6 +21,7 @@ const levels = {
 };
 
 // options.disableFields = ['error.stack'];
+// options.enableFields = ['req.protocol'];
 
 const maxLevelWrite = function(data) {
     let dest;
@@ -45,6 +48,34 @@ const maxLevelWrite = function(data) {
     }
 };
 
+const expressMiddleware = function(req, response, next) {
+    this.debug({ req, ackId: req.ackId }, 'Request accepted');
+    req._startAt = process.hrtime();
+    onHeaders(response, () => {
+        response._startAt = process.hrtime();
+        const diffFromSeconds = (response._startAt[0] - req._startAt[0]) * 1e3;
+        const diffFromNanoseconds = (response._startAt[1] - req._startAt[1]) * 1e-6;
+        const ms = diffFromSeconds + diffFromNanoseconds;
+        response.time = ms.toFixed(3);
+    });
+    onFinished(response, (err, res) => {
+        const error = res[Symbol.for('error')];
+        if (error) {
+            this.error({ error, req, res, ackId: req.ackId }, 'Error handler at the end of app');
+        } else if (res.out) {
+            this.debug({ req, res, ackId: req.ackId }, `Standard output [${res.statusCode}]`);
+        } else {
+            this.info({ req, res, ackId: req.ackId }, `Standard output [${res.statusCode}]`);
+        }
+    });
+    next();
+};
+
+const expressErrorMiddleware = (error, req, res, next) => {
+    res[Symbol.for('error')] = error;
+    next(error);
+};
+
 const defaultLogger = (options = {}) => {
     const pretty = pino.pretty();
     pretty.pipe(process.stdout);
@@ -64,6 +95,27 @@ const defaultLogger = (options = {}) => {
             if (affectedFields.length > 0) {
                 const newSerializer = obj => {
                     return _.omit(value(obj), affectedFields);
+                };
+                serializers[key] = newSerializer;
+            }
+        });
+    }
+
+    if (options.enableFields) {
+        _.forEach(serializers, (value, key) => {
+            const matcher = new RegExp(`^${key}.(.*)`);
+            const affectedFields = [];
+            options.enableFields.forEach(field => {
+                field.replace(matcher, (match, p1) => {
+                    affectedFields.push(p1);
+                });
+            });
+
+            if (affectedFields.length > 0) {
+                const newSerializer = obj => {
+                    const newFields = _.pick(obj, affectedFields);
+                    const originalResult = value(obj);
+                    return _.assign(originalResult, newFields);
                 };
                 serializers[key] = newSerializer;
             }
@@ -106,6 +158,9 @@ const defaultLogger = (options = {}) => {
     // Add maxLevel support to pino-multi-stream
     // This could be replaced with custom pass-through stream being passed to multistream, which would filter the messages
     logger.stream.write = maxLevelWrite.bind(logger.stream);
+
+    logger.express = expressMiddleware.bind(logger);
+    logger.expressError = expressErrorMiddleware;
 
     return logger;
 };
