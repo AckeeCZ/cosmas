@@ -8,7 +8,42 @@ const pino = require('pino');
 const multistream = require('pino-multi-stream').multistream;
 const serializers = require('./serializers');
 
+const levels = {
+    silent: Infinity,
+    fatal: 60,
+    error: 50,
+    warn: 40,
+    info: 30,
+    debug: 20,
+    trace: 10,
+};
+
 // options.disableFields = ['error.stack'];
+
+const maxLevelWrite = function(data) {
+    let dest;
+    let stream;
+    const needsMetadata = Symbol.for('needsMetadata');
+    const level = this.lastLevel;
+    const streams = this.streams;
+    for (let i = 0; i < streams.length; i++) {
+        dest = streams[i];
+        stream = dest.stream;
+        if (dest.level <= level) {
+            if (!dest.maxLevel || (dest.maxLevel && level < dest.maxLevel)) {
+                if (stream[needsMetadata]) {
+                    stream.lastLevel = level;
+                    stream.lastMsg = this.lastMsg;
+                    stream.lastObj = this.lastObj;
+                    stream.lastLogger = this.lastLogger;
+                }
+                stream.write(data);
+            }
+        } else {
+            break;
+        }
+    }
+};
 
 const defaultLogger = (options = {}) => {
     const pretty = pino.pretty();
@@ -49,10 +84,16 @@ const defaultLogger = (options = {}) => {
 
     let streams;
     if (isProduction) {
-        streams = [{ level: defaultLevel, stream: process.stdout }, { level: 'warn', stream: process.stderr }];
+        streams = [
+            { level: defaultLevel, stream: process.stdout, maxLevel: levels.warn },
+            { level: levels.warn, stream: process.stderr },
+        ];
     } else {
         // dev behavior = default
-        streams = [{ level: defaultLevel, stream: pretty }, { level: 'warn', stream: prettyErr }];
+        streams = [
+            { level: defaultLevel, stream: pretty, maxLevel: levels.warn },
+            { level: levels.warn, stream: prettyErr },
+        ];
     }
 
     if (options.streams) {
@@ -61,6 +102,10 @@ const defaultLogger = (options = {}) => {
 
     const logger = pino({ level: defaultLevel, timestamp: false, base: {}, serializers }, multistream(streams));
     logger.warning = logger.warn;
+
+    // Add maxLevel support to pino-multi-stream
+    // This could be replaced with custom pass-through stream being passed to multistream, which would filter the messages
+    logger.stream.write = maxLevelWrite.bind(logger.stream);
 
     return logger;
 };
