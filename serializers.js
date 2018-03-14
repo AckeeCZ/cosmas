@@ -1,13 +1,6 @@
 const _ = require('lodash');
 
-/**
- * Gets full URL from express Req object
- * @param {Req} req
- * @return {!string}
- */
-const fullUrlFromReq = req => (req.get ? `${req.protocol}://${req.get('host')}${req.originalUrl}` : '');
-
-module.exports = {
+const serializers = {
     error(obj) {
         return {
             message: _.get(obj, 'message'),
@@ -45,7 +38,7 @@ module.exports = {
         return {
             body,
             query,
-            url: fullUrlFromReq(obj),
+            url: obj.originalUrl || obj.url,
             method: _.get(obj, 'method'),
         };
     },
@@ -55,4 +48,56 @@ module.exports = {
             time: _.get(obj, 'time'),
         };
     },
+};
+
+const disablePaths = paths => {
+    if (!paths || paths.length <= 0) {
+        return;
+    }
+    _.forEach(serializers, (value, key) => {
+        const matcher = new RegExp(`^${key}.(.*)`);
+        const affectedFields = [];
+        paths.forEach(field => {
+            field.replace(matcher, (match, p1) => {
+                affectedFields.push(p1);
+            });
+        });
+
+        if (affectedFields.length > 0) {
+            const newSerializer = obj => {
+                return _.omit(value(obj), affectedFields);
+            };
+            serializers[key] = newSerializer;
+        }
+    });
+};
+
+const enablePaths = paths => {
+    if (!paths || paths.length <= 0) {
+        return;
+    }
+    _.forEach(serializers, (value, key) => {
+        const matcher = new RegExp(`^${key}.(.*)`);
+        const affectedFields = [];
+        paths.forEach(field => {
+            field.replace(matcher, (match, p1) => {
+                affectedFields.push(p1);
+            });
+        });
+
+        if (affectedFields.length > 0) {
+            const newSerializer = obj => {
+                const newFields = _.pick(obj, affectedFields);
+                const originalResult = value(obj);
+                return _.assign(originalResult, newFields);
+            };
+            serializers[key] = newSerializer;
+        }
+    });
+};
+
+module.exports = {
+    serializers,
+    enablePaths,
+    disablePaths,
 };
