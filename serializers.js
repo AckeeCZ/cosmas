@@ -16,24 +16,8 @@ const serializers = {
         };
     },
     req(obj) {
-        const body = _.cloneDeep(_.get(obj, 'body'));
-        const query = _.cloneDeep(_.get(obj, 'query'));
-
-        if (_.get(body, 'password')) {
-            delete body.password;
-        }
-
-        if (_.get(query, 'password')) {
-            delete query.password;
-        }
-
-        if (_.get(body, 'passwordCheck')) {
-            delete body.passwordCheck;
-        }
-
-        if (_.get(query, 'passwordCheck')) {
-            delete query.passwordCheck;
-        }
+        const omitFields = ['password', 'passwordCheck'];
+        const [body, query] = ['body', 'query'].map(name => _.omit(_.get(obj, name), omitFields));
 
         return {
             body,

@@ -14,6 +14,8 @@ const levels = {
     trace: 10,
 };
 
+// This is a custom slightly edited version of pino-multistream's wirte method, whch adds support for maximum log level
+// The original version was pino-multistream 3.1.2 (commit 71d98ae) - https://github.com/pinojs/pino-multi-stream/blob/71d98ae191e02c56e39e849d2c30d59c8c6db1b9/multistream.js#L43
 const maxLevelWrite = function(data) {
     let dest;
     let stream;
