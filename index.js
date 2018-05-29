@@ -50,7 +50,6 @@ const defaultLogger = (options = {}) => {
     serializers.disablePaths(options.disableFields);
     serializers.enablePaths(options.enableFields);
 
-    const isProduction = process.env.NODE_ENV === 'production';
     const isTesting = process.env.NODE_ENV === 'test';
     let defaultLevel = 'debug';
 
@@ -63,21 +62,18 @@ const defaultLogger = (options = {}) => {
     }
 
     let streams;
-    if (isProduction) {
-        streams = [
-            { level: defaultLevel, stream: process.stdout, maxLevel: levels.warn },
-            { level: levels.warn, stream: process.stderr },
-        ];
-    } else {
-        // dev behavior = default
+    if (options.streams) {
+        streams = options.streams;
+    } else if (options.pretty) {
         streams = [
             { level: defaultLevel, stream: pretty, maxLevel: levels.warn },
             { level: levels.warn, stream: prettyErr },
         ];
-    }
-
-    if (options.streams) {
-        streams = options.streams;
+    } else {
+        streams = [
+            { level: defaultLevel, stream: process.stdout, maxLevel: levels.warn },
+            { level: levels.warn, stream: process.stderr },
+        ];
     }
 
     const logger = pino(

@@ -101,6 +101,7 @@ Options override both default logger configuration and environment-specific conf
 - `disableFields` - list of paths which will be omitted from the objects being logged (if any)
 - `enableFields` - list of paths which will not be omitted by default serializers from objects being logged
 - `streams` - list of stream objects, which will be passed directly to [pino-multistream's multistream function](https://github.com/pinojs/pino-multi-stream#pinomsmultistreamstreams) instead of default `ackee-node-logger` stream
+- `pretty` - if set to `true`, logger will use pretty print. This option can be overriden by `streams`
 
 ## Default serializers
 `ackee-node-logger` defines some [pino serializers](https://github.com/pinojs/pino/blob/master/docs/API.md#constructor) on its own
