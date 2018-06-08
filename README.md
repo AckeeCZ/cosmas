@@ -102,6 +102,7 @@ Options override both default logger configuration and environment-specific conf
 - `enableFields` - list of paths which will not be omitted by default serializers from objects being logged
 - `streams` - list of stream objects, which will be passed directly to [pino-multistream's multistream function](https://github.com/pinojs/pino-multi-stream#pinomsmultistreamstreams) instead of default `ackee-node-logger` stream
 - `pretty` - if set to `true`, logger will use pretty print. This option can be overriden by `streams`
+- `pino` - object, which will be passed to underlying pino logger. See available settings in [pino API docs](https://github.com/pinojs/pino/blob/master/docs/API.md#pinooptions-stream)
 
 ## Default serializers
 `ackee-node-logger` defines some [pino serializers](https://github.com/pinojs/pino/blob/master/docs/API.md#constructor) on its own
@@ -110,3 +111,36 @@ Options override both default logger configuration and environment-specific conf
 - `processEnv` - logs `NODE_PATH` and `NODE_ENV`
 - `req` - logs `body`, `query`, `url`, `method` and omits `password` and `passwordCheck` from `body` and `query`
 - `res` - logs `out` and `time`
+
+
+## Tips
+
+### Nice Google Cloud Stackdriver messages
+
+If you examine log messages in Google's [Stackdriver](https://cloud.google.com/stackdriver/) you probably noticed that most of the time, the whole message payload is displayed as a "title" of the message.
+
+This is because Stackdriver takes the title from `message` field (if available). But pino (ackee-node-logger underlying library) logs those titles to `msg` field (by default).
+
+This can be changed by passing pino the `messageKey` option. It will hide the pretty print message title, but you will have nicer Stackdriver messages
+
+```js
+const logger = require('ackee-node-logger')({ pino: { messageKey: 'message'} });
+```
+
+### VS Code debugging not showing log messages
+
+This problem is caused by a way VS Code handles console output. Therefore it appears in Winston and pino (underlying library of ackee-node-logger) as well.
+
+However, it can be easily solved by adding eithe
+
+```js
+"console": "integratedTerminal",
+```
+
+or
+
+```js
+"outputCapture": "std"
+```
+
+to the debug configuration in your `launch.json` file.
