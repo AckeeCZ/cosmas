@@ -8,14 +8,14 @@ First step is to create a root logger. Its configuration can be specified on cre
 
 ```js
 const logger = require('ackee-node-logger');
-// of
+// or
 const logger = require('ackee-node-logger')();
 ```
 
 ### Create root logger with custom configuration
 
 ```js
-const logger = require('ackee-node-logger)({
+const logger = require('ackee-node-logger')({
     disableFields: ['error.stack'],
     enableFields: ['req.protocol']
 });
@@ -38,12 +38,12 @@ The only difference between root logger and a child logger is that the child log
 Logger itself is an enhanced and specifically configured `pino` instance, so you may use all basic `pino` log methods
 
 ```js
-pino.info('hello world')
-pino.error('this is at error level')
-pino.info('the answer is %d', 42)
-pino.info({ obj: 42 }, 'hello world')
-pino.info({ obj: 42, b: 2 }, 'hello world')
-pino.info({ obj: { aa: 'bbb' } }, 'another')
+logger.info('hello world')
+logger.error('this is at error level')
+logger.info('the answer is %d', 42)
+logger.info({ obj: 42 }, 'hello world')
+logger.info({ obj: 42, b: 2 }, 'hello world')
+logger.info({ obj: { aa: 'bbb' } }, 'another')
 ```
 
 All `pino` levels are supported and additionaly there is a `warning` level which is equivalent to `warn` level.
@@ -88,11 +88,8 @@ All those log messages will contain request and possibly response, error, time f
 ### Testing
 If the `NODE_ENV` environment variable is set to `test`, all logs are turned off (minimal loglevel is set to `silent` which effectively turns logging off).
 
-### Production
-If the `NODE_ENV` environment variable is set to `production`, [standard pino log](https://github.com/pinojs/pino#usage) is used.
-
 ### Otherwise
-In other cases, minimal loglevel is set to `debug` and [pino pretty human-readable logs](https://github.com/pinojs/pino/blob/master/docs/API.md#pretty) are used.
+[Standard pino log](https://github.com/pinojs/pino#usage) is used and it's optimized for Google Stackdriver logging. That means that default log level is `debug`, pretty print is turned off and [pino's `messageKey` option](https://github.com/pinojs/pino/blob/master/docs/API.md#pinooptions-stream) is set to `message`.
 
 ## Options
 Options override both default logger configuration and environment-specific configuration. However, do not forget to specify it during the **first** `ackee-node-logger`. During it, root logger is created and it cannot be changed later.
@@ -101,7 +98,8 @@ Options override both default logger configuration and environment-specific conf
 - `disableFields` - list of paths which will be omitted from the objects being logged (if any)
 - `enableFields` - list of paths which will not be omitted by default serializers from objects being logged
 - `streams` - list of stream objects, which will be passed directly to [pino-multistream's multistream function](https://github.com/pinojs/pino-multi-stream#pinomsmultistreamstreams) instead of default `ackee-node-logger` stream
-- `pretty` - if set to `true`, logger will use pretty print. This option can be overriden by `streams`
+- `pretty` - if set to `true`, logger will use [pino pretty human-readable logs](https://github.com/pinojs/pino/blob/master/docs/API.md#pretty). This option can be overriden by `streams`
+- `config` - object, which will be passed to underlying logger object. Right now, underlying logger is [pino](https://github.com/pinojs/pino), so for available options see [pino API docs](https://github.com/pinojs/pino/blob/master/docs/API.md#pinooptions-stream)
 
 ## Default serializers
 `ackee-node-logger` defines some [pino serializers](https://github.com/pinojs/pino/blob/master/docs/API.md#constructor) on its own
@@ -110,3 +108,24 @@ Options override both default logger configuration and environment-specific conf
 - `processEnv` - logs `NODE_PATH` and `NODE_ENV`
 - `req` - logs `body`, `query`, `url`, `method` and omits `password` and `passwordCheck` from `body` and `query`
 - `res` - logs `out` and `time`
+
+
+## Tips
+
+### VS Code debugging not showing log messages
+
+This problem is caused by a way VS Code handles console output. Therefore it appears in Winston and pino (underlying library of ackee-node-logger) as well.
+
+However, it can be easily solved by adding eithe
+
+```js
+"console": "integratedTerminal",
+```
+
+or
+
+```js
+"outputCapture": "std"
+```
+
+to the debug configuration in your `launch.json` file.
