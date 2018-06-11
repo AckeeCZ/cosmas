@@ -8,14 +8,14 @@ First step is to create a root logger. Its configuration can be specified on cre
 
 ```js
 const logger = require('ackee-node-logger');
-// of
+// or
 const logger = require('ackee-node-logger')();
 ```
 
 ### Create root logger with custom configuration
 
 ```js
-const logger = require('ackee-node-logger)({
+const logger = require('ackee-node-logger')({
     disableFields: ['error.stack'],
     enableFields: ['req.protocol']
 });
@@ -38,12 +38,12 @@ The only difference between root logger and a child logger is that the child log
 Logger itself is an enhanced and specifically configured `pino` instance, so you may use all basic `pino` log methods
 
 ```js
-pino.info('hello world')
-pino.error('this is at error level')
-pino.info('the answer is %d', 42)
-pino.info({ obj: 42 }, 'hello world')
-pino.info({ obj: 42, b: 2 }, 'hello world')
-pino.info({ obj: { aa: 'bbb' } }, 'another')
+logger.info('hello world')
+logger.error('this is at error level')
+logger.info('the answer is %d', 42)
+logger.info({ obj: 42 }, 'hello world')
+logger.info({ obj: 42, b: 2 }, 'hello world')
+logger.info({ obj: { aa: 'bbb' } }, 'another')
 ```
 
 All `pino` levels are supported and additionaly there is a `warning` level which is equivalent to `warn` level.
@@ -88,11 +88,8 @@ All those log messages will contain request and possibly response, error, time f
 ### Testing
 If the `NODE_ENV` environment variable is set to `test`, all logs are turned off (minimal loglevel is set to `silent` which effectively turns logging off).
 
-### Production
-If the `NODE_ENV` environment variable is set to `production`, [standard pino log](https://github.com/pinojs/pino#usage) is used.
-
 ### Otherwise
-In other cases, minimal loglevel is set to `debug` and [pino pretty human-readable logs](https://github.com/pinojs/pino/blob/master/docs/API.md#pretty) are used.
+[Standard pino log](https://github.com/pinojs/pino#usage) is used and it's optimized for Google Stackdriver logging. That means that default log level is `debug`, pretty print is turned off and [pino's `messageKey` option](https://github.com/pinojs/pino/blob/master/docs/API.md#pinooptions-stream) is set to `message`.
 
 ## Options
 Options override both default logger configuration and environment-specific configuration. However, do not forget to specify it during the **first** `ackee-node-logger`. During it, root logger is created and it cannot be changed later.
@@ -101,8 +98,8 @@ Options override both default logger configuration and environment-specific conf
 - `disableFields` - list of paths which will be omitted from the objects being logged (if any)
 - `enableFields` - list of paths which will not be omitted by default serializers from objects being logged
 - `streams` - list of stream objects, which will be passed directly to [pino-multistream's multistream function](https://github.com/pinojs/pino-multi-stream#pinomsmultistreamstreams) instead of default `ackee-node-logger` stream
-- `pretty` - if set to `true`, logger will use pretty print. This option can be overriden by `streams`
-- `pino` - object, which will be passed to underlying pino logger. See available settings in [pino API docs](https://github.com/pinojs/pino/blob/master/docs/API.md#pinooptions-stream)
+- `pretty` - if set to `true`, logger will use [pino pretty human-readable logs](https://github.com/pinojs/pino/blob/master/docs/API.md#pretty). This option can be overriden by `streams`
+- `config` - object, which will be passed to underlying logger object. Right now, underlying logger is [pino](https://github.com/pinojs/pino), so for available options see [pino API docs](https://github.com/pinojs/pino/blob/master/docs/API.md#pinooptions-stream)
 
 ## Default serializers
 `ackee-node-logger` defines some [pino serializers](https://github.com/pinojs/pino/blob/master/docs/API.md#constructor) on its own
@@ -114,18 +111,6 @@ Options override both default logger configuration and environment-specific conf
 
 
 ## Tips
-
-### Nice Google Cloud Stackdriver messages
-
-If you examine log messages in Google's [Stackdriver](https://cloud.google.com/stackdriver/) you probably noticed that most of the time, the whole message payload is displayed as a "title" of the message.
-
-This is because Stackdriver takes the title from `message` field (if available). But pino (ackee-node-logger underlying library) logs those titles to `msg` field (by default).
-
-This can be changed by passing pino the `messageKey` option. It will hide the pretty print message title, but you will have nicer Stackdriver messages
-
-```js
-const logger = require('ackee-node-logger')({ pino: { messageKey: 'message'} });
-```
 
 ### VS Code debugging not showing log messages
 

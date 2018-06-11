@@ -2,7 +2,7 @@
 
 ### Added
 
-- `options.pino` for configuring underlying pino instance
+- `options.config` for configuring underlying logger instance
 - "Tips" section to README
 
 

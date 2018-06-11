@@ -62,6 +62,7 @@ const defaultLogger = (options = {}) => {
     }
 
     let streams;
+    let defaultMessageKey = 'message'; // best option for Google Stackdriver
     if (options.streams) {
         streams = options.streams;
     } else if (options.pretty) {
@@ -69,6 +70,7 @@ const defaultLogger = (options = {}) => {
             { level: defaultLevel, stream: pretty, maxLevel: levels.warn },
             { level: levels.warn, stream: prettyErr },
         ];
+        defaultMessageKey = 'msg'; // default pino - best option for pretty print
     } else {
         streams = [
             { level: defaultLevel, stream: process.stdout, maxLevel: levels.warn },
@@ -77,7 +79,16 @@ const defaultLogger = (options = {}) => {
     }
 
     const logger = pino(
-        { level: defaultLevel, timestamp: false, base: {}, serializers: serializers.serializers },
+        _.merge(
+            {
+                level: defaultLevel,
+                timestamp: false,
+                base: {},
+                serializers: serializers.serializers,
+                messageKey: defaultMessageKey,
+            },
+            options.config
+        ),
         multistream(streams)
     );
     logger.warning = logger.warn;
