@@ -2,7 +2,8 @@ const onFinished = require('on-finished');
 const onHeaders = require('on-headers');
 
 const expressMiddleware = function(req, response, next) {
-    this.debug({ req, ackId: req.ackId }, 'Request accepted');
+    const reqInfo = `${req.method} ${req.originalUrl} HTTP/${req.httpVersion}`;
+    this.debug({ req, ackId: req.ackId }, `${reqInfo} - Request accepted`);
     req._startAt = process.hrtime();
     onHeaders(response, () => {
         response._startAt = process.hrtime();
@@ -14,11 +15,11 @@ const expressMiddleware = function(req, response, next) {
     onFinished(response, (err, res) => {
         const error = res[Symbol.for('error')];
         if (error) {
-            this.error({ error, req, res, ackId: req.ackId }, 'Error handler at the end of app');
+            this.error({ error, req, res, ackId: req.ackId }, `${reqInfo} - Error handler at the end of app`);
         } else if (res.out) {
-            this.debug({ req, res, ackId: req.ackId }, `Standard output [${res.statusCode}]`);
+            this.debug({ req, res, ackId: req.ackId }, `${reqInfo} - Standard output [${res.statusCode}]`);
         } else {
-            this.info({ req, res, ackId: req.ackId }, `Standard output [${res.statusCode}]`);
+            this.info({ req, res, ackId: req.ackId }, `${reqInfo} - Standard output [${res.statusCode}]`);
         }
     });
     next();
