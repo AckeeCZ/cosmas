@@ -1,5 +1,7 @@
 const loggerFactory = require('..');
 const { redirect } = require('./helper');
+const express = require('express');
+const supertest = require('supertest');
 
 test('can create default logger', () => {
     const logger = loggerFactory();
@@ -39,4 +41,12 @@ test('can use warning level', () => {
     });
 
     logger.warning('Hello');
+});
+
+test('express binds', () => {
+    const logger = loggerFactory();
+    const app = express();
+    const request = supertest(app);
+    app.use(logger.express);
+    return request.get('/');
 });
