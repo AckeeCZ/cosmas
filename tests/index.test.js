@@ -21,6 +21,7 @@ test('can create named logger', () => {
 });
 
 test('can use custom stream', () => {
+    const loggerWrites = jest.fn();
     const logger = loggerFactory({
         streams: [
             {
@@ -28,6 +29,7 @@ test('can use custom stream', () => {
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.message).toBe('Hello');
+                        loggerWrites();
                         next();
                     },
                 }),
@@ -36,9 +38,11 @@ test('can use custom stream', () => {
     });
 
     logger.info('Hello');
+    expect(loggerWrites).toBeCalled();
 });
 
 test('can use warning level', () => {
+    const loggerWrites = jest.fn();
     const logger = loggerFactory({
         streams: [
             {
@@ -47,6 +51,7 @@ test('can use warning level', () => {
                         const json = JSON.parse(chunk);
                         expect(json.message).toBe('Hello');
                         expect(json.level).toBe(levels.warn);
+                        loggerWrites();
                         next();
                     },
                 }),
@@ -55,6 +60,7 @@ test('can use warning level', () => {
     });
 
     logger.warning('Hello');
+    expect(loggerWrites).toBeCalled();
 });
 
 test('express binds', () => {
@@ -63,4 +69,75 @@ test('express binds', () => {
     const request = supertest(app);
     app.use(logger.express);
     return request.get('/');
+});
+
+test('GET requests are logged by default', () => {
+    const loggerWrites = jest.fn();
+    const logger = loggerFactory({
+        streams: [
+            {
+                stream: new stream.Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.req.method).toBe('GET');
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+    const app = express();
+    const request = supertest(app);
+    app.use(logger.express);
+    return request.get('/').then(() => {
+        expect(loggerWrites).toBeCalled();
+    });
+});
+
+test('OPTIONS requests are ignored by default', () => {
+    const loggerWrites = jest.fn();
+    const logger = loggerFactory({
+        streams: [
+            {
+                stream: new stream.Writable({
+                    write: (chunk, encoding, next) => {
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+    const app = express();
+    const request = supertest(app);
+    app.use(logger.express);
+    return request.options('/').then(() => {
+        expect(loggerWrites).not.toBeCalled();
+    });
+});
+
+['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'].forEach(method => {
+    test(`${method} HTTP method can be ignored by options`, () => {
+        const loggerWrites = jest.fn();
+        const logger = loggerFactory({
+            streams: [
+                {
+                    stream: new stream.Writable({
+                        write: (chunk, encoding, next) => {
+                            loggerWrites();
+                            next();
+                        },
+                    }),
+                },
+            ],
+            ignoredHttpMethods: [method],
+        });
+        const app = express();
+        const request = supertest(app);
+        app.use(logger.express);
+        return request[method.toLowerCase()]('/').then(() => {
+            expect(loggerWrites).not.toBeCalled();
+        });
+    });
 });
