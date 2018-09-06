@@ -1,3 +1,8 @@
+## [0.2.3] - 2018-09-06
+
+### Fixed
+- log levels not working correctly
+
 ## [0.2.1] - 2018-06-08
 
 ### Added

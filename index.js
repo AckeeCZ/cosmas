@@ -2,7 +2,7 @@ const _ = require('lodash');
 const pino = require('pino');
 const multistream = require('pino-multi-stream').multistream;
 const serializers = require('./serializers');
-const levels = require('./levels');
+const { levels } = require('./levels');
 const { expressMiddleware, expressErrorMiddleware } = require('./express');
 
 // This is a custom slightly edited version of pino-multistream's wirte method, whch adds support for maximum log level
