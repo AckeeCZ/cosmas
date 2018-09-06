@@ -14,6 +14,9 @@ const expressMiddleware = function(req, response, next) {
     });
     onFinished(response, (err, res) => {
         const error = res[Symbol.for('error')];
+        if (this.options.ignoredHttpMethods.includes(req.method)) {
+            return;
+        }
         if (error) {
             this.error({ error, req, res, ackId: req.ackId }, `${reqInfo} - Error handler at the end of app`);
         } else if (res.out) {

@@ -1,3 +1,8 @@
+## [0.2.4] - 2018-09-06
+
+### Added
+- `options.ignoredHttpMethods` to ignore certain HTTP requests in express middleware
+
 ## [0.2.3] - 2018-09-06
 
 ### Fixed
