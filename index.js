@@ -69,6 +69,10 @@ const defaultLogger = (options = {}) => {
         ];
     }
 
+    if (!options.ignoredHttpMethods) {
+        options.ignoredHttpMethods = ['OPTIONS'];
+    }
+
     const logger = pino(
         _.merge(
             {
@@ -83,6 +87,7 @@ const defaultLogger = (options = {}) => {
         multistream(streams)
     );
     logger.warning = logger.warn;
+    logger.options = options;
 
     // Add maxLevel support to pino-multi-stream
     // This could be replaced with custom pass-through stream being passed to multistream, which would filter the messages
