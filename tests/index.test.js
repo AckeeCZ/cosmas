@@ -1,7 +1,14 @@
-const loggerFactory = require('..');
-const { redirect } = require('./helper');
 const express = require('express');
 const supertest = require('supertest');
+const stream = require('stream');
+const { levels } = require('../levels');
+
+let loggerFactory;
+
+beforeEach(() => {
+    jest.resetModules();
+    loggerFactory = require('..'); // eslint-disable-line global-require
+});
 
 test('can create default logger', () => {
     const logger = loggerFactory();
@@ -14,12 +21,15 @@ test('can create named logger', () => {
 });
 
 test('can use custom stream', () => {
-    const logger = loggerFactory('', {
+    const logger = loggerFactory({
         streams: [
             {
-                stream: redirect((chunk, enc, cb) => {
-                    expect(chunk.msg).toBe('Hello');
-                    cb();
+                stream: new stream.Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.message).toBe('Hello');
+                        next();
+                    },
                 }),
             },
         ],
@@ -29,12 +39,16 @@ test('can use custom stream', () => {
 });
 
 test('can use warning level', () => {
-    const logger = loggerFactory('', {
+    const logger = loggerFactory({
         streams: [
             {
-                stream: redirect((chunk, enc, cb) => {
-                    expect(chunk.msg).toBe('Hello');
-                    cb();
+                stream: new stream.Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.message).toBe('Hello');
+                        expect(json.level).toBe(levels.warn);
+                        next();
+                    },
                 }),
             },
         ],
