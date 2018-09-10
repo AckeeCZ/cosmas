@@ -1,3 +1,9 @@
+## [0.2.5] - 2018-09-10
+
+### Added
+- log object are automatically enhanced for Google Stackdriver
+- `options.disableStackdriverFormat` to prevent logger from modifying log objects
+
 ## [0.2.4] - 2018-09-06
 
 ### Added

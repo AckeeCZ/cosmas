@@ -69,15 +69,17 @@ const defaultLogger = (options = {}) => {
             { level: levels.warn, stream: process.stderr },
         ];
     }
-    streams = streams.map(stream => {
-        const newStream = new StackDriverFormatStream();
-        newStream.pipe(stream.stream);
-        return {
-            level: stream.level,
-            maxLevel: stream.maxLevel,
-            stream: newStream,
-        };
-    });
+    if (!_.get(options, 'disableStackdriverFormat', false)) {
+        streams = streams.map(stream => {
+            const newStream = new StackDriverFormatStream();
+            newStream.pipe(stream.stream);
+            return {
+                level: stream.level,
+                maxLevel: stream.maxLevel,
+                stream: newStream,
+            };
+        });
+    }
 
     if (!options.ignoredHttpMethods) {
         options.ignoredHttpMethods = ['OPTIONS'];
