@@ -141,3 +141,46 @@ test('OPTIONS requests are ignored by default', () => {
         });
     });
 });
+
+test('severity field is automatically added to log object', () => {
+    const loggerWrites = jest.fn();
+    const logger = loggerFactory({
+        streams: [
+            {
+                stream: new stream.Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.severity).toBe('CRITICAL');
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+
+    logger.fatal('Hello');
+    expect(loggerWrites).toBeCalled();
+});
+
+test('automatic severity field can be disabled by options', () => {
+    const loggerWrites = jest.fn();
+    const logger = loggerFactory({
+        disableStackdriverFormat: true,
+        streams: [
+            {
+                stream: new stream.Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.severity).toBe(undefined);
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+
+    logger.fatal('Hello');
+    expect(loggerWrites).toBeCalled();
+});
