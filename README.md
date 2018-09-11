@@ -100,6 +100,7 @@ Options override both default logger configuration and environment-specific conf
 - `ignoredHttpMethods` - list of HTTP methods which will not be logged by express logging middleware at all. Defaults to `['OPTIONS']`
 - `streams` - list of stream objects, which will be passed directly to [pino-multistream's multistream function](https://github.com/pinojs/pino-multi-stream#pinomsmultistreamstreams) instead of default `ackee-node-logger` stream
 - `pretty` - if set to `true`, logger will use [pino pretty human-readable logs](https://github.com/pinojs/pino/blob/master/docs/API.md#pretty). This option can be overriden by `streams`
+- `disableStackdriverFormat` - if set to `true`, logger will add `severity` field to all log objects, so that log levels in Google Stackdriver work as expected
 - `config` - object, which will be passed to underlying logger object. Right now, underlying logger is [pino](https://github.com/pinojs/pino), so for available options see [pino API docs](https://github.com/pinojs/pino/blob/master/docs/API.md#pinooptions-stream)
 
 ## Default serializers

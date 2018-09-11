@@ -4,6 +4,7 @@ const multistream = require('pino-multi-stream').multistream;
 const serializers = require('./serializers');
 const { levels } = require('./levels');
 const { expressMiddleware, expressErrorMiddleware } = require('./express');
+const { StackDriverFormatStream } = require('./stackdriver');
 
 // This is a custom slightly edited version of pino-multistream's wirte method, whch adds support for maximum log level
 // The original version was pino-multistream 3.1.2 (commit 71d98ae) - https://github.com/pinojs/pino-multi-stream/blob/71d98ae191e02c56e39e849d2c30d59c8c6db1b9/multistream.js#L43
@@ -67,6 +68,17 @@ const defaultLogger = (options = {}) => {
             { level: defaultLevel, stream: process.stdout, maxLevel: levels.warn },
             { level: levels.warn, stream: process.stderr },
         ];
+    }
+    if (!_.get(options, 'disableStackdriverFormat', false)) {
+        streams = streams.map(stream => {
+            const newStream = new StackDriverFormatStream();
+            newStream.pipe(stream.stream);
+            return {
+                level: stream.level,
+                maxLevel: stream.maxLevel,
+                stream: newStream,
+            };
+        });
     }
 
     if (!options.ignoredHttpMethods) {
