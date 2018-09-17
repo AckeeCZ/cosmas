@@ -184,3 +184,24 @@ test('automatic severity field can be disabled by options', () => {
     logger.fatal('Hello');
     expect(loggerWrites).toBeCalled();
 });
+
+test('logger version is logged', () => {
+    const loggerWrites = jest.fn();
+    const logger = loggerFactory({
+        streams: [
+            {
+                stream: new stream.Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.pkgVersion).not.toBe(undefined);
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+
+    logger.fatal('Hello');
+    expect(loggerWrites).toBeCalled();
+});
