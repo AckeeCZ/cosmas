@@ -9,22 +9,27 @@ const serializers = {
             data: _.get(obj, 'data'),
         };
     },
-    processEnv(obj) {
-        return {
-            nodePath: _.get(obj, 'NODE_PATH'),
-            nodeEnv: _.get(obj, 'NODE_ENV'),
-        };
+    process(obj) {
+        const nodePath = _.get(obj.env, 'NODE_PATH');
+        const nodeEnv = _.get(obj.env, 'NODE_ENV');
+        return _.omitBy(
+            _.defaultsDeep({ env: _.omitBy({ nodePath, nodeEnv }, _.isUndefined) }, _.omit(obj, 'env')),
+            val => _.isUndefined(val) || _.isEmpty(val)
+        );
     },
     req(obj) {
         const omitFields = ['password', 'passwordCheck'];
         const [body, query] = ['body', 'query'].map(name => _.omit(_.get(obj, name), omitFields));
 
-        return {
-            body,
-            query,
-            url: obj.originalUrl || obj.url,
-            method: _.get(obj, 'method'),
-        };
+        return _.omitBy(
+            {
+                body,
+                query,
+                url: obj.originalUrl || obj.url,
+                method: _.get(obj, 'method'),
+            },
+            val => _.isUndefined(val) || _.isEmpty(val)
+        );
     },
     res(obj) {
         return {
