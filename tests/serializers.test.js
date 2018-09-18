@@ -9,6 +9,7 @@ beforeEach(() => {
 });
 
 test('Default serializers', () => {
+    const loggerWrites = jest.fn();
     const error = {
         message: 'Bad error',
         code: 400,
@@ -17,11 +18,13 @@ test('Default serializers', () => {
         devInfo: 'Lorem',
         userInfo: 'Ipsum',
     };
-    const processEnv = {
-        NODE_PATH: 'app:config',
-        NODE_ENV: 'local',
-        PATH: '.',
-        USER: 'root',
+    const process = {
+        env: {
+            NODE_PATH: 'app:config',
+            NODE_ENV: 'local',
+            PATH: '.',
+            USER: 'root',
+        },
     };
     const res = {
         out: 'Lorem ipsum',
@@ -51,9 +54,9 @@ test('Default serializers', () => {
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.error).toEqual(_.pick(error, ['message', 'code', 'stack', 'data']));
-                        expect(json.processEnv).toEqual({
-                            nodePath: processEnv.NODE_PATH,
-                            nodeEnv: processEnv.NODE_ENV,
+                        expect(json.process.env).toEqual({
+                            nodePath: process.env.NODE_PATH,
+                            nodeEnv: process.env.NODE_ENV,
                         });
                         expect(json.req).toEqual(
                             _.pick(
@@ -67,6 +70,7 @@ test('Default serializers', () => {
                             )
                         );
                         expect(json.res).toEqual(_.pick(res, ['out', 'time']));
+                        loggerWrites();
                         next();
                     },
                 }),
@@ -74,13 +78,56 @@ test('Default serializers', () => {
         ],
     });
 
-    logger.info({ error, processEnv, req, res });
+    logger.info({ error, process, req, res });
+    expect(loggerWrites).toBeCalled();
+});
+
+test('No extra fields are added in default serializers', () => {
+    const loggerWrites = jest.fn();
+    const error = {
+        devInfo: 'Lorem',
+        userInfo: 'Ipsum',
+    };
+    const process = {
+        stuff: {
+            NODE_PATH: 'app:config',
+            NODE_ENV: 'local',
+            PATH: '.',
+            USER: 'root',
+        },
+    };
+    const res = {
+        noteToSelf: 'Send to user',
+    };
+    const req = {
+        extraData: 'Some server data',
+    };
+
+    const logger = loggerFactory({
+        streams: [
+            {
+                stream: new stream.Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.error).toEqual({});
+                        expect(json.res).toEqual({});
+                        expect(json.req).toEqual({});
+                        expect(json.process).toEqual(process);
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+
+    logger.info({ error, process, req, res });
+    expect(loggerWrites).toBeCalled();
 });
 
 test('Disable custom path', () => {
+    const loggerWrites = jest.fn();
     const req = {
-        body: {},
-        query: {},
         url: 'www.example.com',
         method: 'GET',
         extraData: 'Some server data',
@@ -94,6 +141,7 @@ test('Disable custom path', () => {
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.req).toEqual(_.pick(req, ['body', 'query', 'method']));
+                        loggerWrites();
                         next();
                     },
                 }),
@@ -102,12 +150,12 @@ test('Disable custom path', () => {
     });
 
     logger.info({ req });
+    expect(loggerWrites).toBeCalled();
 });
 
 test('Enable custom path', () => {
+    const loggerWrites = jest.fn();
     const req = {
-        body: {},
-        query: {},
         url: 'www.example.com',
         method: 'GET',
         extraData: 'Some server data',
@@ -121,6 +169,7 @@ test('Enable custom path', () => {
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.req).toEqual(_.pick(req, ['body', 'query', 'method', 'url', 'extraData']));
+                        loggerWrites();
                         next();
                     },
                 }),
@@ -129,4 +178,5 @@ test('Enable custom path', () => {
     });
 
     logger.info({ req });
+    expect(loggerWrites).toBeCalled();
 });
