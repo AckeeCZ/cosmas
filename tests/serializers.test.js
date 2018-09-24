@@ -1,4 +1,5 @@
-const _ = require('lodash');
+const pick = require('lodash.pick');
+const omitDeep = require('omit-deep');
 const stream = require('stream');
 
 let loggerFactory;
@@ -32,11 +33,6 @@ test('Default serializers', () => {
         noteToSelf: 'Send to user',
     };
     const req = {
-        query: {
-            password: '1234',
-            passwordCheck: '1234',
-            search: 'my cat',
-        },
         body: {
             password: '1234',
             passwordCheck: '1234',
@@ -53,23 +49,19 @@ test('Default serializers', () => {
                 stream: new stream.Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
-                        expect(json.error).toEqual(_.pick(error, ['message', 'code', 'stack', 'data']));
+                        expect(json.error).toEqual(pick(error, ['message', 'code', 'stack', 'data']));
                         expect(json.process.env).toEqual({
                             nodePath: process.env.NODE_PATH,
                             nodeEnv: process.env.NODE_ENV,
                         });
-                        expect(json.req).toEqual(
-                            _.pick(
-                                _.omit(req, [
-                                    'body.password',
-                                    'body.passwordCheck',
-                                    'query.password',
-                                    'query.passwordCheck',
-                                ]),
-                                ['url', 'body', 'query', 'method']
-                            )
-                        );
-                        expect(json.res).toEqual(_.pick(res, ['out', 'time']));
+                        const filteredReq = omitDeep(req, [
+                            'body.password',
+                            'body.passwordCheck',
+                            'query.password',
+                            'query.passwordCheck',
+                        ]);
+                        expect(json.req).toEqual(pick(filteredReq, ['url', 'body', 'query', 'method']));
+                        expect(json.res).toEqual(pick(res, ['out', 'time']));
                         loggerWrites();
                         next();
                     },
@@ -140,7 +132,7 @@ test('Disable custom path', () => {
                 stream: new stream.Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
-                        expect(json.req).toEqual(_.pick(req, ['body', 'query', 'method']));
+                        expect(json.req).toEqual(pick(req, ['body', 'query', 'method']));
                         loggerWrites();
                         next();
                     },
@@ -168,7 +160,7 @@ test('Enable custom path', () => {
                 stream: new stream.Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
-                        expect(json.req).toEqual(_.pick(req, ['body', 'query', 'method', 'url', 'extraData']));
+                        expect(json.req).toEqual(pick(req, ['body', 'query', 'method', 'url', 'extraData']));
                         loggerWrites();
                         next();
                     },

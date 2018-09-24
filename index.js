@@ -1,4 +1,7 @@
-const _ = require('lodash');
+const get = require('lodash.get');
+const merge = require('lodash.merge');
+const isString = require('lodash.isstring');
+const isObject = require('lodash.isobject');
 const pino = require('pino');
 const multistream = require('pino-multi-stream').multistream;
 const serializers = require('./serializers');
@@ -70,7 +73,7 @@ const defaultLogger = (options = {}) => {
             { level: levels.warn, stream: process.stderr },
         ];
     }
-    if (!_.get(options, 'disableStackdriverFormat', false)) {
+    if (!get(options, 'disableStackdriverFormat', false)) {
         streams = decorateStreams(streams, StackDriverFormatStream);
     }
 
@@ -81,7 +84,7 @@ const defaultLogger = (options = {}) => {
     }
 
     const logger = pino(
-        _.merge(
+        merge(
             {
                 level: defaultLevel,
                 timestamp: false,
@@ -112,9 +115,9 @@ const loggerFactory = data => {
     let moduleName;
     let options;
     if (data) {
-        if (_.isString(data)) {
+        if (isString(data)) {
             moduleName = data;
-        } else if (_.isObject(data)) {
+        } else if (isObject(data)) {
             options = data;
         } else {
             throw new TypeError(`Invalid argument of type ${typeof data}`);
