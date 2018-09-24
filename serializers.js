@@ -1,40 +1,48 @@
-const _ = require('lodash');
+const get = require('lodash.get');
+const omit = require('lodash.omit');
+const pick = require('lodash.pick');
+const omitBy = require('lodash.omitby');
+const defaultsDeep = require('lodash.defaultsdeep');
+const isUndefined = require('lodash.isundefined');
+const isEmpty = require('lodash.isempty');
+const forEach = require('lodash.foreach');
+const assign = require('lodash.assign');
 
 const serializers = {
     error(obj) {
         return {
-            message: _.get(obj, 'message'),
-            code: _.get(obj, 'code'),
-            stack: _.get(obj, 'stack'),
-            data: _.get(obj, 'data'),
+            message: get(obj, 'message'),
+            code: get(obj, 'code'),
+            stack: get(obj, 'stack'),
+            data: get(obj, 'data'),
         };
     },
     process(obj) {
-        const nodePath = _.get(obj.env, 'NODE_PATH');
-        const nodeEnv = _.get(obj.env, 'NODE_ENV');
-        return _.omitBy(
-            _.defaultsDeep({ env: _.omitBy({ nodePath, nodeEnv }, _.isUndefined) }, _.omit(obj, 'env')),
-            val => _.isUndefined(val) || _.isEmpty(val)
+        const nodePath = get(obj.env, 'NODE_PATH');
+        const nodeEnv = get(obj.env, 'NODE_ENV');
+        return omitBy(
+            defaultsDeep({ env: omitBy({ nodePath, nodeEnv }, isUndefined) }, omit(obj, 'env')),
+            val => isUndefined(val) || isEmpty(val)
         );
     },
     req(obj) {
         const omitFields = ['password', 'passwordCheck'];
-        const [body, query] = ['body', 'query'].map(name => _.omit(_.get(obj, name), omitFields));
+        const [body, query] = ['body', 'query'].map(name => omit(get(obj, name), omitFields));
 
-        return _.omitBy(
+        return omitBy(
             {
                 body,
                 query,
                 url: obj.originalUrl || obj.url,
-                method: _.get(obj, 'method'),
+                method: get(obj, 'method'),
             },
-            val => _.isUndefined(val) || _.isEmpty(val)
+            val => isUndefined(val) || isEmpty(val)
         );
     },
     res(obj) {
         return {
-            out: _.get(obj, 'out'),
-            time: _.get(obj, 'time'),
+            out: get(obj, 'out'),
+            time: get(obj, 'time'),
         };
     },
 };
@@ -43,7 +51,7 @@ const disablePaths = paths => {
     if (!paths || paths.length <= 0) {
         return;
     }
-    _.forEach(serializers, (value, key) => {
+    forEach(serializers, (value, key) => {
         const matcher = new RegExp(`^${key}.(.*)`);
         const affectedFields = [];
         paths.forEach(field => {
@@ -54,7 +62,7 @@ const disablePaths = paths => {
 
         if (affectedFields.length > 0) {
             const newSerializer = obj => {
-                return _.omit(value(obj), affectedFields);
+                return omit(value(obj), affectedFields);
             };
             serializers[key] = newSerializer;
         }
@@ -65,7 +73,7 @@ const enablePaths = paths => {
     if (!paths || paths.length <= 0) {
         return;
     }
-    _.forEach(serializers, (value, key) => {
+    forEach(serializers, (value, key) => {
         const matcher = new RegExp(`^${key}.(.*)`);
         const affectedFields = [];
         paths.forEach(field => {
@@ -76,9 +84,9 @@ const enablePaths = paths => {
 
         if (affectedFields.length > 0) {
             const newSerializer = obj => {
-                const newFields = _.pick(obj, affectedFields);
+                const newFields = pick(obj, affectedFields);
                 const originalResult = value(obj);
-                return _.assign(originalResult, newFields);
+                return assign(originalResult, newFields);
             };
             serializers[key] = newSerializer;
         }
