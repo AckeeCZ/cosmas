@@ -1,38 +1,46 @@
-const get = require('lodash.get');
-const omit = require('lodash.omit');
 const forEach = require('lodash.foreach');
-const { pick, removeEmpty } = require('./utils');
+const { pick, removeEmpty, deleteKeys } = require('./utils');
 
 const serializers = {
     error(obj) {
         return {
-            message: get(obj, 'message'),
-            code: get(obj, 'code'),
-            stack: get(obj, 'stack'),
-            data: get(obj, 'data'),
+            message: obj.message,
+            code: obj.code,
+            stack: obj.stack,
+            data: obj.data,
         };
     },
     process(obj) {
-        const nodePath = get(obj.env, 'NODE_PATH');
-        const nodeEnv = get(obj.env, 'NODE_ENV');
+        if (!obj.env) {
+            return obj;
+        }
+        const nodePath = obj.env.NODE_PATH;
+        const nodeEnv = obj.env.NODE_ENV;
         const filteredEnv = { env: removeEmpty({ nodePath, nodeEnv }) };
-        return removeEmpty(Object.assign({}, filteredEnv, omit(obj, 'env')));
+        const { env, ...rest } = obj;
+        return removeEmpty(Object.assign({}, filteredEnv, rest));
     },
     req(obj) {
-        const omitFields = ['password', 'passwordCheck'];
-        const [body, query] = ['body', 'query'].map(name => omit(get(obj, name), omitFields));
+        const [body, query] = ['body', 'query'].map(name => {
+            const source = obj[name];
+            if (source) {
+                const { password, passwordCheck, ...rest } = source;
+                return rest;
+            }
+            return source;
+        });
 
         return removeEmpty({
             body,
             query,
             url: obj.originalUrl || obj.url,
-            method: get(obj, 'method'),
+            method: obj.method,
         });
     },
     res(obj) {
         return {
-            out: get(obj, 'out'),
-            time: get(obj, 'time'),
+            out: obj.out,
+            time: obj.time,
         };
     },
 };
@@ -52,7 +60,8 @@ const disablePaths = paths => {
 
         if (affectedFields.length > 0) {
             const newSerializer = obj => {
-                return omit(value(obj), affectedFields);
+                const objCopy = JSON.parse(JSON.stringify(obj)); // we will loose info about functions being passed to logger, but that's a really specific use case, so probably OK
+                return deleteKeys(value(objCopy), affectedFields);
             };
             serializers[key] = newSerializer;
         }

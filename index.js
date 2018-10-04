@@ -1,4 +1,3 @@
-const get = require('lodash.get');
 const isString = require('lodash.isstring');
 const isObject = require('lodash.isobject');
 const pino = require('pino');
@@ -72,7 +71,7 @@ const defaultLogger = (options = {}) => {
             { level: levels.warn, stream: process.stderr },
         ];
     }
-    if (!get(options, 'disableStackdriverFormat', false)) {
+    if (!options.disableStackdriverFormat) {
         streams = decorateStreams(streams, StackDriverFormatStream);
     }
 
@@ -83,8 +82,8 @@ const defaultLogger = (options = {}) => {
     }
 
     const logger = pino(
+        // no deep-merging needed, so assign is OK
         Object.assign(
-            // no deep-merging needed, so assign is OK
             {},
             {
                 level: defaultLevel,

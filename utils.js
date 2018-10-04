@@ -19,4 +19,13 @@ const removeEmpty = obj => {
     return obj;
 };
 
-module.exports = { pick, removeEmpty };
+const deleteKeys = (obj, keys) => {
+    keys.forEach(key => {
+        if (obj[key]) {
+            delete obj[key];
+        }
+    });
+    return obj;
+};
+
+module.exports = { pick, removeEmpty, deleteKeys };
