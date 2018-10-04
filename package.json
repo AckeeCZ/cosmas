@@ -15,7 +15,6 @@
   "author": "Michal Vlasák <michal.vlasak@ackee.cz>",
   "license": "ISC",
   "dependencies": {
-    "lodash.clonedeep": "^4.5.0",
     "lodash.foreach": "^4.5.0",
     "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0",
