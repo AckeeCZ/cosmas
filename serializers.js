@@ -6,7 +6,6 @@ const defaultsDeep = require('lodash.defaultsdeep');
 const isUndefined = require('lodash.isundefined');
 const isEmpty = require('lodash.isempty');
 const forEach = require('lodash.foreach');
-const assign = require('lodash.assign');
 
 const serializers = {
     error(obj) {
@@ -86,7 +85,7 @@ const enablePaths = paths => {
             const newSerializer = obj => {
                 const newFields = pick(obj, affectedFields);
                 const originalResult = value(obj);
-                return assign(originalResult, newFields);
+                return Object.assign({}, originalResult, newFields);
             };
             serializers[key] = newSerializer;
         }
