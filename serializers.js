@@ -1,6 +1,5 @@
 const get = require('lodash.get');
 const omit = require('lodash.omit');
-const defaultsDeep = require('lodash.defaultsdeep');
 const forEach = require('lodash.foreach');
 const { pick, removeEmpty } = require('./utils');
 
@@ -16,7 +15,8 @@ const serializers = {
     process(obj) {
         const nodePath = get(obj.env, 'NODE_PATH');
         const nodeEnv = get(obj.env, 'NODE_ENV');
-        return removeEmpty(defaultsDeep({ env: removeEmpty({ nodePath, nodeEnv }) }, omit(obj, 'env')));
+        const filteredEnv = { env: removeEmpty({ nodePath, nodeEnv }) };
+        return removeEmpty(Object.assign({}, filteredEnv, omit(obj, 'env')));
     },
     req(obj) {
         const omitFields = ['password', 'passwordCheck'];
