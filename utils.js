@@ -1,3 +1,5 @@
+const isEmpty = require('lodash.isempty');
+
 const pick = (object, paths) => {
     const obj = {};
     for (const path of paths) {
@@ -8,4 +10,13 @@ const pick = (object, paths) => {
     return obj;
 };
 
-module.exports = { pick };
+const removeEmpty = obj => {
+    Object.keys(obj).forEach(key => {
+        if (obj[key] === undefined || isEmpty(obj[key])) {
+            delete obj[key];
+        }
+    });
+    return obj;
+};
+
+module.exports = { pick, removeEmpty };

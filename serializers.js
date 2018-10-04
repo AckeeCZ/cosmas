@@ -1,11 +1,8 @@
 const get = require('lodash.get');
 const omit = require('lodash.omit');
-const omitBy = require('lodash.omitby');
 const defaultsDeep = require('lodash.defaultsdeep');
-const isUndefined = require('lodash.isundefined');
-const isEmpty = require('lodash.isempty');
 const forEach = require('lodash.foreach');
-const { pick } = require('./utils');
+const { pick, removeEmpty } = require('./utils');
 
 const serializers = {
     error(obj) {
@@ -19,24 +16,18 @@ const serializers = {
     process(obj) {
         const nodePath = get(obj.env, 'NODE_PATH');
         const nodeEnv = get(obj.env, 'NODE_ENV');
-        return omitBy(
-            defaultsDeep({ env: omitBy({ nodePath, nodeEnv }, isUndefined) }, omit(obj, 'env')),
-            val => isUndefined(val) || isEmpty(val)
-        );
+        return removeEmpty(defaultsDeep({ env: removeEmpty({ nodePath, nodeEnv }) }, omit(obj, 'env')));
     },
     req(obj) {
         const omitFields = ['password', 'passwordCheck'];
         const [body, query] = ['body', 'query'].map(name => omit(get(obj, name), omitFields));
 
-        return omitBy(
-            {
-                body,
-                query,
-                url: obj.originalUrl || obj.url,
-                method: get(obj, 'method'),
-            },
-            val => isUndefined(val) || isEmpty(val)
-        );
+        return removeEmpty({
+            body,
+            query,
+            url: obj.originalUrl || obj.url,
+            method: get(obj, 'method'),
+        });
     },
     res(obj) {
         return {
