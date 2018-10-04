@@ -1,6 +1,6 @@
 {
   "name": "ackee-node-logger",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Ackee Node Logger",
   "main": "index.js",
   "scripts": {
