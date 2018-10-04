@@ -1,31 +1,18 @@
 const isEmpty = require('lodash.isempty');
+const difference = require('lodash.difference');
+const pick = require('lodash.pick');
 
-const pick = (object, paths) => {
-    const obj = {};
-    for (const path of paths) {
-        if (object[path]) {
-            obj[path] = object[path];
-        }
-    }
-    return obj;
-};
+// left here for future
+/* const shallowOmit = (obj, omitKeys) => {
+    return difference(Object.keys(obj), omitKeys).reduce((omitted, key) => {
+        omitted[key] = obj[key];
+        return omitted;
+    }, {});
+};*/
 
-const removeEmpty = obj => {
-    Object.keys(obj).forEach(key => {
-        if (obj[key] === undefined || isEmpty(obj[key])) {
-            delete obj[key];
-        }
-    });
-    return obj;
-};
+const shallowOmit = (obj, omitKeys) => pick(obj, difference(Object.keys(obj), omitKeys));
 
-const deleteKeys = (obj, keys) => {
-    keys.forEach(key => {
-        if (obj[key]) {
-            delete obj[key];
-        }
-    });
-    return obj;
-};
+const removeEmpty = obj =>
+    shallowOmit(obj, Object.keys(obj).filter(key => obj[key] === undefined || isEmpty(obj[key])));
 
-module.exports = { pick, removeEmpty, deleteKeys };
+module.exports = { shallowOmit, removeEmpty };

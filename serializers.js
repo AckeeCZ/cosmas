@@ -1,5 +1,6 @@
 const forEach = require('lodash.foreach');
-const { pick, removeEmpty, deleteKeys } = require('./utils');
+const pick = require('lodash.pick');
+const { removeEmpty, shallowOmit } = require('./utils');
 
 const serializers = {
     error(obj) {
@@ -60,8 +61,7 @@ const disablePaths = paths => {
 
         if (affectedFields.length > 0) {
             const newSerializer = obj => {
-                const objCopy = JSON.parse(JSON.stringify(obj)); // we will loose info about functions being passed to logger, but that's a really specific use case, so probably OK
-                return deleteKeys(value(objCopy), affectedFields);
+                return shallowOmit(value(obj), affectedFields);
             };
             serializers[key] = newSerializer;
         }
