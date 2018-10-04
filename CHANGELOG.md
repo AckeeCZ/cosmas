@@ -1,9 +1,12 @@
+## [0.2.6] - 2018-10-04
+
 ### Added
 - log version of `ackee-node-logger` package being used to `pkgVersion` field
 
 ### Changed
 - change default serializer for `process` object
 - do not log undefined and empty objects in default serializers
+- remove some lodash packages
 
 ## [0.2.5] - 2018-09-10
 

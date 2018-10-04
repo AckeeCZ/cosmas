@@ -1,6 +1,6 @@
 {
   "name": "ackee-node-logger",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Ackee Node Logger",
   "main": "index.js",
   "scripts": {
@@ -14,19 +14,15 @@
   },
   "author": "Michal Vlasák <michal.vlasak@ackee.cz>",
   "license": "ISC",
+  "engines": {
+    "node": "8.6.0"
+  },
   "dependencies": {
-    "lodash.assign": "^4.2.0",
-    "lodash.clonedeep": "^4.5.0",
-    "lodash.defaultsdeep": "^4.6.0",
+    "lodash.difference": "^4.5.0",
     "lodash.foreach": "^4.5.0",
-    "lodash.get": "^4.4.2",
     "lodash.isempty": "^4.4.0",
     "lodash.isobject": "^3.0.2",
     "lodash.isstring": "^4.0.1",
-    "lodash.isundefined": "^3.0.1",
-    "lodash.merge": "^4.6.1",
-    "lodash.omit": "^4.5.0",
-    "lodash.omitby": "^4.6.0",
     "lodash.pick": "^4.4.0",
     "omit-deep": "^0.3.0",
     "on-finished": "^2.3.0",

@@ -1,48 +1,47 @@
-const get = require('lodash.get');
-const omit = require('lodash.omit');
-const pick = require('lodash.pick');
-const omitBy = require('lodash.omitby');
-const defaultsDeep = require('lodash.defaultsdeep');
-const isUndefined = require('lodash.isundefined');
-const isEmpty = require('lodash.isempty');
 const forEach = require('lodash.foreach');
-const assign = require('lodash.assign');
+const pick = require('lodash.pick');
+const { removeEmpty, shallowOmit } = require('./utils');
 
 const serializers = {
     error(obj) {
         return {
-            message: get(obj, 'message'),
-            code: get(obj, 'code'),
-            stack: get(obj, 'stack'),
-            data: get(obj, 'data'),
+            message: obj.message,
+            code: obj.code,
+            stack: obj.stack,
+            data: obj.data,
         };
     },
     process(obj) {
-        const nodePath = get(obj.env, 'NODE_PATH');
-        const nodeEnv = get(obj.env, 'NODE_ENV');
-        return omitBy(
-            defaultsDeep({ env: omitBy({ nodePath, nodeEnv }, isUndefined) }, omit(obj, 'env')),
-            val => isUndefined(val) || isEmpty(val)
-        );
+        if (!obj.env) {
+            return obj;
+        }
+        const nodePath = obj.env.NODE_PATH;
+        const nodeEnv = obj.env.NODE_ENV;
+        const filteredEnv = { env: removeEmpty({ nodePath, nodeEnv }) };
+        const { env, ...rest } = obj;
+        return removeEmpty(Object.assign({}, filteredEnv, rest));
     },
     req(obj) {
-        const omitFields = ['password', 'passwordCheck'];
-        const [body, query] = ['body', 'query'].map(name => omit(get(obj, name), omitFields));
+        const [body, query] = ['body', 'query'].map(name => {
+            const source = obj[name];
+            if (source) {
+                const { password, passwordCheck, ...rest } = source;
+                return rest;
+            }
+            return source;
+        });
 
-        return omitBy(
-            {
-                body,
-                query,
-                url: obj.originalUrl || obj.url,
-                method: get(obj, 'method'),
-            },
-            val => isUndefined(val) || isEmpty(val)
-        );
+        return removeEmpty({
+            body,
+            query,
+            url: obj.originalUrl || obj.url,
+            method: obj.method,
+        });
     },
     res(obj) {
         return {
-            out: get(obj, 'out'),
-            time: get(obj, 'time'),
+            out: obj.out,
+            time: obj.time,
         };
     },
 };
@@ -62,7 +61,7 @@ const disablePaths = paths => {
 
         if (affectedFields.length > 0) {
             const newSerializer = obj => {
-                return omit(value(obj), affectedFields);
+                return shallowOmit(value(obj), affectedFields);
             };
             serializers[key] = newSerializer;
         }
@@ -86,7 +85,7 @@ const enablePaths = paths => {
             const newSerializer = obj => {
                 const newFields = pick(obj, affectedFields);
                 const originalResult = value(obj);
-                return assign(originalResult, newFields);
+                return Object.assign({}, originalResult, newFields);
             };
             serializers[key] = newSerializer;
         }
