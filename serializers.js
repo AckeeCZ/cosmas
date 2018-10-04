@@ -1,11 +1,11 @@
 const get = require('lodash.get');
 const omit = require('lodash.omit');
-const pick = require('lodash.pick');
 const omitBy = require('lodash.omitby');
 const defaultsDeep = require('lodash.defaultsdeep');
 const isUndefined = require('lodash.isundefined');
 const isEmpty = require('lodash.isempty');
 const forEach = require('lodash.foreach');
+const { pick } = require('./utils');
 
 const serializers = {
     error(obj) {

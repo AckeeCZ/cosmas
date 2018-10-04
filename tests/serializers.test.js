@@ -1,4 +1,4 @@
-const pick = require('lodash.pick');
+const { pick } = require('../utils');
 const omitDeep = require('omit-deep');
 const stream = require('stream');
 
