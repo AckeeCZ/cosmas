@@ -1,5 +1,4 @@
 const get = require('lodash.get');
-const merge = require('lodash.merge');
 const isString = require('lodash.isstring');
 const isObject = require('lodash.isobject');
 const pino = require('pino');
@@ -84,7 +83,9 @@ const defaultLogger = (options = {}) => {
     }
 
     const logger = pino(
-        merge(
+        Object.assign(
+            // no deep-merging needed, so assign is OK
+            {},
             {
                 level: defaultLevel,
                 timestamp: false,
