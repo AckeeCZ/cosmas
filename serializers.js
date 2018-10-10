@@ -1,6 +1,7 @@
 const forEach = require('lodash.foreach');
 const pick = require('lodash.pick');
-const { removeEmpty, shallowOmit } = require('./utils');
+const { removeEmpty } = require('./utils');
+const omit = require('omit-deep');
 
 const serializers = {
     error(obj) {
@@ -18,14 +19,16 @@ const serializers = {
         const nodePath = obj.env.NODE_PATH;
         const nodeEnv = obj.env.NODE_ENV;
         const filteredEnv = { env: removeEmpty({ nodePath, nodeEnv }) };
-        const { env, ...rest } = obj;
+        const rest = Object.assign({}, obj);
+        omit(rest, 'env');
         return removeEmpty(Object.assign({}, filteredEnv, rest));
     },
     req(obj) {
         const [body, query] = ['body', 'query'].map(name => {
             const source = obj[name];
             if (source) {
-                const { password, passwordCheck, ...rest } = source;
+                const rest = Object.assign({}, source);
+                omit(rest, ['password', 'passwordCheck']);
                 return rest;
             }
             return source;
@@ -61,7 +64,7 @@ const disablePaths = paths => {
 
         if (affectedFields.length > 0) {
             const newSerializer = obj => {
-                return shallowOmit(value(obj), affectedFields);
+                return omit(value(obj), affectedFields);
             };
             serializers[key] = newSerializer;
         }

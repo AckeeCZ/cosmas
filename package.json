@@ -1,6 +1,6 @@
 {
   "name": "ackee-node-logger",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Ackee Node Logger",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
   "author": "Michal Vlasák <michal.vlasak@ackee.cz>",
   "license": "ISC",
   "engines": {
-    "node": "8.6.0"
+    "node": "6.14.3"
   },
   "dependencies": {
     "lodash.difference": "^4.5.0",
