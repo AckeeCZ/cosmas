@@ -1,3 +1,8 @@
+## [0.2.7] - 2018-10-10
+
+### Changed
+- replace rest operator with `omit-deep` package
+
 ## [0.2.6] - 2018-10-04
 
 ### Added
