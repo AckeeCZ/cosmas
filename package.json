@@ -23,10 +23,10 @@
     "lodash.isempty": "^4.4.0",
     "lodash.isobject": "^3.0.2",
     "lodash.isstring": "^4.0.1",
-    "lodash.pick": "^4.4.0",
     "omit-deep": "^0.3.0",
     "on-finished": "^2.3.0",
     "on-headers": "^1.0.1",
+    "pick-deep": "^1.0.0",
     "pino": "^4.13.0",
     "pino-multi-stream": "3.1.2"
   },
@@ -37,10 +37,14 @@
     "flush-write-stream": "^1.0.2",
     "husky": "^0.14.3",
     "jest": "^22.4.2",
+    "jest-expect-message": "^1.0.1",
     "lint-staged": "^7.0.0",
     "npm-check": "^5.5.2",
     "prettier": "^1.11.0",
     "split2": "^2.2.0",
     "supertest": "^3.1.0"
+  },
+  "jest": {
+    "setupTestFrameworkScriptFile": "jest-expect-message"
   }
 }

@@ -1,6 +1,8 @@
-const pick = require('lodash.pick');
+const pick = require('pick-deep');
 const omitDeep = require('omit-deep');
 const stream = require('stream');
+const express = require('express');
+const supertest = require('supertest');
 
 let loggerFactory;
 
@@ -171,4 +173,69 @@ test('Enable custom path', () => {
 
     logger.info({ req });
     expect(loggerWrites).toBeCalled();
+});
+
+test.only('Some express headers are enabled by default', () => {
+    const loggerWrites = jest.fn();
+    const logger = loggerFactory({
+        streams: [
+            {
+                stream: new stream.Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        const validHeaders = ['x-deviceid', 'authorization', 'user-agent'];
+                        validHeaders.forEach(header =>
+                            expect(json.req.headers[header], `${header} header should be defined`).toBeDefined()
+                        );
+                        Object.keys(json.req.headers).forEach(header =>
+                            expect(validHeaders.includes(header), `${header} header should not be defined`).toBe(true)
+                        );
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+    const app = express();
+    const request = supertest(app);
+    app.use(logger.express);
+    return request
+        .get('/')
+        .set('x-deviceid', '12345abcde')
+        .set('Authorization', 'Basic pass')
+        .set('User-Agent', 'Jest tests')
+        .set('Age', 100)
+        .then(() => {
+            expect(loggerWrites).toBeCalled();
+        });
+});
+
+test.only('Express fields and headers can be enabled', () => {
+    const loggerWrites = jest.fn();
+    const logger = loggerFactory({
+        enableFields: ['req.protocol', 'req.headers.host'],
+        streams: [
+            {
+                stream: new stream.Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.req.protocol).toBe('http');
+                        expect(json.req.headers.host).toBe('localhost');
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+    const app = express();
+    const request = supertest(app);
+    app.use(logger.express);
+    return request
+        .get('/')
+        .set('host', 'localhost')
+        .then(() => {
+            expect(loggerWrites).toBeCalled();
+        });
 });

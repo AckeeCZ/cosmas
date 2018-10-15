@@ -1,5 +1,5 @@
 const forEach = require('lodash.foreach');
-const pick = require('lodash.pick');
+const pick = require('pick-deep');
 const { removeEmpty } = require('./utils');
 const omit = require('omit-deep');
 
@@ -24,6 +24,7 @@ const serializers = {
         return removeEmpty(Object.assign({}, filteredEnv, rest));
     },
     req(obj) {
+        const pickHeaders = ['x-deviceid', 'authorization', 'user-agent'];
         const [body, query] = ['body', 'query'].map(name => {
             const source = obj[name];
             if (source) {
@@ -39,6 +40,7 @@ const serializers = {
             query,
             url: obj.originalUrl || obj.url,
             method: obj.method,
+            headers: pick(obj.headers, pickHeaders),
         });
     },
     res(obj) {
