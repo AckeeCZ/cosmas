@@ -175,7 +175,7 @@ test('Enable custom path', () => {
     expect(loggerWrites).toBeCalled();
 });
 
-test.only('Some express headers are enabled by default', () => {
+test('Some express headers are enabled by default', () => {
     const loggerWrites = jest.fn();
     const logger = loggerFactory({
         streams: [
@@ -211,7 +211,7 @@ test.only('Some express headers are enabled by default', () => {
         });
 });
 
-test.only('Express fields and headers can be enabled', () => {
+test('Express fields and headers can be enabled', () => {
     const loggerWrites = jest.fn();
     const logger = loggerFactory({
         enableFields: ['req.protocol', 'req.headers.host'],
@@ -235,6 +235,34 @@ test.only('Express fields and headers can be enabled', () => {
     return request
         .get('/')
         .set('host', 'localhost')
+        .then(() => {
+            expect(loggerWrites).toBeCalled();
+        });
+});
+
+test('Default express headers can be disabled', () => {
+    const loggerWrites = jest.fn();
+    const logger = loggerFactory({
+        disableFields: ['req.headers.user-agent'],
+        streams: [
+            {
+                stream: new stream.Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.req.headers['user-agent']).toBeUndefined();
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+    const app = express();
+    const request = supertest(app);
+    app.use(logger.express);
+    return request
+        .get('/')
+        .set('x-deviceid', '1234')
         .then(() => {
             expect(loggerWrites).toBeCalled();
         });
