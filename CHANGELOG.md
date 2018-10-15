@@ -1,4 +1,4 @@
-## [0.2.8] - 2018-10-15
+## [0.2.9] - 2018-10-15
 
 ### Changed
 - output format of express middleware logging
