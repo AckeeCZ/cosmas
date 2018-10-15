@@ -80,7 +80,7 @@ If you use it together with logger's error express middleware, it will also log 
 app.use(logger.expressError)
 ```
 
-All those log messages will contain request and possibly response, error, time from request to response and status code.
+All those log messages will contain request and possibly response, error, time from request to response, status code and `user-agent`, `x-deviceid` and `authorization` request headers.
 
 ## Environment-specific behavior
 `ackee-node-logger` is meant to be used throughout different environments (development, testing, production) and some of its configuration is setup differently based on the environment it runs in.
