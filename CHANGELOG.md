@@ -1,3 +1,11 @@
+## [0.2.8] - 2018-10-15
+
+### Changed
+- output format of express middleware logging
+
+### Fixed
+- bug in `enableFields` options
+
 ## [0.2.7] - 2018-10-10
 
 ### Changed
