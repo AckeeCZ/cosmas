@@ -1,15 +1,15 @@
-const forEach = require('lodash.foreach');
-const pick = require('pick-deep');
-const { removeEmpty } = require('./utils');
-const omit = require('omit-deep');
+import * as forEach from 'lodash.foreach';
+import * as omit from 'omit-deep';
+import * as pick from 'pick-deep';
+import { removeEmpty } from './utils';
 
 const serializers = {
     error(obj) {
         return {
-            message: obj.message,
             code: obj.code,
-            stack: obj.stack,
             data: obj.data,
+            message: obj.message,
+            stack: obj.stack,
         };
     },
     process(obj) {
@@ -38,9 +38,9 @@ const serializers = {
         return removeEmpty({
             body,
             query,
-            url: obj.originalUrl || obj.url,
-            method: obj.method,
             headers: pick(obj.headers, pickHeaders),
+            method: obj.method,
+            url: obj.originalUrl || obj.url,
         });
     },
     res(obj) {
@@ -97,8 +97,4 @@ const enablePaths = paths => {
     });
 };
 
-module.exports = {
-    serializers,
-    enablePaths,
-    disablePaths,
-};
+export { disablePaths, enablePaths, serializers };

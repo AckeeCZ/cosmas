@@ -1,23 +1,32 @@
-const isString = require('lodash.isstring');
-const isObject = require('lodash.isobject');
-const pino = require('pino');
-const multistream = require('pino-multi-stream').multistream;
-const serializers = require('./serializers');
-const { levels } = require('./levels');
-const { expressMiddleware, expressErrorMiddleware } = require('./express');
-const { StackDriverFormatStream } = require('./stackdriver');
-const { decorateStreams, DefaultTransformStream } = require('./streams');
+import * as isObject from 'lodash.isobject';
+import * as isString from 'lodash.isstring';
+import * as pino from 'pino';
+import { multistream } from 'pino-multi-stream';
+import { expressErrorMiddleware, expressMiddleware } from './express';
+import { levels } from './levels';
+import * as serializers from './serializers';
+import { StackDriverFormatStream } from './stackdriver';
+import { decorateStreams, DefaultTransformStream } from './streams';
+
+interface LoggerOptions {
+    disableFields: string[];
+    enableFields: string[];
+    defaultLevel: string;
+    disableStackdriverFormat: boolean;
+    streams: any[];
+    ignoredHttpMethods: string[];
+    config: any;
+    pretty: boolean;
+}
 
 // This is a custom slightly edited version of pino-multistream's wirte method, whch adds support for maximum log level
 // The original version was pino-multistream 3.1.2 (commit 71d98ae) - https://github.com/pinojs/pino-multi-stream/blob/71d98ae191e02c56e39e849d2c30d59c8c6db1b9/multistream.js#L43
 const maxLevelWrite = function(data) {
-    let dest;
     let stream;
     const needsMetadata = Symbol.for('needsMetadata');
     const level = this.lastLevel;
     const streams = this.streams;
-    for (let i = 0; i < streams.length; i++) {
-        dest = streams[i];
+    for (const dest of streams) {
         stream = dest.stream;
         if (dest.level <= level) {
             if (!dest.maxLevel || (dest.maxLevel && level < dest.maxLevel)) {
@@ -35,7 +44,7 @@ const maxLevelWrite = function(data) {
     }
 };
 
-const defaultLogger = (options = {}) => {
+const defaultLogger = (options: LoggerOptions = ({} as any) as LoggerOptions) => {
     const pretty = pino.pretty();
     pretty.pipe(process.stdout);
     const prettyErr = pino.pretty();
@@ -86,11 +95,11 @@ const defaultLogger = (options = {}) => {
         Object.assign(
             {},
             {
-                level: defaultLevel,
-                timestamp: false,
                 base: {},
-                serializers: serializers.serializers,
+                level: defaultLevel,
                 messageKey: defaultMessageKey,
+                serializers: serializers.serializers,
+                timestamp: false,
             },
             options.config
         ),
@@ -109,9 +118,9 @@ const defaultLogger = (options = {}) => {
     return logger;
 };
 
-let logger;
+let rootLogger;
 
-const loggerFactory = data => {
+const loggerFactory = (data = {}) => {
     let moduleName;
     let options;
     if (data) {
@@ -124,17 +133,17 @@ const loggerFactory = data => {
         }
     }
 
-    if (!logger) {
-        logger = defaultLogger(options);
+    if (!rootLogger) {
+        rootLogger = defaultLogger(options);
     }
     if (!moduleName) {
-        return logger;
+        return rootLogger;
     }
-    return logger.child({ name: moduleName });
+    return rootLogger.child({ name: moduleName });
 };
 
 const factoryProxy = new Proxy(loggerFactory, {
     get: (target, key) => target()[key],
 });
 
-module.exports = factoryProxy;
+export default factoryProxy;

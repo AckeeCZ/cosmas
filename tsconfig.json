@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "target": "es5",
+        "lib": ["es2016"],
+        "sourceMap": true,
+        "declaration": true,
+    },
+    "include": [
+        "./src/**/*"
+    ],
+    "exclude": [
+        "./src/tests"
+    ]
+}

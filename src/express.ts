@@ -1,5 +1,5 @@
-const onFinished = require('on-finished');
-const onHeaders = require('on-headers');
+import * as onFinished from 'on-finished';
+import * as onHeaders from 'on-headers';
 
 const expressMiddleware = function(req, response, next) {
     const reqIn = `--- ${req.method} ${req.originalUrl} ${req.headers['user-agent']}`;
@@ -34,7 +34,4 @@ const expressErrorMiddleware = (error, req, res, next) => {
     next(error);
 };
 
-module.exports = {
-    expressMiddleware,
-    expressErrorMiddleware,
-};
+export { expressErrorMiddleware, expressMiddleware };

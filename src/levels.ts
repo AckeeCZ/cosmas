@@ -1,3 +1,5 @@
+/* tslint:disable:object-literal-sort-keys */
+
 const levels = {
     silent: Infinity,
     fatal: 60,
@@ -8,6 +10,4 @@ const levels = {
     trace: 10,
 };
 
-module.exports = {
-    levels,
-};
+export { levels };

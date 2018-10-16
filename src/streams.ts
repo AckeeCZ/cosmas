@@ -1,8 +1,11 @@
-const { Transform } = require('stream');
-const pkgJson = require('./package.json');
+import * as fs from 'fs';
+import * as path from 'path';
+import { Transform } from 'stream';
+
+const pkgJson = JSON.parse(fs.readFileSync(path.resolve(path.join(__dirname, '..', 'package.json')), 'utf8'));
 
 class DefaultTransformStream extends Transform {
-    _transform(chunk, encoding, callback) {
+    public _transform(chunk, encoding, callback) {
         const obj = JSON.parse(chunk);
         obj.pkgVersion = pkgJson.version;
 
@@ -11,9 +14,9 @@ class DefaultTransformStream extends Transform {
     }
 }
 
-const decorateStreams = (streams, StreamClass) => {
+const decorateStreams = (streams, streamClass) => {
     return streams.map(stream => {
-        const newStream = new StreamClass();
+        const newStream = new streamClass();
         newStream.pipe(stream.stream);
         return {
             level: stream.level,
@@ -23,4 +26,4 @@ const decorateStreams = (streams, StreamClass) => {
     });
 };
 
-module.exports = { decorateStreams, DefaultTransformStream };
+export { decorateStreams, DefaultTransformStream };

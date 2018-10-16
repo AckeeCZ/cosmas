@@ -4,13 +4,17 @@
   "description": "Ackee Node Logger",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
     "lint-staged": "lint-staged",
-    "test": "jest --coverage",
-    "test-watch": "jest --watch --coverage",
-    "lint": "eslint .",
-    "pretty": "prettier --write '*.js'",
+    "test": "jest",
+    "test-watch": "jest --watch",
+    "lint": "tslint -p . --force --format verbose; exit 0",
+    "pretty": "prettier --write 'src/*.ts'",
     "precommit": "lint-staged && npm test",
     "check": "npm-check -i components -i config -i controllers -i enums -i errors -i middleware -i routes -i repositories -i services -i husky & exit 0"
+  },
+  "lint-staged": {
+    "*.js": ["eslint", "git add"]
   },
   "author": "Michal Vlasák <michal.vlasak@ackee.cz>",
   "license": "ISC",
@@ -31,6 +35,8 @@
     "pino-multi-stream": "3.1.2"
   },
   "devDependencies": {
+    "@types/jest": "^23.3.5",
+    "@types/node": "^10.12.0",
     "eslint": "^4.18.2",
     "eslint-config-ackee": "^0.8.1",
     "express": "^4.16.3",
@@ -40,11 +46,12 @@
     "jest-expect-message": "^1.0.1",
     "lint-staged": "^7.0.0",
     "npm-check": "^5.5.2",
-    "prettier": "^1.11.0",
+    "prettier": "^1.14.3",
     "split2": "^2.2.0",
-    "supertest": "^3.1.0"
-  },
-  "jest": {
-    "setupTestFrameworkScriptFile": "jest-expect-message"
+    "supertest": "^3.1.0",
+    "ts-jest": "^23.10.4",
+    "tslint": "^5.11.0",
+    "tslint-config-ackee": "^0.2.1",
+    "typescript": "^3.1.3"
   }
 }

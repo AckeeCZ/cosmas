@@ -1,4 +1,4 @@
-const { Transform } = require('stream');
+import { Transform } from 'stream';
 
 const PINO_TO_STACKDRIVER = {
     10: 'DEBUG',
@@ -10,7 +10,7 @@ const PINO_TO_STACKDRIVER = {
 };
 
 class StackDriverFormatStream extends Transform {
-    _transform(chunk, encoding, callback) {
+    public _transform(chunk, encoding, callback) {
         const obj = JSON.parse(chunk);
         obj.severity = PINO_TO_STACKDRIVER[obj.level] || 'UNKNOWN';
 
@@ -19,4 +19,4 @@ class StackDriverFormatStream extends Transform {
     }
 }
 
-module.exports = { StackDriverFormatStream };
+export { StackDriverFormatStream };
