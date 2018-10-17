@@ -2,7 +2,7 @@
   "name": "ackee-node-logger",
   "version": "1.0.0",
   "description": "Ackee Node Logger",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
     "lint-staged": "lint-staged",
