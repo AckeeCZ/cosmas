@@ -185,10 +185,10 @@ test('Some express headers are enabled by default', () => {
                         const json = JSON.parse(chunk);
                         const validHeaders = ['x-deviceid', 'authorization', 'user-agent'];
                         validHeaders.forEach(header =>
-                            expect(json.req.headers[header], `${header} header should be defined`).toBeDefined()
+                            expect(json.req.headers[header]).toBeDefined()
                         );
                         Object.keys(json.req.headers).forEach(header =>
-                            expect(validHeaders.includes(header), `${header} header should not be defined`).toBe(true)
+                            expect(validHeaders.includes(header)).toBe(true)
                         );
                         loggerWrites();
                         next();
