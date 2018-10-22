@@ -1,10 +1,13 @@
-import * as forEach from 'lodash.foreach';
-import * as omit from 'omit-deep';
-import * as pick from 'pick-deep';
+import { Dictionary } from 'lodash';
+import forEach = require('lodash.foreach');
+import omit = require('omit-deep');
+import pick = require('pick-deep');
 import { removeEmpty } from './utils';
 
-const serializers = {
-    error(obj) {
+type SerializerFn = (obj: Dictionary<any>) => Dictionary<any>;
+
+const serializers: Dictionary<SerializerFn> = {
+    error(obj: Dictionary<any>): Dictionary<any> {
         return {
             code: obj.code,
             data: obj.data,
@@ -12,7 +15,7 @@ const serializers = {
             stack: obj.stack,
         };
     },
-    process(obj) {
+    process(obj: Dictionary<any>): Dictionary<any> {
         if (!obj.env) {
             return obj;
         }
@@ -23,7 +26,7 @@ const serializers = {
         omit(rest, 'env');
         return removeEmpty(Object.assign({}, filteredEnv, rest));
     },
-    req(obj) {
+    req(obj: Dictionary<any>): Dictionary<any> {
         const pickHeaders = ['x-deviceid', 'authorization', 'user-agent'];
         const [body, query] = ['body', 'query'].map(name => {
             const source = obj[name];
@@ -43,7 +46,7 @@ const serializers = {
             url: obj.originalUrl || obj.url,
         });
     },
-    res(obj) {
+    res(obj: Dictionary<any>): Dictionary<any> {
         return {
             out: obj.out,
             time: obj.time,
@@ -51,21 +54,22 @@ const serializers = {
     },
 };
 
-const disablePaths = paths => {
+const disablePaths = (paths: string[] | undefined) => {
     if (!paths || paths.length <= 0) {
         return;
     }
     forEach(serializers, (value, key) => {
         const matcher = new RegExp(`^${key}.(.*)`);
-        const affectedFields = [];
+        const affectedFields: string[] = [];
         paths.forEach(field => {
-            field.replace(matcher, (match, p1) => {
-                affectedFields.push(p1);
-            });
+            const res = field.match(matcher);
+            if (res !== null) {
+                affectedFields.push(res[1]);
+            }
         });
 
         if (affectedFields.length > 0) {
-            const newSerializer = obj => {
+            const newSerializer: SerializerFn = (obj: Dictionary<any>) => {
                 return omit(value(obj), affectedFields);
             };
             serializers[key] = newSerializer;
@@ -73,21 +77,22 @@ const disablePaths = paths => {
     });
 };
 
-const enablePaths = paths => {
+const enablePaths = (paths: string[] | undefined) => {
     if (!paths || paths.length <= 0) {
         return;
     }
     forEach(serializers, (value, key) => {
         const matcher = new RegExp(`^${key}.(.*)`);
-        const affectedFields = [];
+        const affectedFields: string[] = [];
         paths.forEach(field => {
-            field.replace(matcher, (match, p1) => {
-                affectedFields.push(p1);
-            });
+            const res = field.match(matcher);
+            if (res !== null) {
+                affectedFields.push(res[1]);
+            }
         });
 
         if (affectedFields.length > 0) {
-            const newSerializer = obj => {
+            const newSerializer: SerializerFn = (obj: Dictionary<any>) => {
                 const newFields = pick(obj, affectedFields);
                 const originalResult = value(obj);
                 return Object.assign({}, originalResult, newFields);

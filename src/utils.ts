@@ -1,6 +1,8 @@
-import * as isEmpty from 'lodash.isempty';
-import * as omit from 'omit-deep';
+import { Dictionary } from 'lodash';
+import isEmpty = require('lodash.isempty');
+import omit = require('omit-deep');
 
-const removeEmpty = obj => omit(obj, Object.keys(obj).filter(key => obj[key] === undefined || isEmpty(obj[key])));
+const removeEmpty = (obj: Dictionary<any>): object =>
+    omit(obj, Object.keys(obj).filter(key => obj[key] === undefined || isEmpty(obj[key])));
 
 export { removeEmpty };

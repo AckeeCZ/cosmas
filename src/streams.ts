@@ -1,11 +1,19 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { LevelWithSilent } from 'pino';
 import { Transform } from 'stream';
+
+// this is basically enhanced version of pino-multi-stream.Streams type
+export interface AckeeLoggerStream {
+    level?: LevelWithSilent;
+    maxLevel?: LevelWithSilent;
+    stream: NodeJS.WritableStream;
+}
 
 const pkgJson = JSON.parse(fs.readFileSync(path.resolve(path.join(__dirname, '..', 'package.json')), 'utf8'));
 
 class DefaultTransformStream extends Transform {
-    public _transform(chunk, encoding, callback) {
+    public _transform(chunk: any, _encoding: string, callback: (error?: Error | undefined, data?: any) => void) {
         const obj = JSON.parse(chunk);
         obj.pkgVersion = pkgJson.version;
 
@@ -14,7 +22,7 @@ class DefaultTransformStream extends Transform {
     }
 }
 
-const decorateStreams = (streams, streamClass) => {
+const decorateStreams = <T extends Transform>(streams: AckeeLoggerStream[], streamClass: { new (): T }) => {
     return streams.map(stream => {
         const newStream = new streamClass();
         newStream.pipe(stream.stream);

@@ -1,21 +1,37 @@
+import { ErrorRequestHandler, Request, RequestHandler, Response } from 'express';
 import * as onFinished from 'on-finished';
-import * as onHeaders from 'on-headers';
+import onHeaders = require('on-headers');
+import { AckeeLogger } from '.';
 
-const expressMiddleware = function(req, response, next) {
+const errorSymbol = Symbol.for('error');
+
+export type AckeeLoggerExpressMiddleware = (
+    this: AckeeLogger,
+    req: Request & { _startAt?: [number, number]; ackId?: string },
+    response: Response & { _startAt?: [number, number]; time?: string; out?: object; [errorSymbol]?: any },
+    next: any
+) => void;
+
+const expressMiddleware: RequestHandler = function(
+    this: AckeeLogger,
+    req: Request & { _startAt?: [number, number]; ackId?: string },
+    response: Response & { _startAt?: [number, number]; time?: string; out?: object; [errorSymbol]?: any },
+    next: any
+) {
     const reqIn = `--- ${req.method} ${req.originalUrl} ${req.headers['user-agent']}`;
     this.debug({ req, ackId: req.ackId }, `${reqIn} - Request accepted`);
     req._startAt = process.hrtime();
     onHeaders(response, () => {
         response._startAt = process.hrtime();
-        const diffFromSeconds = (response._startAt[0] - req._startAt[0]) * 1e3;
-        const diffFromNanoseconds = (response._startAt[1] - req._startAt[1]) * 1e-6;
+        const diffFromSeconds = (response._startAt[0] - req._startAt![0]) * 1e3;
+        const diffFromNanoseconds = (response._startAt[1] - req._startAt![1]) * 1e-6;
         const ms = diffFromSeconds + diffFromNanoseconds;
         response.time = ms.toFixed(3);
     });
-    onFinished(response, (err, res) => {
-        const error = res[Symbol.for('error')];
+    onFinished(response, (_err, res) => {
+        const error = res[errorSymbol];
         const reqOut = `${res.statusCode} ${req.method} ${req.originalUrl} ${res.time} ms ${req.headers['user-agent']}`;
-        if (this.options.ignoredHttpMethods.includes(req.method)) {
+        if (this.options.ignoredHttpMethods && this.options.ignoredHttpMethods.includes(req.method)) {
             return;
         }
         if (error) {
@@ -29,9 +45,10 @@ const expressMiddleware = function(req, response, next) {
     next();
 };
 
-const expressErrorMiddleware = (error, req, res, next) => {
-    res[Symbol.for('error')] = error;
+const expressErrorMiddleware: ErrorRequestHandler = (error, _req, res, next) => {
+    (res as any)[Symbol.for('error')] = error;
     next(error);
 };
 
 export { expressErrorMiddleware, expressMiddleware };
+

@@ -1,6 +1,6 @@
 import * as express from 'express';
-import * as omitDeep from 'omit-deep';
-import * as pick from 'pick-deep';
+import omitDeep = require('omit-deep');
+import pick = require('pick-deep');
 import { Writable } from 'stream';
 import * as supertest from 'supertest';
 
