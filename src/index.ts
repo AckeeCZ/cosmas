@@ -4,6 +4,7 @@ import isString = require('lodash.isstring');
 import * as pino from 'pino';
 import { BaseLogger as PinoLogger } from 'pino';
 import { Level, LoggerOptions, multistream } from 'pino-multi-stream';
+import { Writable } from 'stream';
 import { AckeeLoggerExpressMiddleware, expressErrorMiddleware, expressMiddleware } from './express';
 import * as serializers from './serializers';
 import { StackDriverFormatStream } from './stackdriver';
@@ -25,6 +26,7 @@ export interface AckeeLogger extends PinoLogger {
     options: AckeeLoggerOptions;
     express: AckeeLoggerExpressMiddleware;
     expressError: ErrorRequestHandler;
+    stream: Writable;
 }
 
 // This is a custom slightly edited version of pino-multistream's wirte method, whch adds support for maximum log level
@@ -109,17 +111,17 @@ const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
             options.config
         ),
         multistream(streams)
-    );
+    ) as PinoLogger as AckeeLogger;
     logger.warning = logger.warn;
-    (logger as any).options = options;
+    logger.options = options;
 
     // Add maxLevel support to pino-multi-stream
     // This could be replaced with custom pass-through stream being passed to multistream, which would filter the messages
-    (logger as any).stream.write = maxLevelWrite.bind(logger.stream);
+    logger.stream.write = maxLevelWrite.bind(logger.stream);
     logger.express = expressMiddleware.bind(logger);
     logger.expressError = expressErrorMiddleware as any;
 
-    return (logger as any) as AckeeLogger;
+    return logger;
 };
 
 let rootLogger: AckeeLogger;
