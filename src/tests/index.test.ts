@@ -1,13 +1,13 @@
-const express = require('express');
-const supertest = require('supertest');
-const stream = require('stream');
-const { levels } = require('../levels');
+import * as express from 'express';
+import { Writable } from 'stream';
+import * as supertest from 'supertest';
+import { levels } from '../levels';
 
 let loggerFactory;
 
 beforeEach(() => {
     jest.resetModules();
-    loggerFactory = require('..'); // eslint-disable-line global-require
+    loggerFactory = require('..').default;
 });
 
 test('can create default logger', () => {
@@ -25,7 +25,7 @@ test('can use custom stream', () => {
     const logger = loggerFactory({
         streams: [
             {
-                stream: new stream.Writable({
+                stream: new Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.message).toBe('Hello');
@@ -46,7 +46,7 @@ test('can use warning level', () => {
     const logger = loggerFactory({
         streams: [
             {
-                stream: new stream.Writable({
+                stream: new Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.message).toBe('Hello');
@@ -76,7 +76,7 @@ test('GET requests are logged by default', () => {
     const logger = loggerFactory({
         streams: [
             {
-                stream: new stream.Writable({
+                stream: new Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.req.method).toBe('GET');
@@ -100,7 +100,7 @@ test('OPTIONS requests are ignored by default', () => {
     const logger = loggerFactory({
         streams: [
             {
-                stream: new stream.Writable({
+                stream: new Writable({
                     write: (chunk, encoding, next) => {
                         loggerWrites();
                         next();
@@ -121,9 +121,10 @@ test('OPTIONS requests are ignored by default', () => {
     test(`${method} HTTP method can be ignored by options`, () => {
         const loggerWrites = jest.fn();
         const logger = loggerFactory({
+            ignoredHttpMethods: [method],
             streams: [
                 {
-                    stream: new stream.Writable({
+                    stream: new Writable({
                         write: (chunk, encoding, next) => {
                             loggerWrites();
                             next();
@@ -131,7 +132,6 @@ test('OPTIONS requests are ignored by default', () => {
                     }),
                 },
             ],
-            ignoredHttpMethods: [method],
         });
         const app = express();
         const request = supertest(app);
@@ -147,7 +147,7 @@ test('severity field is automatically added to log object', () => {
     const logger = loggerFactory({
         streams: [
             {
-                stream: new stream.Writable({
+                stream: new Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.severity).toBe('CRITICAL');
@@ -169,7 +169,7 @@ test('automatic severity field can be disabled by options', () => {
         disableStackdriverFormat: true,
         streams: [
             {
-                stream: new stream.Writable({
+                stream: new Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.severity).toBe(undefined);
@@ -190,7 +190,7 @@ test('logger version is logged', () => {
     const logger = loggerFactory({
         streams: [
             {
-                stream: new stream.Writable({
+                stream: new Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.pkgVersion).not.toBe(undefined);

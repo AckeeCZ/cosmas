@@ -1,60 +1,60 @@
-const pick = require('pick-deep');
-const omitDeep = require('omit-deep');
-const stream = require('stream');
-const express = require('express');
-const supertest = require('supertest');
+import * as express from 'express';
+import omitDeep = require('omit-deep');
+import pick = require('pick-deep');
+import { Writable } from 'stream';
+import * as supertest from 'supertest';
 
 let loggerFactory;
 
 beforeEach(() => {
     jest.resetModules();
-    loggerFactory = require('..'); // eslint-disable-line global-require
+    loggerFactory = require('..').default;
 });
 
 test('Default serializers', () => {
     const loggerWrites = jest.fn();
     const error = {
-        message: 'Bad error',
         code: 400,
-        stack: 'Detailed stack',
         data: { user: 1 },
         devInfo: 'Lorem',
+        message: 'Bad error',
+        stack: 'Detailed stack',
         userInfo: 'Ipsum',
     };
     const process = {
         env: {
-            NODE_PATH: 'app:config',
             NODE_ENV: 'local',
+            NODE_PATH: 'app:config',
             PATH: '.',
             USER: 'root',
         },
     };
     const res = {
+        noteToSelf: 'Send to user',
         out: 'Lorem ipsum',
         time: 14,
-        noteToSelf: 'Send to user',
     };
     const req = {
         body: {
+            catName: 'Cersei',
             password: '1234',
             passwordCheck: '1234',
-            catName: 'Cersei',
         },
-        url: 'www.example.com',
-        method: 'GET',
         extraData: 'Some server data',
+        method: 'GET',
+        url: 'www.example.com',
     };
 
     const logger = loggerFactory({
         streams: [
             {
-                stream: new stream.Writable({
+                stream: new Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.error).toEqual(pick(error, ['message', 'code', 'stack', 'data']));
                         expect(json.process.env).toEqual({
-                            nodePath: process.env.NODE_PATH,
                             nodeEnv: process.env.NODE_ENV,
+                            nodePath: process.env.NODE_PATH,
                         });
                         const filteredReq = omitDeep(req, [
                             'body.password',
@@ -84,8 +84,8 @@ test('No extra fields are added in default serializers', () => {
     };
     const process = {
         stuff: {
-            NODE_PATH: 'app:config',
             NODE_ENV: 'local',
+            NODE_PATH: 'app:config',
             PATH: '.',
             USER: 'root',
         },
@@ -100,7 +100,7 @@ test('No extra fields are added in default serializers', () => {
     const logger = loggerFactory({
         streams: [
             {
-                stream: new stream.Writable({
+                stream: new Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.error).toEqual({});
@@ -122,16 +122,16 @@ test('No extra fields are added in default serializers', () => {
 test('Disable custom path', () => {
     const loggerWrites = jest.fn();
     const req = {
-        url: 'www.example.com',
-        method: 'GET',
         extraData: 'Some server data',
+        method: 'GET',
+        url: 'www.example.com',
     };
 
     const logger = loggerFactory({
         disableFields: ['req.url'],
         streams: [
             {
-                stream: new stream.Writable({
+                stream: new Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.req).toEqual(pick(req, ['body', 'query', 'method']));
@@ -150,16 +150,16 @@ test('Disable custom path', () => {
 test('Enable custom path', () => {
     const loggerWrites = jest.fn();
     const req = {
-        url: 'www.example.com',
-        method: 'GET',
         extraData: 'Some server data',
+        method: 'GET',
+        url: 'www.example.com',
     };
 
     const logger = loggerFactory({
         enableFields: ['req.extraData'],
         streams: [
             {
-                stream: new stream.Writable({
+                stream: new Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.req).toEqual(pick(req, ['body', 'query', 'method', 'url', 'extraData']));
@@ -180,15 +180,15 @@ test('Some express headers are enabled by default', () => {
     const logger = loggerFactory({
         streams: [
             {
-                stream: new stream.Writable({
+                stream: new Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         const validHeaders = ['x-deviceid', 'authorization', 'user-agent'];
                         validHeaders.forEach(header =>
-                            expect(json.req.headers[header], `${header} header should be defined`).toBeDefined()
+                            expect(json.req.headers[header]).toBeDefined()
                         );
                         Object.keys(json.req.headers).forEach(header =>
-                            expect(validHeaders.includes(header), `${header} header should not be defined`).toBe(true)
+                            expect(validHeaders.includes(header)).toBe(true)
                         );
                         loggerWrites();
                         next();
@@ -217,7 +217,7 @@ test('Express fields and headers can be enabled', () => {
         enableFields: ['req.protocol', 'req.headers.host'],
         streams: [
             {
-                stream: new stream.Writable({
+                stream: new Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.req.protocol).toBe('http');
@@ -246,7 +246,7 @@ test('Default express headers can be disabled', () => {
         disableFields: ['req.headers.user-agent'],
         streams: [
             {
-                stream: new stream.Writable({
+                stream: new Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.req.headers['user-agent']).toBeUndefined();

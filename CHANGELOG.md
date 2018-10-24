@@ -1,3 +1,8 @@
+## [1.0.0] - 2018-10-17
+
+### Changed
+- converted to Typescript
+
 ## [0.2.9] - 2018-10-15
 
 ### Changed
