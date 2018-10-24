@@ -1,3 +1,6 @@
+# We are currently unable to upgrade to pino5, because there is some problem in pino's prettification since 5.0.0 on (probably something here https://github.com/pinojs/pino/blob/238fe2857501dca963783d93915506012c8b43bf/lib/tools.js#L181 or in pino-pretty package?).
+This cause stream metadata to disappear which makes pinoms unusable.
+
 # Simple pino-based logger setup for Ackee purposes
 
 ## How to use
