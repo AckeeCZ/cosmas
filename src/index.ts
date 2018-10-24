@@ -97,7 +97,7 @@ const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
         options.ignoredHttpMethods = ['OPTIONS'];
     }
 
-    const logger = pino(
+    const logger = (pino(
         // no deep-merging needed, so assign is OK
         Object.assign(
             {},
@@ -111,7 +111,7 @@ const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
             options.config
         ),
         multistream(streams)
-    ) as PinoLogger as AckeeLogger;
+    ) as PinoLogger) as AckeeLogger;
     logger.warning = logger.warn;
     logger.options = options;
 

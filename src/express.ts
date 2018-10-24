@@ -51,4 +51,3 @@ const expressErrorMiddleware: ErrorRequestHandler = (error, _req, res, next) => 
 };
 
 export { expressErrorMiddleware, expressMiddleware };
-
