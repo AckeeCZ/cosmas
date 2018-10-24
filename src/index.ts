@@ -59,7 +59,6 @@ const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
     pretty.pipe(process.stdout);
     const prettyErr = pino.pretty();
     prettyErr.pipe(process.stderr);
-
     serializers.disablePaths(options.disableFields);
     serializers.enablePaths(options.enableFields);
 
