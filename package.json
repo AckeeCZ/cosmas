@@ -40,6 +40,8 @@
   },
   "devDependencies": {
     "@types/jest": "^23.3.7",
+    "@types/lodash.foreach": "^4.5.4",
+    "@types/lodash.isempty": "^4.4.4",
     "@types/lodash.isobject": "^3.0.4",
     "@types/lodash.isstring": "^4.0.4",
     "@types/node": "^10.12.0",
