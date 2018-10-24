@@ -205,3 +205,24 @@ test('logger version is logged', () => {
     logger.fatal('Hello');
     expect(loggerWrites).toBeCalled();
 });
+
+test('silent stream does not write', () => {
+    const loggerWrites = jest.fn();
+    const logger = loggerFactory({
+        streams: [
+            {
+                stream: new Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        loggerWrites();
+                        next();
+                    },
+                }),
+                level: 'silent',
+            },
+        ],
+    });
+
+    logger.fatal('Hello');
+    expect(loggerWrites).not.toBeCalled();
+});
