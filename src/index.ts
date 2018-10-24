@@ -55,11 +55,6 @@ const maxLevelWrite: pino.WriteFn = function(this: any, data: object): void {
 };
 
 const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
-    const pretty = pino.pretty();
-    pretty.pipe(process.stdout);
-    const prettyErr = pino.pretty();
-    prettyErr.pipe(process.stderr);
-
     serializers.disablePaths(options.disableFields);
     serializers.enablePaths(options.enableFields);
 
@@ -78,14 +73,14 @@ const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
     let defaultMessageKey = 'message'; // best option for Google Stackdriver
     if (options.streams) {
         streams = options.streams;
-    } else if (options.pretty) {
-        streams = [{ level: defaultLevel, maxLevel: 'warn', stream: pretty }, { level: 'warn', stream: prettyErr }];
-        defaultMessageKey = 'msg'; // default pino - best option for pretty print
     } else {
         streams = [
             { level: defaultLevel, maxLevel: 'warn', stream: process.stdout },
             { level: 'warn', stream: process.stderr },
         ];
+    }
+    if (options.pretty) {
+        defaultMessageKey = 'msg'; // default pino - best option for pretty print
     }
     if (!options.disableStackdriverFormat) {
         streams = decorateStreams(streams, StackDriverFormatStream);
@@ -108,7 +103,7 @@ const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
                 serializers: serializers.serializers,
                 timestamp: false,
             },
-            options.config
+            Object.assign({}, { prettyPrint: options.pretty }, options.config)
         ),
         multistream(streams)
     ) as PinoLogger) as AckeeLogger;
@@ -117,7 +112,8 @@ const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
 
     // Add maxLevel support to pino-multi-stream
     // This could be replaced with custom pass-through stream being passed to multistream, which would filter the messages
-    logger.stream.write = maxLevelWrite.bind(logger.stream);
+    const streamSym = (pino as any).symbols.streamSym;
+    logger[streamSym].write = maxLevelWrite.bind(logger[streamSym]);
     logger.express = expressMiddleware.bind(logger);
     logger.expressError = expressErrorMiddleware as any;
 
