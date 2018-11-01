@@ -2,6 +2,8 @@
 
 ### Changed
 - converted to Typescript
+- renamed to `cosmas`
+- moved to public GitHub repo
 
 ## [0.2.9] - 2018-10-15
 
