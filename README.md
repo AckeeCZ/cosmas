@@ -7,28 +7,28 @@ First step is to create a root logger. Its configuration can be specified on cre
 ### Create root logger with default configuration
 
 ```js
-const logger = require('ackee-node-logger');
+const logger = require('cosmas');
 // or
-const logger = require('ackee-node-logger')();
+const logger = require('cosmas')();
 ```
 
 ### Create root logger with custom configuration
 
 ```js
-const logger = require('ackee-node-logger')({
+const logger = require('cosmas')({
     disableFields: ['error.stack'],
     enableFields: ['req.protocol']
 });
 ```
 
-Note: If you want to specify custom configuration it must be done **in the first require** of `ackee-node-logger`. Otherwise, default configuration will be used.
+Note: If you want to specify custom configuration it must be done **in the first require** of `cosmas`. Otherwise, default configuration will be used.
 
 See **Options** for a list of possible options.
 
 After you create a root logger, you may use it or you can create a child logger.
 
 ```js
-const databaseLogger = require('ackee-node-logger')('database')
+const databaseLogger = require('cosmas')('database')
 ```
 
 The only difference between root logger and a child logger is that the child logger will print its name in each log message.
@@ -56,12 +56,12 @@ All loglevels from warning up (inclusive) - warning, error, fatal - are logged t
 
 ## Express middleware
 
-`ackee-node-logger` contains an express middleware which you can use to log all requests and responses of your express application.
+`cosmas` contains an express middleware which you can use to log all requests and responses of your express application.
 
 Usage:
 ```js
 const express = require('express');
-const logger = require('ackee-node-logger');
+const logger = require('cosmas');
 
 const app = express();
 // or
@@ -83,7 +83,7 @@ app.use(logger.expressError)
 All those log messages will contain request and possibly response, error, time from request to response, status code and `user-agent`, `x-deviceid` and `authorization` request headers.
 
 ## Environment-specific behavior
-`ackee-node-logger` is meant to be used throughout different environments (development, testing, production) and some of its configuration is setup differently based on the environment it runs in.
+`cosmas` is meant to be used throughout different environments (development, testing, production) and some of its configuration is setup differently based on the environment it runs in.
 
 ### Testing
 If the `NODE_ENV` environment variable is set to `test`, all logs are turned off (minimal loglevel is set to `silent` which effectively turns logging off).
@@ -92,19 +92,19 @@ If the `NODE_ENV` environment variable is set to `test`, all logs are turned off
 [Standard pino log](https://github.com/pinojs/pino#usage) is used and it's optimized for Google Stackdriver logging. That means that default log level is `debug`, pretty print is turned off and [pino's `messageKey` option](https://github.com/pinojs/pino/blob/master/docs/API.md#pinooptions-stream) is set to `message`.
 
 ## Options
-Options override both default logger configuration and environment-specific configuration. However, do not forget to specify it during the **first** `ackee-node-logger`. During it, root logger is created and it cannot be changed later.
+Options override both default logger configuration and environment-specific configuration. However, do not forget to specify it during the **first** `cosmas`. During it, root logger is created and it cannot be changed later.
 
 - `defaultLevel` - set logger's minimal loglevel (default is `debug`)
 - `disableFields` - list of paths which will be omitted from the objects being logged (if any)
 - `enableFields` - list of paths which will not be omitted by default serializers from objects being logged
 - `ignoredHttpMethods` - list of HTTP methods which will not be logged by express logging middleware at all. Defaults to `['OPTIONS']`
-- `streams` - list of stream objects, which will be passed directly to [pino-multistream's multistream function](https://github.com/pinojs/pino-multi-stream#pinomsmultistreamstreams) instead of default `ackee-node-logger` stream
+- `streams` - list of stream objects, which will be passed directly to [pino-multistream's multistream function](https://github.com/pinojs/pino-multi-stream#pinomsmultistreamstreams) instead of default `cosmas` stream
 - `pretty` - if set to `true`, logger will use [pino pretty human-readable logs](https://github.com/pinojs/pino/blob/master/docs/API.md#pretty). This option can be overriden by `streams`
 - `disableStackdriverFormat` - if set to `false`, logger will add `severity` field to all log objects, so that log levels in Google Stackdriver work as expected. Defaults to `false`
 - `config` - object, which will be passed to underlying logger object. Right now, underlying logger is [pino](https://github.com/pinojs/pino), so for available options see [pino API docs](https://github.com/pinojs/pino/blob/master/docs/API.md#pinooptions-stream)
 
 ## Default serializers
-`ackee-node-logger` defines some [pino serializers](https://github.com/pinojs/pino/blob/master/docs/API.md#constructor) on its own
+`cosmas` defines some [pino serializers](https://github.com/pinojs/pino/blob/master/docs/API.md#constructor) on its own
 
 - `error` - logs `message`, `code`, `stack` and `data` fields
 - `processEnv` - logs `NODE_PATH` and `NODE_ENV`
@@ -116,7 +116,7 @@ Options override both default logger configuration and environment-specific conf
 
 ### VS Code debugging not showing log messages
 
-This problem is caused by a way VS Code handles console output. Therefore it appears in Winston and pino (underlying library of ackee-node-logger) as well.
+This problem is caused by a way VS Code handles console output. Therefore it appears in Winston and pino (underlying library of cosmas) as well.
 
 However, it can be easily solved by adding eithe
 
