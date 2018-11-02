@@ -63,6 +63,29 @@ test('can use warning level', () => {
     expect(loggerWrites).toBeCalled();
 });
 
+test('child logger has warning level', () => {
+    const loggerWrites = jest.fn();
+    loggerFactory({
+        streams: [
+            {
+                stream: new Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.message).toBe('Hello');
+                        expect(json.level).toBe(levels.warn);
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+    const childLogger = loggerFactory('child');
+
+    childLogger.warning('Hello');
+    expect(loggerWrites).toBeCalled();
+});
+
 test('express binds', () => {
     const logger = loggerFactory();
     const app = express();
