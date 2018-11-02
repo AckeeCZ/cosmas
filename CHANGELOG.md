@@ -1,9 +1,13 @@
+## [1.0.1] - 2018-11-02
+
+### Changed
+- renamed to `cosmas`
+- moved to public GitHub repo
+
 ## [1.0.0] - 2018-10-17
 
 ### Changed
 - converted to Typescript
-- renamed to `cosmas`
-- moved to public GitHub repo
 
 ## [0.2.9] - 2018-10-15
 

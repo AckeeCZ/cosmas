@@ -1,4 +1,9 @@
-# Simple pino-based logger setup for Ackee purposes
+# Cosmas
+
+[![Npm](https://img.shields.io/npm/v/cosmas.svg?style=flat-square)](https://www.npmjs.com/package/cosmas)
+[![License](https://img.shields.io/github/license/AckeeCZ/cosmas.svg?style=flat-square)](https://github.com/AckeeCZ/cosmas/blob/master/LICENSE)
+
+Simple pino-based logger for all your writing needs
 
 ## How to use
 
