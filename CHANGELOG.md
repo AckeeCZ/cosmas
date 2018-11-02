@@ -1,3 +1,10 @@
+## [Unpublished]
+
+### Added
+- .npmignore
+- `prepublish` npm script
+- Travis CI build
+
 ## [1.0.1] - 2018-11-02
 
 ### Changed
