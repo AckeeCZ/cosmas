@@ -20,71 +20,54 @@ test('can create named logger', () => {
     expect(logger).toBeDefined();
 });
 
-test('can use custom stream', () => {
-    const loggerWrites = jest.fn();
-    const logger = loggerFactory({
-        streams: [
-            {
-                stream: new Writable({
-                    write: (chunk, encoding, next) => {
-                        const json = JSON.parse(chunk);
-                        expect(json.message).toBe('Hello');
-                        loggerWrites();
-                        next();
-                    },
-                }),
-            },
-        ],
-    });
-
-    logger.info('Hello');
-    expect(loggerWrites).toBeCalled();
+const testWriteStream = (resolve, assert) => ({
+    stream: new Writable({
+        write: (chunk, encoding, next) => {
+            const json = JSON.parse(chunk);
+            assert(json);
+            next();
+            resolve();
+        },
+    }),
 });
 
-test('can use warning level', () => {
-    const loggerWrites = jest.fn();
-    const logger = loggerFactory({
-        streams: [
-            {
-                stream: new Writable({
-                    write: (chunk, encoding, next) => {
-                        const json = JSON.parse(chunk);
-                        expect(json.message).toBe('Hello');
-                        expect(json.level).toBe(levels.warn);
-                        loggerWrites();
-                        next();
-                    },
+test('can use custom stream', () =>
+    new Promise((resolve, reject) => {
+        const logger = loggerFactory({
+            streams: [testWriteStream(resolve, json => expect(json.message).toBe('Hello'))],
+        });
+
+        logger.info('Hello');
+    }));
+
+test('can use warning level', () =>
+    new Promise((resolve, reject) => {
+        const logger = loggerFactory({
+            streams: [
+                testWriteStream(resolve, json => {
+                    expect(json.message).toBe('Hello');
+                    expect(json.level).toBe(levels.warn);
                 }),
-            },
-        ],
-    });
+            ],
+        });
 
-    logger.warning('Hello');
-    expect(loggerWrites).toBeCalled();
-});
+        logger.warning('Hello');
+    }));
 
-test('child logger has warning level', () => {
-    const loggerWrites = jest.fn();
-    loggerFactory({
-        streams: [
-            {
-                stream: new Writable({
-                    write: (chunk, encoding, next) => {
-                        const json = JSON.parse(chunk);
-                        expect(json.message).toBe('Hello');
-                        expect(json.level).toBe(levels.warn);
-                        loggerWrites();
-                        next();
-                    },
+test('child logger has warning level', () =>
+    new Promise((resolve, reject) => {
+        loggerFactory({
+            streams: [
+                testWriteStream(resolve, json => {
+                    expect(json.message).toBe('Hello');
+                    expect(json.level).toBe(levels.warn);
                 }),
-            },
-        ],
-    });
-    const childLogger = loggerFactory('child');
+            ],
+        });
+        const childLogger = loggerFactory('child');
 
-    childLogger.warning('Hello');
-    expect(loggerWrites).toBeCalled();
-});
+        childLogger.warning('Hello');
+    }));
 
 test('express binds', () => {
     const logger = loggerFactory();
@@ -94,29 +77,16 @@ test('express binds', () => {
     return request.get('/');
 });
 
-test('GET requests are logged by default', () => {
-    const loggerWrites = jest.fn();
-    const logger = loggerFactory({
-        streams: [
-            {
-                stream: new Writable({
-                    write: (chunk, encoding, next) => {
-                        const json = JSON.parse(chunk);
-                        expect(json.req.method).toBe('GET');
-                        loggerWrites();
-                        next();
-                    },
-                }),
-            },
-        ],
-    });
-    const app = express();
-    const request = supertest(app);
-    app.use(logger.express);
-    return request.get('/').then(() => {
-        expect(loggerWrites).toBeCalled();
-    });
-});
+test('GET requests are logged by default', () =>
+    new Promise((resolve, reject) => {
+        const logger = loggerFactory({
+            streams: [testWriteStream(resolve, json => expect(json.req.method).toBe('GET'))],
+        });
+        const app = express();
+        const request = supertest(app);
+        app.use(logger.express);
+        request.get('/').then(() => null);
+    }));
 
 test('OPTIONS requests are ignored by default', () => {
     const loggerWrites = jest.fn();
@@ -165,69 +135,33 @@ test('OPTIONS requests are ignored by default', () => {
     });
 });
 
-test('severity field is automatically added to log object', () => {
-    const loggerWrites = jest.fn();
-    const logger = loggerFactory({
-        streams: [
-            {
-                stream: new Writable({
-                    write: (chunk, encoding, next) => {
-                        const json = JSON.parse(chunk);
-                        expect(json.severity).toBe('CRITICAL');
-                        loggerWrites();
-                        next();
-                    },
-                }),
-            },
-        ],
-    });
+test('severity field is automatically added to log object', () =>
+    new Promise((resolve, reject) => {
+        const logger = loggerFactory({
+            streams: [testWriteStream(resolve, json => expect(json.severity).toBe('CRITICAL'))],
+        });
 
-    logger.fatal('Hello');
-    expect(loggerWrites).toBeCalled();
-});
+        logger.fatal('Hello');
+    }));
 
-test('automatic severity field can be disabled by options', () => {
-    const loggerWrites = jest.fn();
-    const logger = loggerFactory({
-        disableStackdriverFormat: true,
-        streams: [
-            {
-                stream: new Writable({
-                    write: (chunk, encoding, next) => {
-                        const json = JSON.parse(chunk);
-                        expect(json.severity).toBe(undefined);
-                        loggerWrites();
-                        next();
-                    },
-                }),
-            },
-        ],
-    });
+test('automatic severity field can be disabled by options', () =>
+    new Promise((resolve, reject) => {
+        const logger = loggerFactory({
+            disableStackdriverFormat: true,
+            streams: [testWriteStream(resolve, json => expect(json.severity).toBe(undefined))],
+        });
 
-    logger.fatal('Hello');
-    expect(loggerWrites).toBeCalled();
-});
+        logger.fatal('Hello');
+    }));
 
-test('logger version is logged', () => {
-    const loggerWrites = jest.fn();
-    const logger = loggerFactory({
-        streams: [
-            {
-                stream: new Writable({
-                    write: (chunk, encoding, next) => {
-                        const json = JSON.parse(chunk);
-                        expect(json.pkgVersion).not.toBe(undefined);
-                        loggerWrites();
-                        next();
-                    },
-                }),
-            },
-        ],
-    });
+test('logger version is logged', () =>
+    new Promise((resolve, reject) => {
+        const logger = loggerFactory({
+            streams: [testWriteStream(resolve, json => expect(json.pkgVersion).not.toBe(undefined))],
+        });
 
-    logger.fatal('Hello');
-    expect(loggerWrites).toBeCalled();
-});
+        logger.fatal('Hello');
+    }));
 
 test('silent stream does not write', () => {
     const loggerWrites = jest.fn();
