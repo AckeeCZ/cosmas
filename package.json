@@ -6,8 +6,8 @@
   "scripts": {
     "build": "tsc --strict --noImplicitReturns --noUnusedLocals --noUnusedParameters",
     "lint-staged": "lint-staged",
-    "test": "jest",
-    "test-watch": "jest --watch",
+    "test": "NODE_ENV= jest",
+    "test-watch": "NODE_ENV= jest --watch",
     "lint": "tslint -p . --force --format codeFrame; exit 0",
     "pretty": "prettier --parser typescript --write 'src/*.ts'",
     "precommit": "lint-staged && npm test",
