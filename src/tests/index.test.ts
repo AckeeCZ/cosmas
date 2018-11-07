@@ -170,7 +170,6 @@ test('silent stream does not write', () => {
             {
                 stream: new Writable({
                     write: (chunk, encoding, next) => {
-                        const json = JSON.parse(chunk);
                         loggerWrites();
                         next();
                     },
