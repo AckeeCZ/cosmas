@@ -2,13 +2,19 @@ import { ErrorRequestHandler } from 'express';
 import isObject = require('lodash.isobject');
 import isString = require('lodash.isstring');
 import * as pino from 'pino';
-import { BaseLogger as PinoLogger } from 'pino';
-import { Level, LoggerOptions, multistream } from 'pino-multi-stream';
+import { BaseLogger as PinoLogger, LevelWithSilent as Level } from 'pino';
 import { Writable } from 'stream';
 import { AckeeLoggerExpressMiddleware, expressErrorMiddleware, expressMiddleware } from './express';
+import { levels } from './levels';
 import * as serializers from './serializers';
 import { StackDriverFormatStream } from './stackdriver';
 import { AckeeLoggerStream, decorateStreams, DefaultTransformStream } from './streams';
+
+import * as pinoms from 'pino-multi-stream';
+
+interface LoggerOptions extends pino.LoggerOptions {
+    streams?: Array<{ stream: NodeJS.WritableStream; level?: pino.Level }>;
+}
 
 export interface AckeeLoggerOptions {
     disableFields?: string[];
@@ -27,6 +33,10 @@ export interface AckeeLogger extends PinoLogger {
     express: AckeeLoggerExpressMiddleware;
     expressError: ErrorRequestHandler;
     stream: Writable;
+}
+
+export interface AckeeLoggerFactory extends AckeeLogger {
+    (data: string | AckeeLoggerOptions): AckeeLogger;
 }
 
 // This is a custom slightly edited version of pino-multistream's wirte method, whch adds support for maximum log level
@@ -78,11 +88,14 @@ const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
     if (options.streams) {
         streams = options.streams;
     } else if (options.pretty) {
-        streams = [{ level: defaultLevel, maxLevel: 'warn', stream: pretty }, { level: 'warn', stream: prettyErr }];
+        streams = [
+            { level: defaultLevel, maxLevel: levels.warn, stream: pretty },
+            { level: 'warn', stream: prettyErr },
+        ];
         defaultMessageKey = 'msg'; // default pino - best option for pretty print
     } else {
         streams = [
-            { level: defaultLevel, maxLevel: 'warn', stream: process.stdout },
+            { level: defaultLevel, maxLevel: levels.warn, stream: process.stdout },
             { level: 'warn', stream: process.stderr },
         ];
     }
@@ -109,7 +122,7 @@ const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
             },
             options.config
         ),
-        multistream(streams)
+        (pinoms as any).multistream(streams)
     ) as PinoLogger) as AckeeLogger;
     logger.warning = logger.warn;
     logger.options = options;
@@ -149,6 +162,6 @@ const loggerFactory = (data: string | AckeeLoggerOptions = {}): AckeeLogger => {
 
 const factoryProxy = new Proxy(loggerFactory, {
     get: (target, key) => (target() as any)[key],
-});
+}) as AckeeLoggerFactory;
 
 export default factoryProxy;

@@ -8,8 +8,12 @@ declare module 'pick-deep' {
     export = pickDeep;
 }
 
-// there is a @typed/pino-multi-stream package, but it has wrong type in its Streams definition. So until its fixed, we use this
 declare module 'pino-multi-stream' {
+
+}
+
+// there is a @typed/pino-multi-stream package, but it has wrong type in its Streams definition. So until its fixed, we use this
+/* declare module 'pino-multi-stream' {
     import {
         LevelWithSilent as PinoLevel,
         Logger as PinoLogger,
@@ -29,4 +33,9 @@ declare module 'pino-multi-stream' {
     type Logger = PinoLogger;
 
     function pinoms(options: LoggerOptions): Logger;
-}
+    interface pinoms {
+        multistream(streams: Streams): stream.Writable;
+        (options: LoggerOptions): Logger;
+    }
+    export = pinoms;
+}*/

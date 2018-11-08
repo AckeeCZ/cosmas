@@ -6,7 +6,7 @@ import { Transform } from 'stream';
 // this is basically enhanced version of pino-multi-stream.Streams type
 export interface AckeeLoggerStream {
     level?: LevelWithSilent;
-    maxLevel?: LevelWithSilent;
+    maxLevel?: number; // this is not processed by pino, so we need the number directly
     stream: NodeJS.WritableStream;
 }
 
