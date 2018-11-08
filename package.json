@@ -1,6 +1,6 @@
 {
   "name": "cosmas",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Cosmas is a pino-based logger for all your writing needs",
   "main": "./dist/index.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "lint": "tslint -p . --force --format codeFrame; exit 0",
     "pretty": "prettier --parser typescript --write 'src/*.ts'",
     "precommit": "lint-staged && npm test",
-    "prepublish": "npm run build",
+    "prepublishOnly": "npm run build",
     "check": "npm-check -i husky -i ts-jest -i tslint-config-ackee && exit 0",
     "clean": "rm -rf ./node_modules && npm i && npm t"
   },

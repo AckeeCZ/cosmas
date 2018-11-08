@@ -1,8 +1,16 @@
 ## [Unpublished]
 
+## [1.0.3] - 2018-11-08
+
+### Fixed
+- bug in pretty print
+- update README
+
+## [1.0.2] - 2018-11-08
+
 ### Added
 - .npmignore
-- `prepublish` npm script
+- `prepublishOnly` npm script
 - Travis CI build
 
 ## [1.0.1] - 2018-11-02
