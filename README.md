@@ -9,18 +9,30 @@ Simple pino-based logger for all your writing needs
 
 First step is to create a root logger. Its configuration can be specified on creation and it will be used for all other loggers created.
 
+### Import the logger factory
+
+```js
+const loggerFactory = require('cosmas').default;
+```
+
+or with import
+
+```js
+import loggerFactory from 'cosmas';
+```
+
 ### Create root logger with default configuration
 
 ```js
-const logger = require('cosmas');
+const logger = loggerFactory; // factory itself is a logger
 // or
-const logger = require('cosmas')();
+const logger = loggerFactory();
 ```
 
 ### Create root logger with custom configuration
 
 ```js
-const logger = require('cosmas')({
+const logger = loggerFactory({
     disableFields: ['error.stack'],
     enableFields: ['req.protocol']
 });
@@ -33,7 +45,7 @@ See **Options** for a list of possible options.
 After you create a root logger, you may use it or you can create a child logger.
 
 ```js
-const databaseLogger = require('cosmas')('database')
+const databaseLogger = loggerFactory('database')
 ```
 
 The only difference between root logger and a child logger is that the child logger will print its name in each log message.
