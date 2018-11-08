@@ -2,7 +2,14 @@ node_modules
 package-lock.json
 coverage
 docs
+CHANGELOG.md
+src
+
+# dev files
 jest.config.js
 tsconfig.json
 tslint.json
-CHANGELOG.md
+.travis.yml
+.prettierrc
+.lintstagedrc
+.editorconfig
