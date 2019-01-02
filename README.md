@@ -2,6 +2,10 @@
 
 [![Npm](https://img.shields.io/npm/v/cosmas.svg?style=flat-square)](https://www.npmjs.com/package/cosmas)
 [![License](https://img.shields.io/github/license/AckeeCZ/cosmas.svg?style=flat-square)](https://github.com/AckeeCZ/cosmas/blob/master/LICENSE)
+[![Dependencies](https://img.shields.io/david/AckeeCZ/cosmas.svg?style=flat-square)](https://david-dm.org/AckeeCZ/cosmas)	
+[![Dev dependencies](https://img.shields.io/david/dev/AckeeCZ/cosmas.svg?style=flat-square)](https://david-dm.org/AckeeCZ/cosmas)	
+[![Downloads](https://img.shields.io/npm/dw/cosmas.svg?style=flat-square)](https://www.npmjs.com/package/cosmas)
+[![Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 Simple pino-based logger for all your writing needs
 
