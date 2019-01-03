@@ -22,7 +22,7 @@ class DefaultTransformStream extends Transform {
     }
 }
 
-const decorateStreams = <T extends Transform>(streams: AckeeLoggerStream[], streamClass: new () => T ) => {
+const decorateStreams = <T extends Transform>(streams: AckeeLoggerStream[], streamClass: new () => T) => {
     return streams.map(stream => {
         const newStream = new streamClass();
         newStream.pipe(stream.stream);
