@@ -2,8 +2,11 @@
 
 [![Npm](https://img.shields.io/npm/v/cosmas.svg?style=flat-square)](https://www.npmjs.com/package/cosmas)
 [![License](https://img.shields.io/github/license/AckeeCZ/cosmas.svg?style=flat-square)](https://github.com/AckeeCZ/cosmas/blob/master/LICENSE)
+[![Known Vulnerabilities](https://snyk.io/test/github/AckeeCZ/cosmas/badge.svg?targetFile=package.json)](https://snyk.io/test/github/AckeeCZ/cosmas?targetFile=package.json)
 [![Dependencies](https://img.shields.io/david/AckeeCZ/cosmas.svg?style=flat-square)](https://david-dm.org/AckeeCZ/cosmas)	
-[![Dev dependencies](https://img.shields.io/david/dev/AckeeCZ/cosmas.svg?style=flat-square)](https://david-dm.org/AckeeCZ/cosmas)	
+[![Dev dependencies](https://img.shields.io/david/dev/AckeeCZ/cosmas.svg?style=flat-square)](https://david-dm.org/AckeeCZ/cosmas)
+[![Maintainability](https://img.shields.io/codeclimate/maintainability/AckeeCZ/cosmas.svg?style=flat-square)](https://codeclimate.com/github/AckeeCZ/cosmas)
+[![Technical debt](https://img.shields.io/codeclimate/tech-debt/AckeeCZ/cosmas.svg?style=flat-square)](https://codeclimate.com/github/AckeeCZ/cosmas)
 [![Downloads](https://img.shields.io/npm/dw/cosmas.svg?style=flat-square)](https://www.npmjs.com/package/cosmas)
 [![Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
