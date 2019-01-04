@@ -1,5 +1,12 @@
 ## [Unpublished]
 
+### Fixed
+- lint issue due to changes in tslint 5.12.0
+- stream write function type
+
+### Added
+- coveralls integration
+
 ## [1.0.3] - 2018-11-08
 
 ### Fixed

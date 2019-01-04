@@ -39,7 +39,7 @@ export interface AckeeLoggerFactory extends AckeeLogger {
     (data: string | AckeeLoggerOptions): AckeeLogger;
 }
 
-// This is a custom slightly edited version of pino-multistream's wirte method, whch adds support for maximum log level
+// This is a custom slightly edited version of pino-multistream's write method, which adds support for maximum log level
 // The original version was pino-multistream 3.1.2 (commit 71d98ae) - https://github.com/pinojs/pino-multi-stream/blob/71d98ae191e02c56e39e849d2c30d59c8c6db1b9/multistream.js#L43
 const maxLevelWrite: pino.WriteFn = function(this: any, data: object): void {
     let stream;
@@ -129,7 +129,11 @@ const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
 
     // Add maxLevel support to pino-multi-stream
     // This could be replaced with custom pass-through stream being passed to multistream, which would filter the messages
-    logger.stream.write = maxLevelWrite.bind(logger.stream);
+    const streamMaxLevelWrite = maxLevelWrite.bind(logger.stream);
+    logger.stream.write = (chunk: any) => {
+        streamMaxLevelWrite(chunk);
+        return true;
+    };
     logger.express = expressMiddleware.bind(logger);
     logger.expressError = expressErrorMiddleware as any;
 
