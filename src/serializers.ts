@@ -54,13 +54,10 @@ const serializers: Dictionary<SerializerFn> = {
     },
 };
 
-const sliceByPrefix = (prefix: string, paths: string[]) =>
-    paths.filter(field => field.startsWith(prefix)).map(field => field.slice(prefix.length));
+const sliceByPrefix = (prefix: string, paths?: string[]) =>
+    (paths || []).filter(field => field.startsWith(prefix)).map(field => field.slice(prefix.length));
 
-const disablePaths = (paths: string[] | undefined) => {
-    if (!paths || paths.length <= 0) {
-        return;
-    }
+const disablePaths = (paths?: string[]) => {
     forEach(serializers, (value, key) => {
         const affectedFields = sliceByPrefix(`${key}.`, paths);
 
@@ -73,10 +70,7 @@ const disablePaths = (paths: string[] | undefined) => {
     });
 };
 
-const enablePaths = (paths: string[] | undefined) => {
-    if (!paths || paths.length <= 0) {
-        return;
-    }
+const enablePaths = (paths?: string[]) => {
     forEach(serializers, (value, key) => {
         const affectedFields = sliceByPrefix(`${key}.`, paths);
 
