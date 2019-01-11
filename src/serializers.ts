@@ -54,19 +54,12 @@ const serializers: Dictionary<SerializerFn> = {
     },
 };
 
-const disablePaths = (paths: string[] | undefined) => {
-    if (!paths || paths.length <= 0) {
-        return;
-    }
+const sliceByPrefix = (prefix: string, paths?: string[]) =>
+    (paths || []).filter(field => field.startsWith(prefix)).map(field => field.slice(prefix.length));
+
+const disablePaths = (paths?: string[]) => {
     forEach(serializers, (value, key) => {
-        const matcher = new RegExp(`^${key}.(.*)`);
-        const affectedFields: string[] = [];
-        paths.forEach(field => {
-            const res = field.match(matcher);
-            if (res !== null) {
-                affectedFields.push(res[1]);
-            }
-        });
+        const affectedFields = sliceByPrefix(`${key}.`, paths);
 
         if (affectedFields.length > 0) {
             const newSerializer: SerializerFn = (obj: Dictionary<any>) => {
@@ -77,19 +70,9 @@ const disablePaths = (paths: string[] | undefined) => {
     });
 };
 
-const enablePaths = (paths: string[] | undefined) => {
-    if (!paths || paths.length <= 0) {
-        return;
-    }
+const enablePaths = (paths?: string[]) => {
     forEach(serializers, (value, key) => {
-        const matcher = new RegExp(`^${key}.(.*)`);
-        const affectedFields: string[] = [];
-        paths.forEach(field => {
-            const res = field.match(matcher);
-            if (res !== null) {
-                affectedFields.push(res[1]);
-            }
-        });
+        const affectedFields = sliceByPrefix(`${key}.`, paths);
 
         if (affectedFields.length > 0) {
             const newSerializer: SerializerFn = (obj: Dictionary<any>) => {
