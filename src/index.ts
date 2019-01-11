@@ -3,29 +3,12 @@ import isObject = require('lodash.isobject');
 import isString = require('lodash.isstring');
 import * as pino from 'pino';
 import { BaseLogger as PinoLogger, LevelWithSilent as Level } from 'pino';
+import * as pinoms from 'pino-multi-stream';
 import { Writable } from 'stream';
 import { AckeeLoggerExpressMiddleware, expressErrorMiddleware, expressMiddleware } from './express';
-import { levels } from './levels';
+import { AckeeLoggerOptions } from './interfaces';
 import * as serializers from './serializers';
-import { StackDriverFormatStream } from './stackdriver';
-import { AckeeLoggerStream, decorateStreams, DefaultTransformStream } from './streams';
-
-import * as pinoms from 'pino-multi-stream';
-
-interface LoggerOptions extends pino.LoggerOptions {
-    streams?: Array<{ stream: NodeJS.WritableStream; level?: pino.Level }>;
-}
-
-export interface AckeeLoggerOptions {
-    disableFields?: string[];
-    enableFields?: string[];
-    defaultLevel?: Level;
-    disableStackdriverFormat?: boolean;
-    streams?: AckeeLoggerStream[];
-    ignoredHttpMethods?: string[];
-    config?: LoggerOptions;
-    pretty?: boolean;
-}
+import { initLoggerStreams } from './streams';
 
 export interface AckeeLogger extends PinoLogger {
     warning: pino.LogFn;
@@ -65,45 +48,20 @@ const maxLevelWrite: pino.WriteFn = function(this: any, data: object): void {
 };
 
 const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
-    const pretty = pino.pretty();
-    pretty.pipe(process.stdout);
-    const prettyErr = pino.pretty();
-    prettyErr.pipe(process.stderr);
     serializers.disablePaths(options.disableFields);
     serializers.enablePaths(options.enableFields);
 
     const isTesting = process.env.NODE_ENV === 'test';
     let defaultLevel: Level = 'debug';
 
-    if (isTesting) {
+    if (options.defaultLevel) {
+        defaultLevel = options.defaultLevel;
+    } else if (isTesting) {
         defaultLevel = 'silent';
     }
 
-    if (options.defaultLevel) {
-        defaultLevel = options.defaultLevel;
-    }
-
-    let streams: AckeeLoggerStream[];
-    let defaultMessageKey = 'message'; // best option for Google Stackdriver
-    if (options.streams) {
-        streams = options.streams;
-    } else if (options.pretty) {
-        streams = [
-            { level: defaultLevel, maxLevel: levels.warn, stream: pretty },
-            { level: 'warn', stream: prettyErr },
-        ];
-        defaultMessageKey = 'msg'; // default pino - best option for pretty print
-    } else {
-        streams = [
-            { level: defaultLevel, maxLevel: levels.warn, stream: process.stdout },
-            { level: 'warn', stream: process.stderr },
-        ];
-    }
-    if (!options.disableStackdriverFormat) {
-        streams = decorateStreams(streams, StackDriverFormatStream);
-    }
-
-    streams = decorateStreams(streams, DefaultTransformStream);
+    const streams = initLoggerStreams(defaultLevel, options);
+    const defaultMessageKey = options.pretty ? 'msg' : 'message'; // "message" is the best option for Google Stackdriver
 
     if (!options.ignoredHttpMethods) {
         options.ignoredHttpMethods = ['OPTIONS'];
@@ -142,7 +100,7 @@ const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
 
 let rootLogger: AckeeLogger;
 
-const loggerFactory = (data: string | AckeeLoggerOptions = {}): AckeeLogger => {
+const parseLoggerData = (data: string | AckeeLoggerOptions = {}) => {
     let moduleName: string | undefined;
     let options: AckeeLoggerOptions = {};
     if (data) {
@@ -154,6 +112,11 @@ const loggerFactory = (data: string | AckeeLoggerOptions = {}): AckeeLogger => {
             throw new TypeError(`Invalid argument of type ${typeof data}`);
         }
     }
+    return { moduleName, options };
+};
+
+const loggerFactory = (data: string | AckeeLoggerOptions = {}): AckeeLogger => {
+    const { moduleName, options } = parseLoggerData(data);
 
     if (!rootLogger) {
         rootLogger = defaultLogger(options);

@@ -1,14 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { LevelWithSilent } from 'pino';
+import * as pino from 'pino';
 import { Transform } from 'stream';
-
-// this is basically enhanced version of pino-multi-stream.Streams type
-export interface AckeeLoggerStream {
-    level?: LevelWithSilent;
-    maxLevel?: number; // this is not processed by pino, so we need the number directly
-    stream: NodeJS.WritableStream;
-}
+import { AckeeLoggerOptions, AckeeLoggerStream } from './interfaces';
+import { levels } from './levels';
+import { StackDriverFormatStream } from './stackdriver';
 
 const pkgJson = JSON.parse(fs.readFileSync(path.resolve(path.join(__dirname, '..', 'package.json')), 'utf8'));
 
@@ -34,4 +30,33 @@ const decorateStreams = <T extends Transform>(streams: AckeeLoggerStream[], stre
     });
 };
 
-export { decorateStreams, DefaultTransformStream };
+const initLoggerStreams = (defaultLevel: pino.LevelWithSilent, options: AckeeLoggerOptions = {}) => {
+    const pretty = pino.pretty();
+    pretty.pipe(process.stdout);
+    const prettyErr = pino.pretty();
+    prettyErr.pipe(process.stderr);
+
+    let streams: AckeeLoggerStream[];
+    if (options.streams) {
+        streams = options.streams;
+    } else if (options.pretty) {
+        streams = [
+            { level: defaultLevel, maxLevel: levels.warn, stream: pretty },
+            { level: 'warn', stream: prettyErr },
+        ];
+    } else {
+        streams = [
+            { level: defaultLevel, maxLevel: levels.warn, stream: process.stdout },
+            { level: 'warn', stream: process.stderr },
+        ];
+    }
+    if (!options.disableStackdriverFormat) {
+        streams = decorateStreams(streams, StackDriverFormatStream);
+    }
+
+    streams = decorateStreams(streams, DefaultTransformStream);
+
+    return streams;
+};
+
+export { initLoggerStreams };

@@ -34,12 +34,21 @@ const expressMiddleware: RequestHandler = function(
         if (this.options.ignoredHttpMethods && this.options.ignoredHttpMethods.includes(req.method)) {
             return;
         }
+        const standardOutput = {
+            data: {
+                req,
+                res,
+                ackId: req.ackId,
+            },
+            message: `${reqOut} - Standard output`,
+        };
+
         if (error) {
             this.error({ error, req, res, ackId: req.ackId }, `${reqOut} - Error handler at the end of app`);
         } else if (res.out) {
-            this.debug({ req, res, ackId: req.ackId }, `${reqOut} - Standard output`);
+            this.debug(standardOutput.data, standardOutput.message);
         } else {
-            this.info({ req, res, ackId: req.ackId }, `${reqOut} - Standard output`);
+            this.info(standardOutput.data, standardOutput.message);
         }
     });
     next();
