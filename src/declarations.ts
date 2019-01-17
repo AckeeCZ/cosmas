@@ -8,7 +8,9 @@ declare module 'pick-deep' {
     export = pickDeep;
 }
 
-declare module 'pino-multi-stream' {}
+declare module 'pino-multi-stream' {
+
+}
 
 // there is a @typed/pino-multi-stream package, but it has wrong type in its Streams definition. So until its fixed, we use this
 /* declare module 'pino-multi-stream' {
