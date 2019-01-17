@@ -31,15 +31,14 @@ const decorateStreams = <T extends Transform>(streams: AckeeLoggerStream[], stre
 };
 
 const initLoggerStreams = (defaultLevel: pino.LevelWithSilent, options: AckeeLoggerOptions = {}) => {
-    const pretty = pino.pretty();
-    pretty.pipe(process.stdout);
-    const prettyErr = pino.pretty();
-    prettyErr.pipe(process.stderr);
-
     let streams: AckeeLoggerStream[];
     if (options.streams) {
         streams = options.streams;
     } else if (options.pretty) {
+        const pretty = pino.pretty();
+        pretty.pipe(process.stdout);
+        const prettyErr = pino.pretty();
+        prettyErr.pipe(process.stderr);
         streams = [
             { level: defaultLevel, maxLevel: levels.warn, stream: pretty },
             { level: 'warn', stream: prettyErr },
