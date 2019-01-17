@@ -52,16 +52,8 @@ const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
     serializers.enablePaths(options.enableFields);
 
     const isTesting = process.env.NODE_ENV === 'test';
-    let defaultLevel: Level = 'debug';
-
-    if (options.defaultLevel) {
-        defaultLevel = options.defaultLevel;
-    } else if (isTesting) {
-        defaultLevel = 'silent';
-    }
-
+    const defaultLevel: Level = options.defaultLevel || (isTesting ? 'silent' : 'debug');
     const streams = initLoggerStreams(defaultLevel, options);
-    const defaultMessageKey = options.pretty ? 'msg' : 'message'; // "message" is the best option for Google Stackdriver
 
     if (!options.ignoredHttpMethods) {
         options.ignoredHttpMethods = ['OPTIONS'];
@@ -74,7 +66,7 @@ const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
             {
                 base: {},
                 level: defaultLevel,
-                messageKey: defaultMessageKey,
+                messageKey: options.pretty ? 'msg' : 'message', // "message" is the best option for Google Stackdriver,
                 serializers: serializers.serializers,
                 timestamp: false,
             },
