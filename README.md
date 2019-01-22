@@ -1,5 +1,9 @@
 # Cosmas
 
+<div align="center">
+
+![Cosmas](https://i.imgur.com/EFe3wOa.png)
+
 [![Build Status](https://img.shields.io/travis/com/AckeeCZ/cosmas/master.svg?style=flat-square)](https://travis-ci.com/AckeeCZ/cosmas)
 [![Npm](https://img.shields.io/npm/v/cosmas.svg?style=flat-square)](https://www.npmjs.com/package/cosmas)
 [![License](https://img.shields.io/github/license/AckeeCZ/cosmas.svg?style=flat-square)](https://github.com/AckeeCZ/cosmas/blob/master/LICENSE)
@@ -12,6 +16,8 @@
 [![Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 Simple pino-based logger for all your writing needs
+
+</div>
 
 ## How to use
 
