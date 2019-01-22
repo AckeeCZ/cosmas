@@ -10,6 +10,7 @@ const PINO_TO_STACKDRIVER: { [key: number]: string } = {
 };
 
 class StackDriverFormatStream extends Transform {
+    // tslint:disable-next-line:function-name
     public _transform(chunk: any, _encoding: string, callback: (error?: Error | undefined, data?: any) => void) {
         const obj = JSON.parse(chunk);
         obj.severity = PINO_TO_STACKDRIVER[obj.level] || 'UNKNOWN';

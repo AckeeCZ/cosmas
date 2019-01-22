@@ -9,6 +9,7 @@ import { StackDriverFormatStream } from './stackdriver';
 const pkgJson = JSON.parse(fs.readFileSync(path.resolve(path.join(__dirname, '..', 'package.json')), 'utf8'));
 
 class DefaultTransformStream extends Transform {
+    // tslint:disable-next-line:function-name
     public _transform(chunk: any, _encoding: string, callback: (error?: Error | undefined, data?: any) => void) {
         const obj = JSON.parse(chunk);
         obj.pkgVersion = pkgJson.version;
