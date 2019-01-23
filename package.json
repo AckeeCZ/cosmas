@@ -10,7 +10,7 @@
     "test-watch": "NODE_ENV= jest --watch",
     "test:coverage": "npm run test -- --collectCoverage",
     "test:coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "lint": "tslint -p . --force --format codeFrame; exit 0",
+    "lint": "tslint -p . --force --format codeFrame",
     "pretty": "prettier --parser typescript --write 'src/*.ts'",
     "precommit": "lint-staged && npm test",
     "prepublishOnly": "npm run build",
@@ -64,7 +64,7 @@
     "supertest": "^3.1.0",
     "ts-jest": "^23.10.4",
     "tslint": "^5.11.0",
-    "tslint-config-ackee": "^0.2.1",
+    "tslint-config-ackee": "^0.2.5",
     "typescript": "^3.1.3"
   }
 }

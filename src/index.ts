@@ -2,13 +2,15 @@ import { ErrorRequestHandler } from 'express';
 import isObject = require('lodash.isobject');
 import isString = require('lodash.isstring');
 import * as pino from 'pino';
-import { BaseLogger as PinoLogger, LevelWithSilent as Level } from 'pino';
 import * as pinoms from 'pino-multi-stream';
 import { Writable } from 'stream';
 import { AckeeLoggerExpressMiddleware, expressErrorMiddleware, expressMiddleware } from './express';
 import { AckeeLoggerOptions } from './interfaces';
 import * as serializers from './serializers';
 import { initLoggerStreams } from './streams';
+
+export type PinoLogger = pino.BaseLogger;
+export type Level = pino.LevelWithSilent;
 
 export interface AckeeLogger extends PinoLogger {
     warning: pino.LogFn;
