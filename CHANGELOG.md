@@ -7,6 +7,7 @@
 
 ### Added
 - coveralls integration
+- automatic logger name in stackdriver messages
   
 ## Changed
 - refactoring of express handlers
