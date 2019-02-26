@@ -1,4 +1,5 @@
 import * as express from 'express';
+import 'jest-extended';
 import { Writable } from 'stream';
 import * as supertest from 'supertest';
 import { levels } from '../levels';
@@ -59,7 +60,7 @@ test('child logger has warning level', () =>
         loggerFactory({
             streams: [
                 testWriteStream(resolve, json => {
-                    expect(json.message).toBe('Hello');
+                    expect(json.message).toContain('Hello');
                     expect(json.level).toBe(levels.warn);
                 }),
             ],
@@ -182,3 +183,19 @@ test('silent stream does not write', () => {
     logger.fatal('Hello');
     expect(loggerWrites).not.toBeCalled();
 });
+
+test('logger name is shown in non-pretty message', () =>
+    new Promise((resolve, reject) => {
+        const loggerName = 'database';
+        loggerFactory({
+            streams: [
+                testWriteStream(resolve, json => {
+                    expect(json.name).toBe(loggerName);
+                    expect(json.message).toStartWith(`[${loggerName}] `);
+                }),
+            ],
+        });
+        const logger = loggerFactory(loggerName);
+
+        logger.fatal('Hello');
+    }));
