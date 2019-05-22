@@ -184,18 +184,44 @@ test('silent stream does not write', () => {
     expect(loggerWrites).not.toBeCalled();
 });
 
-test('logger name is shown in non-pretty message', () =>
-    new Promise((resolve, reject) => {
-        const loggerName = 'database';
-        loggerFactory({
-            streams: [
-                testWriteStream(resolve, json => {
-                    expect(json.name).toBe(loggerName);
-                    expect(json.message).toStartWith(`[${loggerName}] `);
-                }),
-            ],
-        });
-        const logger = loggerFactory(loggerName);
+const exampleMessages = [
+    { type: 'simple', logData: 'Hello' },
+    { type: 'message-key', logData: { message: 'You gotta do, what you gotta do' } },
+    { type: 'msg-key', logData: { message: 'Mirror, mirror, on the wall' } },
+];
 
-        logger.fatal('Hello');
-    }));
+exampleMessages.forEach(data => {
+    test(`logger name is shown in non-pretty ${data.type} message`, () =>
+        new Promise((resolve, reject) => {
+            const loggerName = 'database';
+            loggerFactory({
+                pretty: false,
+                streams: [
+                    testWriteStream(resolve, json => {
+                        expect(json.message).toStartWith(`[${loggerName}] `);
+                    }),
+                ],
+            });
+            const logger = loggerFactory(loggerName);
+
+            logger.fatal(data.logData);
+        }));
+});
+
+exampleMessages.forEach(data => {
+    test(`logger name is propagated to pretty object with ${data.type} message`, () =>
+        new Promise((resolve, reject) => {
+            const loggerName = 'database';
+            loggerFactory({
+                pretty: true,
+                streams: [
+                    testWriteStream(resolve, json => {
+                        expect(json.name).toEqual(loggerName);
+                    }),
+                ],
+            });
+            const logger = loggerFactory(loggerName);
+
+            logger.fatal(data.logData);
+        }));
+});

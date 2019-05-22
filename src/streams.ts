@@ -6,18 +6,33 @@ import { AckeeLoggerOptions, AckeeLoggerStream } from './interfaces';
 import { levels } from './levels';
 import { StackDriverFormatStream } from './stackdriver';
 
+const isString = (x: any) => typeof x === 'string' || x instanceof String;
+
 const pkgJson = JSON.parse(fs.readFileSync(path.resolve(path.join(__dirname, '..', 'package.json')), 'utf8'));
 
-class DefaultTransformStream extends Transform {
-    // tslint:disable-next-line:function-name
-    public _transform(chunk: any, _encoding: string, callback: (error?: Error | undefined, data?: any) => void) {
-        const obj = JSON.parse(chunk);
-        obj.pkgVersion = pkgJson.version;
+const getDefaultTransformStream = (options: AckeeLoggerOptions & { messageKey: string; loggerName?: string }) => {
+    class DefaultTransformStream extends Transform {
+        // tslint:disable-next-line:function-name
+        public _transform(chunk: any, _encoding: string, callback: (error?: Error | undefined, data?: any) => void) {
+            const obj = JSON.parse(chunk);
+            obj.pkgVersion = pkgJson.version;
+            const loggerName = options.loggerName;
+            if (options.pretty) {
+                obj['name\0'] = obj.name; // add null character so that it is not interpreted by pino-pretty but still visible to user unchanged
+                delete obj.name;
+                if (loggerName) {
+                    obj.name = loggerName;
+                }
+            } else if (obj[options.messageKey] && isString(obj[options.messageKey]) && loggerName) {
+                obj[options.messageKey] = `[${loggerName}] ${obj[options.messageKey]}`;
+            }
 
-        this.push(`${JSON.stringify(obj)}\n`);
-        callback();
+            this.push(`${JSON.stringify(obj)}\n`);
+            callback();
+        }
     }
-}
+    return DefaultTransformStream;
+};
 
 const decorateStreams = <T extends Transform>(streams: AckeeLoggerStream[], streamClass: new () => T) => {
     return streams.map(stream => {
@@ -31,7 +46,10 @@ const decorateStreams = <T extends Transform>(streams: AckeeLoggerStream[], stre
     });
 };
 
-const initLoggerStreams = (defaultLevel: pino.LevelWithSilent, options: AckeeLoggerOptions = {}) => {
+const initLoggerStreams = (
+    defaultLevel: pino.LevelWithSilent,
+    options: AckeeLoggerOptions & { messageKey: string; loggerName?: string }
+) => {
     let streams: AckeeLoggerStream[];
     if (options.streams) {
         streams = options.streams;
@@ -54,7 +72,7 @@ const initLoggerStreams = (defaultLevel: pino.LevelWithSilent, options: AckeeLog
         streams = decorateStreams(streams, StackDriverFormatStream);
     }
 
-    streams = decorateStreams(streams, DefaultTransformStream);
+    streams = decorateStreams(streams, getDefaultTransformStream(options));
 
     return streams;
 };
