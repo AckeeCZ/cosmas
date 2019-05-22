@@ -4,10 +4,12 @@
 - lint issue due to changes in tslint 5.12.0
 - stream write function type
 - pretty streams created only when needed
+- logger name in pretty loggers
+
 
 ### Added
 - coveralls integration
-- automatic logger name in messages
+- automatic logger name in non-pretty loggers
   
 ## Changed
 - refactoring of express handlers
