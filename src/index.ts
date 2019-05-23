@@ -97,31 +97,31 @@ let rootLogger: AckeeLogger;
 let rootOptions: AckeeLoggerOptions;
 
 const parseLoggerData = (data: string | AckeeLoggerOptions = {}) => {
-    let moduleName: string | undefined;
+    let loggerName: string | undefined;
     let options: AckeeLoggerOptions = {};
     if (data) {
         if (isString(data)) {
-            moduleName = data;
+            loggerName = data;
         } else if (isObject(data)) {
             options = data;
         } else {
             throw new TypeError(`Invalid argument of type ${typeof data}`);
         }
     }
-    return { moduleName, options };
+    return { loggerName, options };
 };
 
 const loggerFactory = (data: string | AckeeLoggerOptions = {}): AckeeLogger => {
-    const { moduleName, options } = parseLoggerData(data);
+    const { loggerName, options } = parseLoggerData(data);
 
     if (!rootLogger) {
         rootLogger = defaultLogger(options);
         rootOptions = options;
     }
-    if (!moduleName) {
+    if (!loggerName) {
         return rootLogger;
     }
-    return defaultLogger(Object.assign({ loggerName: moduleName }, rootOptions));
+    return defaultLogger(Object.assign({ loggerName }, rootOptions));
 };
 
 const factoryProxy = new Proxy(loggerFactory, {

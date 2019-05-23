@@ -192,7 +192,7 @@ const exampleMessages = [
 
 exampleMessages.forEach(data => {
     test(`logger name is shown in non-pretty ${data.type} message`, () =>
-        new Promise((resolve, reject) => {
+        new Promise(resolve => {
             const loggerName = 'database';
             loggerFactory({
                 pretty: false,
@@ -210,7 +210,7 @@ exampleMessages.forEach(data => {
 
 exampleMessages.forEach(data => {
     test(`logger name is propagated to pretty object with ${data.type} message`, () =>
-        new Promise((resolve, reject) => {
+        new Promise(resolve => {
             const loggerName = 'database';
             loggerFactory({
                 pretty: true,
