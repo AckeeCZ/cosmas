@@ -1,4 +1,5 @@
 import * as express from 'express';
+import 'jest-extended';
 import { Writable } from 'stream';
 import * as supertest from 'supertest';
 import { levels } from '../levels';
@@ -59,7 +60,7 @@ test('child logger has warning level', () =>
         loggerFactory({
             streams: [
                 testWriteStream(resolve, json => {
-                    expect(json.message).toBe('Hello');
+                    expect(json.message).toContain('Hello');
                     expect(json.level).toBe(levels.warn);
                 }),
             ],
@@ -181,4 +182,46 @@ test('silent stream does not write', () => {
 
     logger.fatal('Hello');
     expect(loggerWrites).not.toBeCalled();
+});
+
+const exampleMessages = [
+    { type: 'simple', logData: 'Hello' },
+    { type: 'message-key', logData: { message: 'You gotta do, what you gotta do' } },
+    { type: 'msg-key', logData: { message: 'Mirror, mirror, on the wall' } },
+];
+
+exampleMessages.forEach(data => {
+    test(`logger name is shown in non-pretty ${data.type} message`, () =>
+        new Promise(resolve => {
+            const loggerName = 'database';
+            loggerFactory({
+                pretty: false,
+                streams: [
+                    testWriteStream(resolve, json => {
+                        expect(json.message).toStartWith(`[${loggerName}] `);
+                    }),
+                ],
+            });
+            const logger = loggerFactory(loggerName);
+
+            logger.fatal(data.logData);
+        }));
+});
+
+exampleMessages.forEach(data => {
+    test(`logger name is propagated to pretty object with ${data.type} message`, () =>
+        new Promise(resolve => {
+            const loggerName = 'database';
+            loggerFactory({
+                pretty: true,
+                streams: [
+                    testWriteStream(resolve, json => {
+                        expect(json.name).toEqual(loggerName);
+                    }),
+                ],
+            });
+            const logger = loggerFactory(loggerName);
+
+            logger.fatal(data.logData);
+        }));
 });

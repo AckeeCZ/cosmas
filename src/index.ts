@@ -49,13 +49,14 @@ const maxLevelWrite: pino.WriteFn = function(this: any, data: object): void {
     }
 };
 
-const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
+const defaultLogger = (options: AckeeLoggerOptions & { loggerName?: string } = {}): AckeeLogger => {
     serializers.disablePaths(options.disableFields);
     serializers.enablePaths(options.enableFields);
 
     const isTesting = process.env.NODE_ENV === 'test';
     const defaultLevel: Level = options.defaultLevel || (isTesting ? 'silent' : 'debug');
-    const streams = initLoggerStreams(defaultLevel, options);
+    const messageKey = options.pretty ? 'msg' : 'message'; // "message" is the best option for Google Stackdriver,
+    const streams = initLoggerStreams(defaultLevel, Object.assign({}, options, { messageKey }));
 
     if (!options.ignoredHttpMethods) {
         options.ignoredHttpMethods = ['OPTIONS'];
@@ -66,9 +67,9 @@ const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
         Object.assign(
             {},
             {
+                messageKey,
                 base: {},
                 level: defaultLevel,
-                messageKey: options.pretty ? 'msg' : 'message', // "message" is the best option for Google Stackdriver,
                 serializers: serializers.serializers,
                 timestamp: false,
             },
@@ -93,32 +94,34 @@ const defaultLogger = (options: AckeeLoggerOptions = {}): AckeeLogger => {
 };
 
 let rootLogger: AckeeLogger;
+let rootOptions: AckeeLoggerOptions;
 
 const parseLoggerData = (data: string | AckeeLoggerOptions = {}) => {
-    let moduleName: string | undefined;
+    let loggerName: string | undefined;
     let options: AckeeLoggerOptions = {};
     if (data) {
         if (isString(data)) {
-            moduleName = data as string;
+            loggerName = data;
         } else if (isObject(data)) {
-            options = data as AckeeLoggerOptions;
+            options = data;
         } else {
             throw new TypeError(`Invalid argument of type ${typeof data}`);
         }
     }
-    return { moduleName, options };
+    return { loggerName, options };
 };
 
 const loggerFactory = (data: string | AckeeLoggerOptions = {}): AckeeLogger => {
-    const { moduleName, options } = parseLoggerData(data);
+    const { loggerName, options } = parseLoggerData(data);
 
     if (!rootLogger) {
         rootLogger = defaultLogger(options);
+        rootOptions = options;
     }
-    if (!moduleName) {
+    if (!loggerName) {
         return rootLogger;
     }
-    return (rootLogger.child({ name: moduleName }) as any) as AckeeLogger;
+    return defaultLogger(Object.assign({ loggerName }, rootOptions));
 };
 
 const factoryProxy = new Proxy(loggerFactory, {
