@@ -1,7 +1,5 @@
-import * as express from 'express';
 import 'jest-extended';
 import { Writable } from 'stream';
-import * as supertest from 'supertest';
 import { levels } from '../levels';
 
 let loggerFactory;
@@ -69,72 +67,6 @@ test('child logger has warning level', () =>
 
         childLogger.warning('Hello');
     }));
-
-test('express binds', () => {
-    const logger = loggerFactory();
-    const app = express();
-    const request = supertest(app);
-    app.use(logger.express);
-    return request.get('/');
-});
-
-test('GET requests are logged by default', () =>
-    new Promise((resolve, reject) => {
-        const logger = loggerFactory({
-            streams: [testWriteStream(resolve, json => expect(json.req.method).toBe('GET'))],
-        });
-        const app = express();
-        const request = supertest(app);
-        app.use(logger.express);
-        request.get('/').then(() => null);
-    }));
-
-test('OPTIONS requests are ignored by default', () => {
-    const loggerWrites = jest.fn();
-    const logger = loggerFactory({
-        streams: [
-            {
-                stream: new Writable({
-                    write: (chunk, encoding, next) => {
-                        loggerWrites();
-                        next();
-                    },
-                }),
-            },
-        ],
-    });
-    const app = express();
-    const request = supertest(app);
-    app.use(logger.express);
-    return request.options('/').then(() => {
-        expect(loggerWrites).not.toBeCalled();
-    });
-});
-
-['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'].forEach(method => {
-    test(`${method} HTTP method can be ignored by options`, () => {
-        const loggerWrites = jest.fn();
-        const logger = loggerFactory({
-            ignoredHttpMethods: [method],
-            streams: [
-                {
-                    stream: new Writable({
-                        write: (chunk, encoding, next) => {
-                            loggerWrites();
-                            next();
-                        },
-                    }),
-                },
-            ],
-        });
-        const app = express();
-        const request = supertest(app);
-        app.use(logger.express);
-        return request[method.toLowerCase()]('/').then(() => {
-            expect(loggerWrites).not.toBeCalled();
-        });
-    });
-});
 
 test('severity field is automatically added to log object', () =>
     new Promise((resolve, reject) => {
