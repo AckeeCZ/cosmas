@@ -116,7 +116,7 @@ All those log messages will contain request and possibly response, error, time f
 ### Request skipping
 You might want to omit some requests from logging completely. Right now, there are two ways to do it.
 1) Use `options.ignoredHttpMethods` to define an array of HTTP methods you want to omit. By default all `OPTIONS` requests are ommited. See [options](#options) for details
-2) Use `options.skip` method to define custom rules for requests skipping. Set it to a function which accepts an Express's `Request` and returns `boolean`. If the return value is `true`, request (and corresponding response) will not be logged. You might want to use `matchPath` helper to ignore requests based on the [`req.path` value](https://expressjs.com/en/4x/api.html#req.path)
+2) Use `options.skip` method to define custom rules for requests skipping. Set it to a function which accepts an Express's `Request` and returns `boolean`. If the return value is `true`, request (and corresponding response) will not be logged. You might want to use `matchPath` helper to ignore requests based on the [`req.originalUrl` value](https://expressjs.com/en/4x/api.html#req.originalUrl)
 
 ```js
 const { matchPath } = require('cosmas/utils');
