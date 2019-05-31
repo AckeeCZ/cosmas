@@ -27,6 +27,10 @@ const expressOnFinished = (logger: AckeeLogger, req: AckeeRequest) => (_err: Err
     const error = res[errorSymbol];
     const reqOut = `${res.statusCode} ${req.method} ${req.originalUrl} ${res.time} ms ${req.headers['user-agent']}`;
     if (logger.options.ignoredHttpMethods && logger.options.ignoredHttpMethods.includes(req.method)) {
+        // left here for BC
+        return;
+    }
+    if (logger.options.skip && logger.options.skip(req)) {
         return;
     }
     const standardOutput = {

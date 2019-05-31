@@ -65,7 +65,6 @@ const defaultLogger = (options: AckeeLoggerOptions & { loggerName?: string } = {
     const logger = (pino(
         // no deep-merging needed, so assign is OK
         Object.assign(
-            {},
             {
                 messageKey,
                 base: {},
