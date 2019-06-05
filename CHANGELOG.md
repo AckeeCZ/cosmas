@@ -10,6 +10,7 @@
 ### Added
 - coveralls integration
 - automatic logger name in non-pretty loggers
+- `options.skip` settings for custom log filtering in Express
   
 ## Changed
 - refactoring of express handlers
