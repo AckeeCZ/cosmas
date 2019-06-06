@@ -33,6 +33,7 @@ const maxLevelWrite: pino.WriteFn = function(this: any, data: object): void {
     const streams = this.streams;
     for (const dest of streams) {
         stream = dest.stream;
+        // tslint:disable-next-line:early-exit
         if (dest.level <= level) {
             if (!dest.maxLevel || (dest.maxLevel && level < dest.maxLevel)) {
                 if (stream[needsMetadata]) {

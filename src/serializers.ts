@@ -61,12 +61,11 @@ const disablePaths = (paths?: string[]) => {
     forEach(serializers, (value, key) => {
         const affectedFields = sliceByPrefix(`${key}.`, paths);
 
-        if (affectedFields.length > 0) {
-            const newSerializer: SerializerFn = (obj: Dictionary<any>) => {
-                return omit(value(obj), affectedFields);
-            };
-            serializers[key] = newSerializer;
-        }
+        if (affectedFields.length === 0) return;
+        const newSerializer: SerializerFn = (obj: Dictionary<any>) => {
+            return omit(value(obj), affectedFields);
+        };
+        serializers[key] = newSerializer;
     });
 };
 
@@ -74,14 +73,13 @@ const enablePaths = (paths?: string[]) => {
     forEach(serializers, (value, key) => {
         const affectedFields = sliceByPrefix(`${key}.`, paths);
 
-        if (affectedFields.length > 0) {
-            const newSerializer: SerializerFn = (obj: Dictionary<any>) => {
-                const newFields = pick(obj, affectedFields);
-                const originalResult = value(obj);
-                return Object.assign({}, originalResult, newFields);
-            };
-            serializers[key] = newSerializer;
-        }
+        if (affectedFields.length === 0) return;
+        const newSerializer: SerializerFn = (obj: Dictionary<any>) => {
+            const newFields = pick(obj, affectedFields);
+            const originalResult = value(obj);
+            return Object.assign({}, originalResult, newFields);
+        };
+        serializers[key] = newSerializer;
     });
 };
 
