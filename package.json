@@ -12,7 +12,6 @@
     "test:coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "lint": "tslint -p . --force --format codeFrame",
     "pretty": "prettier --parser typescript --write 'src/*.ts'",
-    "precommit": "lint-staged && npm test",
     "prepublishOnly": "npm run build",
     "check": "npm-check -i husky -i ts-jest -i tslint-config-ackee && exit 0",
     "clean": "rm -rf ./node_modules && npm i && npm t"
@@ -46,7 +45,7 @@
     "pino-multi-stream": "^3.1.2"
   },
   "devDependencies": {
-    "@types/jest": "^23.3.7",
+    "@types/jest": "^24.0.13",
     "@types/lodash.foreach": "^4.5.4",
     "@types/lodash.isempty": "^4.4.4",
     "@types/lodash.isobject": "^3.0.4",
@@ -56,16 +55,21 @@
     "@types/on-headers": "^1.0.0",
     "coveralls": "^3.0.2",
     "express": "^4.16.3",
-    "husky": "^0.14.3",
+    "husky": "^2.4.0",
     "jest": "^24.1.0",
     "jest-extended": "^0.11.1",
     "lint-staged": "^7.3.0",
     "npm-check": "^5.9.0",
     "prettier": "^1.14.3",
-    "supertest": "^3.1.0",
+    "supertest": "^4.0.2",
     "ts-jest": "^24.0.0",
     "tslint": "^5.11.0",
-    "tslint-config-ackee": "^0.2.5",
+    "tslint-config-ackee": "^0.3.0",
     "typescript": "^3.3.3333"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && npm test"
+    }
   }
 }
