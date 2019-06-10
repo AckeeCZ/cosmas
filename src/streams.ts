@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as pino from 'pino';
-import { Transform } from 'stream';
+import { Transform, TransformCallback } from 'stream';
 import { AckeeLoggerOptions, AckeeLoggerStream } from './interfaces';
 import { levels } from './levels';
 import { StackDriverFormatStream } from './stackdriver';
@@ -13,7 +13,7 @@ const pkgJson = JSON.parse(fs.readFileSync(path.resolve(path.join(__dirname, '..
 const getDefaultTransformStream = (options: AckeeLoggerOptions & { messageKey: string; loggerName?: string }) => {
     class DefaultTransformStream extends Transform {
         // tslint:disable-next-line:function-name
-        public _transform(chunk: any, _encoding: string, callback: (error?: Error | undefined, data?: any) => void) {
+        public _transform(chunk: any, _encoding: string, callback: TransformCallback) {
             const obj = JSON.parse(chunk);
             obj.pkgVersion = pkgJson.version;
             const loggerName = options.loggerName;

@@ -59,9 +59,7 @@ const defaultLogger = (options: AckeeLoggerOptions & { loggerName?: string } = {
     const messageKey = options.pretty ? 'msg' : 'message'; // "message" is the best option for Google Stackdriver,
     const streams = initLoggerStreams(defaultLevel, Object.assign({}, options, { messageKey }));
 
-    if (!options.ignoredHttpMethods) {
-        options.ignoredHttpMethods = ['OPTIONS'];
-    }
+    options.ignoredHttpMethods = options.ignoredHttpMethods || ['OPTIONS'];
 
     const logger = (pino(
         // no deep-merging needed, so assign is OK
@@ -77,8 +75,6 @@ const defaultLogger = (options: AckeeLoggerOptions & { loggerName?: string } = {
         ),
         (pinoms as any).multistream(streams)
     ) as PinoLogger) as AckeeLogger;
-    logger.warning = logger.warn;
-    logger.options = options;
 
     // Add maxLevel support to pino-multi-stream
     // This could be replaced with custom pass-through stream being passed to multistream, which would filter the messages
@@ -87,10 +83,12 @@ const defaultLogger = (options: AckeeLoggerOptions & { loggerName?: string } = {
         streamMaxLevelWrite(chunk);
         return true;
     };
-    logger.express = expressMiddleware.bind(logger);
-    logger.expressError = expressErrorMiddleware as any;
-
-    return logger;
+    return Object.assign(logger, {
+        options,
+        express: expressMiddleware.bind(logger),
+        expressError: expressErrorMiddleware as any,
+        warning: logger.warn,
+    });
 };
 
 let rootLogger: AckeeLogger;
