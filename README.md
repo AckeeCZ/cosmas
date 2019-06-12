@@ -126,10 +126,13 @@ const logger = require('cosmas').default({
 ```
 
 ## Environment-specific behavior
-`cosmas` is meant to be used throughout different environments (development, testing, production) and some of its configuration is setup differently based on the environment it runs in.
+`cosmas` is meant to be used throughout different environments (development, testing, production) and some of its configuration is setup differently based on the environment it runs in. By default, `severity` (contains current log level) and `pkgVersion` (contains current version of `cosmas`) fields are added to logged object.
 
 ### Testing
 If the `NODE_ENV` environment variable is set to `test`, all logs are turned off (minimal loglevel is set to `silent` which effectively turns logging off).
+
+### Pretty print
+If you set `pretty` option to `true`, you enable pretty print mode intended for development use. `pkgVersion` and `severity` are ommited from output.
 
 ### Otherwise
 [Standard pino log](https://github.com/pinojs/pino#usage) is used and it's optimized for Google Stackdriver logging. That means that default log level is `debug`, pretty print is turned off and [pino's `messageKey` option](https://github.com/pinojs/pino/blob/master/docs/API.md#pinooptions-stream) is set to `message`.
@@ -153,7 +156,7 @@ Options override both default logger configuration and environment-specific conf
 - `error` - logs `message`, `code`, `stack` and `data` fields
 - `processEnv` - logs `NODE_PATH` and `NODE_ENV`
 - `req` - logs `body`, `query`, `url`, `method` and omits `password` and `passwordCheck` from `body` and `query`
-- `res` - logs `out` and `time`
+- `res` - logs `out`, `time`, `headers.x-deviceid`, `headers.authorization` and `headers.user-agent`
 
 
 ## Tips

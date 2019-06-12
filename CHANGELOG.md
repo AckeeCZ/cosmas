@@ -14,6 +14,7 @@
   
 ## Changed
 - refactoring of express handlers
+- `severity` and `pkgVersion` fields hidden in pretty output
 
 ## [1.0.3] - 2018-11-08
 
