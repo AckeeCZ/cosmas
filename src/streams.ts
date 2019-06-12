@@ -15,7 +15,6 @@ const getDefaultTransformStream = (options: AckeeLoggerOptions & { messageKey: s
         // tslint:disable-next-line:function-name
         public _transform(chunk: any, _encoding: string, callback: TransformCallback) {
             const obj = JSON.parse(chunk);
-            obj.pkgVersion = pkgJson.version;
             const loggerName = options.loggerName;
             if (options.pretty) {
                 obj['name\0'] = obj.name; // add null character so that it is not interpreted by pino-pretty but still visible to user unchanged
@@ -23,8 +22,11 @@ const getDefaultTransformStream = (options: AckeeLoggerOptions & { messageKey: s
                 if (loggerName) {
                     obj.name = loggerName;
                 }
-            } else if (obj[options.messageKey] && isString(obj[options.messageKey]) && loggerName) {
-                obj[options.messageKey] = `[${loggerName}] ${obj[options.messageKey]}`;
+            } else {
+                obj.pkgVersion = pkgJson.version;
+                if (obj[options.messageKey] && isString(obj[options.messageKey]) && loggerName) {
+                    obj[options.messageKey] = `[${loggerName}] ${obj[options.messageKey]}`;
+                }
             }
 
             this.push(`${JSON.stringify(obj)}\n`);
