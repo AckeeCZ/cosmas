@@ -25,7 +25,8 @@ const expressOnHeaders = (req: AckeeRequest, res: AckeeResponse) => () => {
 
 const expressOnFinished = (logger: AckeeLogger, req: AckeeRequest) => (_err: Error | null, res: AckeeResponse) => {
     const error = res[errorSymbol];
-    const reqOut = `${res.statusCode} ${req.method} ${req.originalUrl} ${res.time} ms ${req.headers['user-agent']}`;
+    const userAgent = req.headers['user-agent'];
+    const reqOut = `${res.statusCode} ${req.method} ${req.originalUrl} ${res.time} ms ${userAgent ? userAgent : ''}`;
     if (logger.options.ignoredHttpMethods && logger.options.ignoredHttpMethods.includes(req.method)) {
         // left here for BC
         return;
@@ -57,7 +58,8 @@ const expressMiddleware: RequestHandler = function(
     response: AckeeResponse,
     next: any
 ) {
-    const reqIn = `--- ${req.method} ${req.originalUrl} ${req.headers['user-agent']}`;
+    const userAgent = req.headers['user-agent'];
+    const reqIn = `--- ${req.method} ${req.originalUrl} ${userAgent ? userAgent : ''}`;
     this.debug({ req, ackId: req.ackId }, `${reqIn} - Request accepted`);
     req._startAt = process.hrtime();
     onHeaders(response, expressOnHeaders(req, response));

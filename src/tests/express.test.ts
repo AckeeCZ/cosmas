@@ -133,3 +133,33 @@ test('route can be ignored using regexp helper', () => {
         expect(loggerWrites).not.toBeCalled();
     });
 });
+
+test('user-agent is logged', () =>
+    new Promise((resolve, reject) => {
+        const logger = loggerFactory({
+            streams: [testWriteStream(resolve, json => expect(json.message).toMatch('dummy agent'))],
+        });
+
+        const app = express();
+        const request = supertest(app);
+        app.use(logger.express);
+        request
+            .get('/test')
+            .set('User-Agent', 'dummy agent')
+            .then(() => null);
+    }));
+
+test('missing user-agent is not logged', () =>
+    new Promise((resolve, reject) => {
+        const logger = loggerFactory({
+            streams: [testWriteStream(resolve, json => expect(json.message).not.toMatch('undefined'))],
+        });
+
+        const app = express();
+        const request = supertest(app);
+        app.use(logger.express);
+        request
+            .get('/test')
+            .unset('User-Agent')
+            .then(() => null);
+    }));

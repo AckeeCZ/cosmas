@@ -5,6 +5,7 @@
 - stream write function type
 - pretty streams created only when needed
 - logger name in pretty loggers
+- empty user-agent logged no more
 
 
 ### Added
