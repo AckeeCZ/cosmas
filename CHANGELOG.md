@@ -1,5 +1,7 @@
 ## [Unpublished]
 
+## [1.1.0] - 2019-08-05
+
 ### Fixed
 - lint issue due to changes in tslint 5.12.0
 - stream write function type
