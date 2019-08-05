@@ -1,6 +1,6 @@
 {
   "name": "cosmas",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Cosmas is a pino-based logger for all your writing needs",
   "main": "./dist/index.js",
   "scripts": {
