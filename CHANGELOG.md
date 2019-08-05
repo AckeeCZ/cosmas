@@ -6,6 +6,7 @@
 - pretty streams created only when needed
 - logger name in pretty loggers
 - empty user-agent logged no more
+- set cosmas's default level for custom streams missing level spec
 
 
 ### Added

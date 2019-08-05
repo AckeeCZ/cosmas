@@ -54,7 +54,7 @@ const initLoggerStreams = (
 ) => {
     let streams: AckeeLoggerStream[];
     if (options.streams) {
-        streams = options.streams;
+        streams = options.streams.map(stream => Object.assign({ level: defaultLevel }, stream));
     } else if (options.pretty) {
         const pretty = pino.pretty();
         pretty.pipe(process.stdout);
