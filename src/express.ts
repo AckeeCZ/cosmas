@@ -35,14 +35,16 @@ const expressOnFinished = (logger: AckeeLogger, req: AckeeRequest) => (_err: Err
         },
         message: `${reqOut} - Standard output`,
     };
+    const errorOutput = {
+        data: { ...standardOutput.data, error },
+        message: `${reqOut} - Error handler at the end of app`,
+    };
+    const serverError = res.statusCode >= 500;
 
-    if (error) {
-        logger.error({ error, req, res, ackId: req.ackId }, `${reqOut} - Error handler at the end of app`);
-    } else if (res.out) {
-        logger.debug(standardOutput.data, standardOutput.message);
-    } else {
-        logger.info(standardOutput.data, standardOutput.message);
-    }
+    const logFunction = error || serverError ? logger.error : res.out ? logger.info : logger.trace;
+    const output = error ? errorOutput : standardOutput;
+
+    logFunction.call(logger, output.data, output.message);
 };
 
 const expressMiddleware: RequestHandler = function(

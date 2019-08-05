@@ -2,6 +2,7 @@ import * as express from 'express';
 import 'jest-extended';
 import { Writable } from 'stream';
 import * as supertest from 'supertest';
+import { levels } from '../levels';
 
 let loggerFactory;
 
@@ -190,3 +191,32 @@ test('missing user-agent is not logged', () => {
         });
 });
 
+test('response 5xx is logged at error level', () => {
+    const loggerWrites = jest.fn();
+    const logger = loggerFactory({
+        streams: [
+            {
+                stream: new Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.level).toBe(levels.error);
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+        skip: req => !req.statusCode, // do not log request - log only response
+    });
+
+    const app = express();
+    app.use(logger.express);
+    app.get('/', (req, res) => {
+        res.statusCode = 503;
+        return res.send();
+    });
+    const request = supertest(app);
+    return request.get('/').then(() => {
+        expect(loggerWrites).toBeCalled();
+    });
+});
