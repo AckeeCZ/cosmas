@@ -16,7 +16,7 @@
 - automatic logger name in non-pretty loggers
 - `options.skip` settings for custom log filtering in Express
   
-## Changed
+### Changed
 - refactoring of express handlers
 - `severity` and `pkgVersion` fields hidden in pretty output
 - log levels for express middleware
