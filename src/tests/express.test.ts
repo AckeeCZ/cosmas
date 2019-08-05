@@ -134,32 +134,59 @@ test('route can be ignored using regexp helper', () => {
     });
 });
 
-test('user-agent is logged', () =>
-    new Promise((resolve, reject) => {
-        const logger = loggerFactory({
-            streams: [testWriteStream(resolve, json => expect(json.message).toMatch('dummy agent'))],
+test('user-agent is logged', () => {
+    const loggerWrites = jest.fn();
+    const logger = loggerFactory({
+        streams: [
+            {
+                stream: new Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.message).toMatch('dummy agent');
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+
+    const app = express();
+    const request = supertest(app);
+    app.use(logger.express);
+    return request
+        .get('/')
+        .set('User-Agent', 'dummy agent')
+        .then(() => {
+            expect(loggerWrites).toBeCalled();
         });
+});
 
-        const app = express();
-        const request = supertest(app);
-        app.use(logger.express);
-        request
-            .get('/test')
-            .set('User-Agent', 'dummy agent')
-            .then(() => null);
-    }));
+test('missing user-agent is not logged', () => {
+    const loggerWrites = jest.fn();
+    const logger = loggerFactory({
+        streams: [
+            {
+                stream: new Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.message).not.toMatch('undefined');
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
 
-test('missing user-agent is not logged', () =>
-    new Promise((resolve, reject) => {
-        const logger = loggerFactory({
-            streams: [testWriteStream(resolve, json => expect(json.message).not.toMatch('undefined'))],
+    const app = express();
+    const request = supertest(app);
+    app.use(logger.express);
+    return request
+        .get('/')
+        .unset('User-Agent')
+        .then(() => {
+            expect(loggerWrites).toBeCalled();
         });
+});
 
-        const app = express();
-        const request = supertest(app);
-        app.use(logger.express);
-        request
-            .get('/test')
-            .unset('User-Agent')
-            .then(() => null);
-    }));
