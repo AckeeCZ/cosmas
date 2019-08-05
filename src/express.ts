@@ -27,13 +27,6 @@ const expressOnFinished = (logger: AckeeLogger, req: AckeeRequest) => (_err: Err
     const error = res[errorSymbol];
     const userAgent = req.headers['user-agent'];
     const reqOut = `${res.statusCode} ${req.method} ${req.originalUrl} ${res.time} ms ${userAgent ? userAgent : ''}`;
-    if (logger.options.ignoredHttpMethods && logger.options.ignoredHttpMethods.includes(req.method)) {
-        // left here for BC
-        return;
-    }
-    if (logger.options.skip && logger.options.skip(req)) {
-        return;
-    }
     const standardOutput = {
         data: {
             req,
@@ -60,7 +53,14 @@ const expressMiddleware: RequestHandler = function(
 ) {
     const userAgent = req.headers['user-agent'];
     const reqIn = `--- ${req.method} ${req.originalUrl} ${userAgent ? userAgent : ''}`;
-    this.debug({ req, ackId: req.ackId }, `${reqIn} - Request accepted`);
+    if (this.options.ignoredHttpMethods && this.options.ignoredHttpMethods.includes(req.method)) {
+        // entire method skipped - left here for BC
+        return next();
+    }
+    if (!this.options.skip || !this.options.skip(req)) {
+        // if request not skipped
+        this.debug({ req, ackId: req.ackId }, `${reqIn} - Request accepted`);
+    }
     req._startAt = process.hrtime();
     onHeaders(response, expressOnHeaders(req, response));
     onFinished(response, expressOnFinished(this, req));
