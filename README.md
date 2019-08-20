@@ -92,7 +92,10 @@ All loglevels from warning up (inclusive) - warning, error, fatal - are logged t
 Usage:
 ```js
 const express = require('express');
-const logger = require('cosmas');
+
+const logger = require('cosmas').default;
+// or
+import logger from 'cosmas';
 
 const app = express();
 // or
