@@ -56,13 +56,21 @@ const initLoggerStreams = (
     if (options.streams) {
         streams = options.streams.map(stream => Object.assign({ level: defaultLevel }, stream));
     } else if (options.pretty) {
-        const pretty = pino.pretty();
+        const pretty = pino({
+            prettyPrint: {
+                levelFirst: true,
+            },
+        });
         pretty.pipe(process.stdout);
-        const prettyErr = pino.pretty();
+        const prettyErr = pino({
+            prettyPrint: {
+                levelFirst: true,
+            },
+        });
         prettyErr.pipe(process.stderr);
         streams = [
-            { level: defaultLevel, maxLevel: levels.warn, stream: pretty },
-            { level: 'warn', stream: prettyErr },
+            { level: defaultLevel, maxLevel: levels.warn, stream: pretty as any },
+            { level: 'warn', stream: prettyErr as any },
         ];
     } else {
         streams = [
