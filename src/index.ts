@@ -25,10 +25,10 @@ export interface AckeeLoggerFactory extends AckeeLogger {
 }
 
 // This is a custom slightly edited version of pino-multistream's write method, which adds support for maximum log level
-// The original version was pino-multistream 3.1.2 (commit 71d98ae) - https://github.com/pinojs/pino-multi-stream/blob/71d98ae191e02c56e39e849d2c30d59c8c6db1b9/multistream.js#L43
+// The original version was pino-multistream 4.2.0 (commit bf7941f) - https://github.com/pinojs/pino-multi-stream/blob/bf7941f77661b6c14dd40840ff4a4db6897f08eb/multistream.js#L43
 const maxLevelWrite: pino.WriteFn = function(this: any, data: object): void {
     let stream;
-    const needsMetadata = Symbol.for('needsMetadata');
+    const metadata = Symbol.for('pino.metadata');
     const level = this.lastLevel;
     const streams = this.streams;
     for (const dest of streams) {
@@ -36,11 +36,14 @@ const maxLevelWrite: pino.WriteFn = function(this: any, data: object): void {
         // tslint:disable-next-line:early-exit
         if (dest.level <= level) {
             if (!dest.maxLevel || (dest.maxLevel && level < dest.maxLevel)) {
-                if (stream[needsMetadata]) {
+                if (stream[metadata]) {
+                    // tslint:disable-next-line:no-this-assignment
+                    const { lastTime, lastMsg, lastObj, lastLogger } = this;
                     stream.lastLevel = level;
-                    stream.lastMsg = this.lastMsg;
-                    stream.lastObj = this.lastObj;
-                    stream.lastLogger = this.lastLogger;
+                    stream.lastTime = lastTime;
+                    stream.lastMsg = lastMsg;
+                    stream.lastObj = lastObj;
+                    stream.lastLogger = lastLogger;
                 }
                 stream.write(data);
             }
@@ -78,8 +81,9 @@ const defaultLogger = (options: AckeeLoggerOptions & { loggerName?: string } = {
 
     // Add maxLevel support to pino-multi-stream
     // This could be replaced with custom pass-through stream being passed to multistream, which would filter the messages
-    const streamMaxLevelWrite = maxLevelWrite.bind(logger.stream);
-    logger.stream.write = (chunk: any) => {
+    const loggerStream = (logger as any)[(pino as any).symbols.streamSym] as any;
+    const streamMaxLevelWrite = maxLevelWrite.bind(loggerStream);
+    loggerStream.write = (chunk: any) => {
         streamMaxLevelWrite(chunk);
         return true;
     };
