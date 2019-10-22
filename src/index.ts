@@ -18,11 +18,19 @@ export interface AckeeLogger extends PinoLogger {
     express: AckeeLoggerExpressMiddleware;
     expressError: ErrorRequestHandler;
     stream: Writable;
+    (childName: string): any;
 }
 
 export interface AckeeLoggerFactory extends AckeeLogger {
-    (data: string | AckeeLoggerOptions): AckeeLogger;
+    (data?: string | AckeeLoggerOptions): AckeeLogger;
 }
+
+const makeCallable = <T extends object, F extends (...args: any[]) => any>(obj: T, fun: F): T & F =>
+    new Proxy(fun as any, {
+        get: (_target, key) => (obj as any)[key],
+    });
+
+const objEmpty = (obj: object) => Object.keys(obj).length === 0;
 
 // This is a custom slightly edited version of pino-multistream's write method, which adds support for maximum log level
 // The original version was pino-multistream 4.2.0 (commit bf7941f) - https://github.com/pinojs/pino-multi-stream/blob/bf7941f77661b6c14dd40840ff4a4db6897f08eb/multistream.js#L43
@@ -95,9 +103,6 @@ const defaultLogger = (options: AckeeLoggerOptions & { loggerName?: string } = {
     });
 };
 
-let rootLogger: AckeeLogger;
-let rootOptions: AckeeLoggerOptions;
-
 const parseLoggerData = (data: string | AckeeLoggerOptions = {}) => {
     let loggerName: string | undefined;
     let options: AckeeLoggerOptions = {};
@@ -113,21 +118,21 @@ const parseLoggerData = (data: string | AckeeLoggerOptions = {}) => {
     return { loggerName, options };
 };
 
-const loggerFactory = (data: string | AckeeLoggerOptions = {}): AckeeLogger => {
+const loggerFactory = (data: string | AckeeLoggerOptions = {}, loggerOptions: AckeeLoggerOptions = {}): AckeeLogger => {
+    // console.log('Factory called');
     const { loggerName, options } = parseLoggerData(data);
+    loggerOptions = objEmpty(options) ? loggerOptions : options;
+    const logger = defaultLogger(Object.assign({ loggerName }, loggerOptions));
 
-    if (!rootLogger) {
-        rootLogger = defaultLogger(options);
-        rootOptions = options;
-    }
-    if (!loggerName) {
-        return rootLogger;
-    }
-    return defaultLogger(Object.assign({ loggerName }, rootOptions));
+    const loggerProxy = makeCallable(logger, (childName: string) => {
+        const childLoggerName = [loggerName, childName].join('');
+        // console.log('Creating child', childName);
+        const childOptions = loggerOptions;
+        return loggerFactory(childLoggerName, childOptions);
+    });
+    return loggerProxy;
 };
 
-const factoryProxy = new Proxy(loggerFactory, {
-    get: (target, key) => (target() as any)[key],
-}) as AckeeLoggerFactory;
+const factoryProxy = makeCallable(loggerFactory(), loggerFactory);
 
 export default factoryProxy;
