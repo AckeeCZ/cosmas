@@ -167,3 +167,35 @@ exampleMessages.forEach(data => {
             }
         }));
 });
+
+test('multiple logger configs are not affected', () => {
+    const primaryLogger = loggerFactory({ disableStackdriverFormat: true, ignoredHttpMethods: ['POST'] });
+    const secondaryLogger = loggerFactory({ disableStackdriverFormat: false, ignoredHttpMethods: ['GET'] });
+
+    expect(primaryLogger.options.disableStackdriverFormat).toBe(true);
+    expect(primaryLogger.options.ignoredHttpMethods).toIncludeSameMembers(['POST']);
+    expect(secondaryLogger.options.disableStackdriverFormat).toBe(false);
+    expect(secondaryLogger.options.ignoredHttpMethods).toIncludeSameMembers(['GET']);
+});
+
+test('Child logger takes parent config', () => {
+    const logger = loggerFactory({ disableStackdriverFormat: true });
+    const childLogger = logger('child');
+
+    expect(childLogger.options.disableStackdriverFormat).toBe(true);
+});
+
+test('Child logger inherits parent name', () => {
+    const logger = loggerFactory('parent', { disableStackdriverFormat: true });
+    const childLogger = logger('child');
+
+    expect(childLogger.options.loggerName).toBe('parentchild');
+});
+
+test('Child logger can create another child', () => {
+    const logger = loggerFactory('parent', { disableStackdriverFormat: true });
+    const childLogger = logger('child');
+    const kid = childLogger('grandkid');
+
+    expect(kid.options.loggerName).toBe('parentchildgrandkid');
+});
