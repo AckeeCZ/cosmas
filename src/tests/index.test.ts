@@ -1,13 +1,8 @@
 import 'jest-extended';
+import isString = require('lodash.isstring');
 import { Writable } from 'stream';
+import loggerFactory from '..';
 import { levels } from '../levels';
-
-let loggerFactory;
-
-beforeEach(() => {
-    jest.resetModules();
-    loggerFactory = require('..').default;
-});
 
 test('can create default logger', () => {
     const logger = loggerFactory();
@@ -17,6 +12,13 @@ test('can create default logger', () => {
 test('can create named logger', () => {
     const logger = loggerFactory('myApp');
     expect(logger).toBeDefined();
+    expect((logger.options as any).loggerName).toBe('myApp');
+});
+
+test.skip('can create logger with options', () => {
+    const logger = loggerFactory({ pretty: true });
+    expect(logger).toBeDefined();
+    expect(logger.options.pretty).toBe(true);
 });
 
 const testWriteStream = (resolve, assert) => ({
@@ -55,7 +57,7 @@ test('can use warning level', () =>
 
 test('child logger has warning level', () =>
     new Promise((resolve, reject) => {
-        loggerFactory({
+        const rootLogger = loggerFactory({
             streams: [
                 testWriteStream(resolve, json => {
                     expect(json.message).toContain('Hello');
@@ -63,7 +65,7 @@ test('child logger has warning level', () =>
                 }),
             ],
         });
-        const childLogger = loggerFactory('child');
+        const childLogger = rootLogger('child');
 
         childLogger.warning('Hello');
     }));
@@ -126,7 +128,7 @@ exampleMessages.forEach(data => {
     test(`logger name is shown in non-pretty ${data.type} message`, () =>
         new Promise(resolve => {
             const loggerName = 'database';
-            loggerFactory({
+            const rootLogger = loggerFactory({
                 pretty: false,
                 streams: [
                     testWriteStream(resolve, json => {
@@ -134,9 +136,13 @@ exampleMessages.forEach(data => {
                     }),
                 ],
             });
-            const logger = loggerFactory(loggerName);
+            const logger = rootLogger(loggerName);
 
-            logger.fatal(data.logData);
+            if (isString(data.logData)) {
+                logger.fatal(data.logData);
+            } else {
+                logger.fatal(data.logData, 'Data');
+            }
         }));
 });
 
@@ -144,7 +150,7 @@ exampleMessages.forEach(data => {
     test(`logger name is propagated to pretty object with ${data.type} message`, () =>
         new Promise(resolve => {
             const loggerName = 'database';
-            loggerFactory({
+            const rootLogger = loggerFactory({
                 pretty: true,
                 streams: [
                     testWriteStream(resolve, json => {
@@ -152,8 +158,12 @@ exampleMessages.forEach(data => {
                     }),
                 ],
             });
-            const logger = loggerFactory(loggerName);
+            const logger = rootLogger(loggerName);
 
-            logger.fatal(data.logData);
+            if (isString(data.logData)) {
+                logger.fatal(data.logData);
+            } else {
+                logger.fatal(data.logData, 'Data');
+            }
         }));
 });
