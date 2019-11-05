@@ -15,7 +15,7 @@ test('can create named logger', () => {
     expect((logger.options as any).loggerName).toBe('myApp');
 });
 
-test.skip('can create logger with options', () => {
+test.skip('can create logger with options', () => { // TODO: will work after pretty mechanics update - broken bc of deps update
     const logger = loggerFactory({ pretty: true });
     expect(logger).toBeDefined();
     expect(logger.options.pretty).toBe(true);

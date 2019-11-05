@@ -119,14 +119,12 @@ const parseLoggerData = (data: string | AckeeLoggerOptions = {}) => {
 };
 
 const loggerFactory = (data: string | AckeeLoggerOptions = {}, loggerOptions: AckeeLoggerOptions = {}): AckeeLogger => {
-    // console.log('Factory called');
     const { loggerName, options } = parseLoggerData(data);
     loggerOptions = objEmpty(options) ? loggerOptions : options;
     const logger = defaultLogger(Object.assign({ loggerName }, loggerOptions));
 
     const loggerProxy = makeCallable(logger, (childName: string) => {
         const childLoggerName = [loggerName, childName].join('');
-        // console.log('Creating child', childName);
         const childOptions = loggerOptions;
         return loggerFactory(childLoggerName, childOptions);
     });
