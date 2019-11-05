@@ -3,11 +3,10 @@ import * as path from 'path';
 import * as pino from 'pino';
 import { Transform, TransformCallback } from 'stream';
 import * as util from 'util';
+import { loggerNameKey, pkgVersionKey } from '.';
 import { AckeeLoggerOptions, AckeeLoggerStream } from './interfaces';
 import { levels } from './levels';
 import { StackDriverFormatStream } from './stackdriver';
-
-const isString = (x: any) => typeof x === 'string' || x instanceof String;
 
 const pkgJson = JSON.parse(fs.readFileSync(path.resolve(path.join(__dirname, '..', 'package.json')), 'utf8'));
 
@@ -18,18 +17,20 @@ const getDefaultTransformStream = (options: AckeeLoggerOptions & { messageKey: s
             const obj = JSON.parse(chunk);
             const loggerName = options.loggerName;
             let res;
+            if (loggerName) {
+                // always put logger name to message
+                obj[options.messageKey] = `[${loggerName}] ${obj[options.messageKey]}`;
+            }
+            if (loggerName && !options.pretty) {
+                // do not put logger name field to pretty outputs
+                obj[loggerNameKey] = loggerName;
+            }
+
             if (options.pretty) {
-                // obj['name\0'] = obj.name; // add null character so that it is not interpreted by pino-pretty but still visible to user unchanged
-                delete obj.name;
-                if (loggerName) {
-                    obj.name = loggerName;
-                }
                 res = util.inspect(obj, { colors: true, showHidden: true, depth: 10 });
             } else {
-                obj.pkgVersion = pkgJson.version;
-                if (obj[options.messageKey] && isString(obj[options.messageKey]) && loggerName) {
-                    obj[options.messageKey] = `[${loggerName}] ${obj[options.messageKey]}`;
-                }
+                // do not put pkgVersion to pretty outputs
+                obj[pkgVersionKey] = pkgJson.version;
                 res = JSON.stringify(obj);
             }
 

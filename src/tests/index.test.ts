@@ -1,7 +1,7 @@
 import 'jest-extended';
 import isString = require('lodash.isstring');
 import { Writable } from 'stream';
-import loggerFactory from '..';
+import loggerFactory, { pkgVersionKey, loggerNameKey } from '..';
 import { levels } from '../levels';
 
 test('can create default logger', () => {
@@ -15,7 +15,7 @@ test('can create named logger', () => {
     expect((logger.options as any).loggerName).toBe('myApp');
 });
 
-test.skip('can create logger with options', () => { // TODO: will work after pretty mechanics update - broken bc of deps update
+test('can create logger with options', () => {
     const logger = loggerFactory({ pretty: true });
     expect(logger).toBeDefined();
     expect(logger.options.pretty).toBe(true);
@@ -92,7 +92,7 @@ test('automatic severity field can be disabled by options', () =>
 test('logger version is logged', () =>
     new Promise((resolve, reject) => {
         const logger = loggerFactory({
-            streams: [testWriteStream(resolve, json => expect(json.pkgVersion).not.toBe(undefined))],
+            streams: [testWriteStream(resolve, json => expect(json[pkgVersionKey]).not.toBe(undefined))],
         });
 
         logger.fatal('Hello');
@@ -120,8 +120,8 @@ test('silent stream does not write', () => {
 
 const exampleMessages = [
     { type: 'simple', logData: 'Hello' },
-    { type: 'message-key', logData: { message: 'You gotta do, what you gotta do' } },
-    { type: 'msg-key', logData: { message: 'Mirror, mirror, on the wall' } },
+    { type: 'message-key', logData: { message: 'You gotta do, what you gotta do', name: 'Futurama' } },
+    { type: 'msg-key', logData: { msg: 'Mirror, mirror, on the wall', name: 'Sleeping Beauty' } },
 ];
 
 exampleMessages.forEach(data => {
@@ -133,6 +133,10 @@ exampleMessages.forEach(data => {
                 streams: [
                     testWriteStream(resolve, json => {
                         expect(json.message).toStartWith(`[${loggerName}] `);
+                        expect(json[loggerNameKey]).toBe(loggerName);
+                        if ((data.logData as any).name) {
+                            expect(json.name).toBe((data.logData as any).name);
+                        }
                     }),
                 ],
             });
@@ -157,6 +161,9 @@ exampleMessages.forEach(data => {
                         resolve,
                         message => {
                             expect(message).toContain(loggerName);
+                            if ((data.logData as any).name) {
+                                expect(message).toContain((data.logData as any).name);
+                            }
                         },
                         false
                     ),

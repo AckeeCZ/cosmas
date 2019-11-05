@@ -25,6 +25,9 @@ export interface AckeeLoggerFactory extends AckeeLogger {
     (data?: string | AckeeLoggerOptions): AckeeLogger;
 }
 
+export const loggerNameKey = 'cosmas.loggerName';
+export const pkgVersionKey = 'cosmas.pkgVersion';
+
 const makeCallable = <T extends object, F extends (...args: any[]) => any>(obj: T, fun: F): T & F =>
     new Proxy(fun as any, {
         get: (_target, key) => (obj as any)[key],
@@ -67,7 +70,7 @@ const defaultLogger = (options: AckeeLoggerOptions & { loggerName?: string } = {
 
     const isTesting = process.env.NODE_ENV === 'test';
     const defaultLevel: Level = options.defaultLevel || (isTesting ? 'silent' : 'debug');
-    const messageKey = options.pretty ? 'msg' : 'message'; // "message" is the best option for Google Stackdriver,
+    const messageKey = 'message'; // best option for Google Stackdriver,
     const streams = initLoggerStreams(defaultLevel, Object.assign({}, options, { messageKey }));
 
     options.ignoredHttpMethods = options.ignoredHttpMethods || ['OPTIONS'];
