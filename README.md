@@ -21,8 +21,6 @@ Simple pino-based logger for all your writing needs
 
 ## How to use
 
-First step is to create a root logger. Its configuration can be specified on creation and it will be used for all other loggers created.
-
 ### Import the logger factory
 
 ```js
@@ -35,7 +33,7 @@ or with import
 import loggerFactory from 'cosmas';
 ```
 
-### Create root logger with default configuration
+### Create logger with default configuration
 
 ```js
 const logger = loggerFactory; // factory itself is a logger
@@ -43,7 +41,7 @@ const logger = loggerFactory; // factory itself is a logger
 const logger = loggerFactory();
 ```
 
-### Create root logger with custom configuration
+### Create logger with custom configuration
 
 ```js
 const logger = loggerFactory({
@@ -52,17 +50,17 @@ const logger = loggerFactory({
 });
 ```
 
-Note: If you want to specify custom configuration it must be done **in the first require** of `cosmas`. Otherwise, default configuration will be used.
-
 See **Options** for a list of possible options.
 
-After you create a root logger, you may use it or you can create a child logger.
+### Child loggers
+Every logger can be used to create a *child* logger. Child logger inherits all configuration of its *parent* and cannot override them.
+
+Child logger can specify its own *name* which is then concatenated with parent's *name*. Therefore the child logger name is `parentNamechildName`.
 
 ```js
-const databaseLogger = loggerFactory('database')
+const parentLogger = loggerFactory('database', { pretty: false });
+const childLogger = parentLogger('.updates');
 ```
-
-The only difference between root logger and a child logger is that the child logger will print its name in each log message.
 
 ## Logger usage
 
