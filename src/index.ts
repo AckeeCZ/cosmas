@@ -25,6 +25,7 @@ export interface AckeeLoggerFactory extends AckeeLogger {
     (data?: string | AckeeLoggerOptions): AckeeLogger;
 }
 
+// cannot use Symbols, because they aren't JSON.stringifyable
 export const loggerNameKey = 'cosmas.loggerName';
 export const pkgVersionKey = 'cosmas.pkgVersion';
 
