@@ -21,10 +21,10 @@ test.skip('can create logger with options', () => { // TODO: will work after pre
     expect(logger.options.pretty).toBe(true);
 });
 
-const testWriteStream = (resolve, assert) => ({
+const testWriteStream = (resolve, assert, isJson = true) => ({
     stream: new Writable({
         write: (chunk, encoding, next) => {
-            const json = JSON.parse(chunk);
+            const json = isJson ? JSON.parse(chunk) : chunk.toString();
             assert(json);
             next();
             resolve();
@@ -153,9 +153,13 @@ exampleMessages.forEach(data => {
             const rootLogger = loggerFactory({
                 pretty: true,
                 streams: [
-                    testWriteStream(resolve, json => {
-                        expect(json.name).toEqual(loggerName);
-                    }),
+                    testWriteStream(
+                        resolve,
+                        message => {
+                            expect(message).toContain(loggerName);
+                        },
+                        false
+                    ),
                 ],
             });
             const logger = rootLogger(loggerName);
