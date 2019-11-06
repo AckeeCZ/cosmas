@@ -27,7 +27,7 @@ const getDefaultTransformStream = (options: AckeeLoggerOptions & { messageKey: s
             }
 
             if (options.pretty) {
-                res = util.inspect(obj, { colors: true, showHidden: true, depth: 10 });
+                res = util.inspect(obj, { colors: true, showHidden: true, depth: Infinity });
             } else {
                 // do not put pkgVersion to pretty outputs
                 obj[pkgVersionKey] = pkgJson.version;
