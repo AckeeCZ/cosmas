@@ -1,5 +1,11 @@
 ## [Unpublished]
 
+### Added
+- parent logger name inheritance
+
+### Changed
+- `pino.pretty` replaced with `util.inspect`
+
 ## [1.1.0] - 2019-08-05
 
 ### Fixed
