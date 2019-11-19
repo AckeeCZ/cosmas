@@ -5,6 +5,7 @@
 ![Cosmas](https://i.imgur.com/EFe3wOa.png)
 
 [![Build Status](https://img.shields.io/travis/com/AckeeCZ/cosmas/master.svg?style=flat-square)](https://travis-ci.com/AckeeCZ/cosmas)
+[![Node Version](https://img.shields.io/node/v/cosmas)](https://www.npmjs.com/package/cosmas)
 [![Npm](https://img.shields.io/npm/v/cosmas.svg?style=flat-square)](https://www.npmjs.com/package/cosmas)
 [![License](https://img.shields.io/github/license/AckeeCZ/cosmas.svg?style=flat-square)](https://github.com/AckeeCZ/cosmas/blob/master/LICENSE)
 [![Coverage Status](https://img.shields.io/coveralls/github/AckeeCZ/cosmas.svg?style=flat-square)](https://coveralls.io/github/AckeeCZ/cosmas?branch=master)

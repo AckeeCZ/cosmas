@@ -23,7 +23,7 @@
   "author": "Michal Vlasák <michal.vlasak@ackee.cz>",
   "license": "ISC",
   "engines": {
-    "node": "^6.14.3"
+    "node": ">=6"
   },
   "repository": {
     "type": "git",
