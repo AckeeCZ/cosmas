@@ -41,7 +41,7 @@ const expressOnFinished = (logger: AckeeLogger, req: AckeeRequest) => (_err: Err
     };
     const serverError = res.statusCode >= 500;
 
-    const logFunction = error || serverError ? logger.error : res.out ? logger.info : logger.trace;
+    const logFunction = error || serverError ? logger.error : res.out ? logger.info : logger.debug;
     const output = error ? errorOutput : standardOutput;
 
     logFunction.call(logger, output.data, output.message);
