@@ -8,6 +8,7 @@
     "lint-staged": "lint-staged",
     "test": "NODE_ENV= jest",
     "test-watch": "NODE_ENV= jest --watch",
+    "test:debug": "NODE_ENV= node --trace-warnings ./node_modules/.bin/jest --runInBand",
     "test:coverage": "npm run test -- --collectCoverage",
     "test:coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "lint": "tslint -p . --force --format codeFrame",
