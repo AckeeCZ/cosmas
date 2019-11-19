@@ -23,11 +23,12 @@ const expressOnHeaders = (req: AckeeRequest, res: AckeeResponse) => () => {
     res.time = ms.toFixed(3);
 };
 
+const shouldSkipLogging = (logger: AckeeLogger, req: AckeeRequest, res: AckeeResponse) =>
+    (logger.options.skip && logger.options.skip(req, res)) ||
+    (logger.options.ignoredHttpMethods && logger.options.ignoredHttpMethods.includes(req.method));
+
 const expressOnFinished = (logger: AckeeLogger, req: AckeeRequest) => (_err: Error | null, res: AckeeResponse) => {
-    if (logger.options.skip && logger.options.skip(req, res)) {
-        return;
-    }
-    if (logger.options.ignoredHttpMethods && logger.options.ignoredHttpMethods.includes(req.method)) {
+    if (shouldSkipLogging(logger, req, res)) {
         return;
     }
     const error = res[errorSymbol];
@@ -61,12 +62,7 @@ const expressMiddleware: RequestHandler = function(
 ) {
     const userAgent = req.headers['user-agent'];
     const reqIn = `--- ${req.method} ${req.originalUrl} ${userAgent ? userAgent : ''}`;
-    if (this.options.ignoredHttpMethods && this.options.ignoredHttpMethods.includes(req.method)) {
-        // entire method skipped - left here for BC
-        return next();
-    }
-    if (!this.options.skip || !this.options.skip(req)) {
-        // if request not skipped
+    if (!shouldSkipLogging(this, req, null)) {
         this.debug({ req, ackId: req.ackId }, `${reqIn} - Request accepted`);
     }
     req._startAt = process.hrtime();
