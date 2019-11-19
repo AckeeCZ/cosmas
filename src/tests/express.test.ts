@@ -206,7 +206,7 @@ test('response 5xx is logged at error level', () => {
                 }),
             },
         ],
-        skip: req => !req.statusCode, // do not log request - log only response
+        skip: (_req, res) => !res, // do not log request - log only response
     });
 
     const app = express();

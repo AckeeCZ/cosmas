@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import * as pino from 'pino';
 
 interface LoggerOptions extends pino.LoggerOptions {
@@ -21,5 +21,5 @@ export interface AckeeLoggerOptions {
     ignoredHttpMethods?: string[];
     config?: LoggerOptions;
     pretty?: boolean;
-    skip?: (req: Request) => boolean;
+    skip?: (req: Request, res?: Response) => boolean;
 }

@@ -24,6 +24,12 @@ const expressOnHeaders = (req: AckeeRequest, res: AckeeResponse) => () => {
 };
 
 const expressOnFinished = (logger: AckeeLogger, req: AckeeRequest) => (_err: Error | null, res: AckeeResponse) => {
+    if (logger.options.skip && logger.options.skip(req, res)) {
+        return;
+    }
+    if (logger.options.ignoredHttpMethods && logger.options.ignoredHttpMethods.includes(req.method)) {
+        return;
+    }
     const error = res[errorSymbol];
     const userAgent = req.headers['user-agent'];
     const reqOut = `${res.statusCode} ${req.method} ${req.originalUrl} ${res.time} ms ${userAgent ? userAgent : ''}`;

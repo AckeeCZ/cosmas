@@ -114,10 +114,10 @@ app.use(logger.expressError)
 
 All those log messages will contain request and possibly response, error, time from request to response, status code and `user-agent`, `x-deviceid` and `authorization` request headers.
 
-### Request skipping
-You might want to omit some requests from logging completely. Right now, there are two ways to do it and you can even use both at once.
-1) Use `options.ignoredHttpMethods` to define an array of HTTP methods you want to omit. By default all `OPTIONS` requests are ommited. See [options](#options) for details
-2) Use `options.skip` method to define custom rules for requests skipping. Set it to a function which accepts an Express's `Request` and returns `boolean`. If the return value is `true`, request (and corresponding response) will not be logged. You might want to use `matchPath` helper to ignore requests based on the [`req.originalUrl` value](https://expressjs.com/en/4x/api.html#req.originalUrl)
+### Request and response skipping
+You might want to omit some requests or responses from logging completely. Right now, there are two ways to do it and you can even use both at once.
+1) Use `options.ignoredHttpMethods` to define an array of HTTP methods you want to omit. By default all `OPTIONS` requests and responses are ommited. See [options](#options) for details
+2) Use `options.skip` method to define custom rules for request/response skipping. Set it to a function which accepts an Express's `Request` and `Response` and returns `boolean`. If the return value is `true`, request (or response) will not be logged. You might want to use `matchPath` helper to ignore requests based on the [`req.originalUrl` value](https://expressjs.com/en/4x/api.html#req.originalUrl)
 
 ```js
 const { matchPath } = require('cosmas/utils');
@@ -148,7 +148,7 @@ Options override both default logger configuration and environment-specific conf
 - `streams` - list of stream objects, which will be passed directly to [pino-multistream's multistream function](https://github.com/pinojs/pino-multi-stream#pinomsmultistreamstreams) instead of default `cosmas` stream
 - `pretty` - if set to `true`, logger will use [pino pretty human-readable logs](https://github.com/pinojs/pino/blob/master/docs/API.md#pretty). This option can be overriden by `streams`
 - `disableStackdriverFormat` - if set to `false`, logger will add `severity` field to all log objects, so that log levels in Google Stackdriver work as expected. Defaults to `false`
-- `skip` - Function to be used in express middlewares for filtering request logs. If the function returns `true` for a given request, no message will be logged. No default value.
+- `skip` - Function to be used in express middlewares for filtering request and response logs. If the function returns `true` for a given request, no message will be logged. No default value.
 - `config` - object, which will be passed to underlying logger object. Right now, underlying logger is [pino](https://github.com/pinojs/pino), so for available options see [pino API docs](https://github.com/pinojs/pino/blob/master/docs/API.md#pinooptions-stream)
 
 ## Default serializers
