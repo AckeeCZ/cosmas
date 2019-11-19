@@ -23,7 +23,7 @@ const expressOnHeaders = (req: AckeeRequest, res: AckeeResponse) => () => {
     res.time = ms.toFixed(3);
 };
 
-const shouldSkipLogging = (logger: AckeeLogger, req: AckeeRequest, res: AckeeResponse) =>
+const shouldSkipLogging = (logger: AckeeLogger, req: AckeeRequest, res?: AckeeResponse) =>
     (logger.options.skip && logger.options.skip(req, res)) ||
     (logger.options.ignoredHttpMethods && logger.options.ignoredHttpMethods.includes(req.method));
 
@@ -62,7 +62,7 @@ const expressMiddleware: RequestHandler = function(
 ) {
     const userAgent = req.headers['user-agent'];
     const reqIn = `--- ${req.method} ${req.originalUrl} ${userAgent ? userAgent : ''}`;
-    if (!shouldSkipLogging(this, req, null)) {
+    if (!shouldSkipLogging(this, req)) {
         this.debug({ req, ackId: req.ackId }, `${reqIn} - Request accepted`);
     }
     req._startAt = process.hrtime();
