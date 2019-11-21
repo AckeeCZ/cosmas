@@ -44,6 +44,9 @@
     "pino": "^5.13.2",
     "pino-multi-stream": "^4.2.0"
   },
+  "peerDependencies": {
+    "@sentry/node": "^5.9.0"
+  },
   "devDependencies": {
     "@types/jest": "^24.0.13",
     "@types/lodash.foreach": "^4.5.4",
