@@ -48,6 +48,7 @@
     "@sentry/node": "^5.9.0"
   },
   "devDependencies": {
+    "@sentry/node": "^5.9.0",
     "@types/jest": "^24.0.13",
     "@types/lodash.foreach": "^4.5.4",
     "@types/lodash.isempty": "^4.4.4",

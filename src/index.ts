@@ -91,6 +91,10 @@ const defaultLogger = (options: AckeeLoggerOptions & { loggerName?: string } = {
         (pinoms as any).multistream(streams)
     ) as PinoLogger) as AckeeLogger;
 
+    if (options.sentryDsn) {
+        const sentry = require('@sentry/node');
+    }
+
     // Add maxLevel support to pino-multi-stream
     // This could be replaced with custom pass-through stream being passed to multistream, which would filter the messages
     const loggerStream = (logger as any)[(pino as any).symbols.streamSym] as any;
