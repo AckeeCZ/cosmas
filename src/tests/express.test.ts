@@ -3,23 +3,13 @@ import 'jest-extended';
 import { Writable } from 'stream';
 import * as supertest from 'supertest';
 import { levels } from '../levels';
+import { testWriteStream } from './utils';
 
 let loggerFactory;
 
 beforeEach(() => {
     jest.resetModules();
     loggerFactory = require('..').default;
-});
-
-const testWriteStream = (resolve, assert) => ({
-    stream: new Writable({
-        write: (chunk, encoding, next) => {
-            const json = JSON.parse(chunk);
-            assert(json);
-            next();
-            resolve();
-        },
-    }),
 });
 
 test('express binds', () => {

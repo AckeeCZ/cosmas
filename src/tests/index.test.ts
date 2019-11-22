@@ -3,6 +3,7 @@ import isString = require('lodash.isstring');
 import { Writable } from 'stream';
 import loggerFactory, { pkgVersionKey, loggerNameKey } from '..';
 import { levels } from '../levels';
+import { testWriteStream } from './utils';
 
 test('can create default logger', () => {
     const logger = loggerFactory();
@@ -19,17 +20,6 @@ test('can create logger with options', () => {
     const logger = loggerFactory({ pretty: true });
     expect(logger).toBeDefined();
     expect(logger.options.pretty).toBe(true);
-});
-
-const testWriteStream = (resolve, assert, isJson = true) => ({
-    stream: new Writable({
-        write: (chunk, encoding, next) => {
-            const json = isJson ? JSON.parse(chunk) : chunk.toString();
-            assert(json);
-            next();
-            resolve();
-        },
-    }),
 });
 
 test('can use custom stream', () =>
