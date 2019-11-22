@@ -15,7 +15,7 @@ class SentryTransformStream extends Transform {
         const obj = JSON.parse(chunk);
         withScope(scope => {
             scope.setLevel(PINO_TO_SENTRY[obj.level]);
-            scope.setContext('data', obj);
+            scope.setExtras(obj);
             if (obj.stack) {
                 captureException(obj);
             } else {

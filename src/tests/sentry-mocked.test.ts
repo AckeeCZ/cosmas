@@ -5,6 +5,9 @@ const withScope = jest.fn(fn =>
         setContext: (key: string, val: any) => {
             scope.context = { [key]: val };
         },
+        setExtras: (val: any) => {
+            scope.extras = val;
+        },
         setLevel: (level: any) => {
             scope.level = level;
         },
@@ -76,12 +79,10 @@ describe('sentry mocked', () => {
             Object {
               "data": "Foo",
               "scope": Object {
-                "context": Object {
-                  "data": Object {
-                    "level": 30,
-                    "message": "Foo",
-                    "v": 1,
-                  },
+                "extras": Object {
+                  "level": 30,
+                  "message": "Foo",
+                  "v": 1,
                 },
                 "level": "info",
               },
