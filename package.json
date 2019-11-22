@@ -22,6 +22,10 @@
     ]
   },
   "author": "Michal Vlasák <michal.vlasak@ackee.cz>",
+  "contributors": [
+    "Michal Vlasák <michal.vlasak@ackee.cz>",
+    "Jaroslav Šmolík <grissius@gmail.com>"
+  ],
   "license": "ISC",
   "engines": {
     "node": ">=6"
