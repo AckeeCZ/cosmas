@@ -17,7 +17,11 @@ class SentryTransformStream extends Transform {
             scope.setLevel(PINO_TO_SENTRY[obj.level]);
             scope.setExtras(obj);
             if (obj.stack) {
-                captureException(obj);
+                const error = new Error(obj.message);
+                error.message = obj.message;
+                error.stack = obj.stack;
+                error.name = obj.name;
+                captureException(error);
             } else {
                 captureMessage(obj.message || obj);
             }

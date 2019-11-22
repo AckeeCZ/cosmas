@@ -102,11 +102,7 @@ describe('sentry mocked', () => {
         expect(captureException).toHaveBeenCalledTimes(1);
         expect(captureMessage).not.toHaveBeenCalled();
         expect(captureException.mock.results[0].value).toMatchObject({
-            data: {
-                level: 50,
-                message: expect.any(String),
-                stack: expect.any(String),
-            },
+            data: expect.any(Error),
             scope: {
                 level: 'error',
             },
