@@ -7,6 +7,7 @@ import { loggerNameKey, pkgVersionKey } from '.';
 import { AckeeLoggerOptions, AckeeLoggerStream } from './interfaces';
 import { levels } from './levels';
 import { StackDriverFormatStream } from './stackdriver';
+import { SentryTransformStream } from './sentry';
 
 const pkgJson = JSON.parse(fs.readFileSync(path.resolve(path.join(__dirname, '..', 'package.json')), 'utf8'));
 
@@ -71,6 +72,11 @@ const initLoggerStreams = (
     }
 
     streams = decorateStreams(streams, getDefaultTransformStream(options));
+
+    if (options.sentryDsn) {
+        streams = decorateStreams(streams, SentryTransformStream);
+    }
+
     return streams;
 };
 

@@ -69,6 +69,11 @@ const defaultLogger = (options: AckeeLoggerOptions & { loggerName?: string } = {
     serializers.disablePaths(options.disableFields);
     serializers.enablePaths(options.enableFields);
 
+    if (options.sentryDsn) {
+        // Check library is available
+        require('@sentry/node');
+    }
+
     const isTesting = process.env.NODE_ENV === 'test';
     const defaultLevel: Level = options.defaultLevel || (isTesting ? 'silent' : 'debug');
     const messageKey = 'message'; // best option for Google Stackdriver,
@@ -90,10 +95,6 @@ const defaultLogger = (options: AckeeLoggerOptions & { loggerName?: string } = {
         ),
         (pinoms as any).multistream(streams)
     ) as PinoLogger) as AckeeLogger;
-
-    if (options.sentryDsn) {
-        const sentry = require('@sentry/node');
-    }
 
     // Add maxLevel support to pino-multi-stream
     // This could be replaced with custom pass-through stream being passed to multistream, which would filter the messages
