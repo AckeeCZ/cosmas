@@ -69,10 +69,10 @@ const defaultLogger = (options: AckeeLoggerOptions & { loggerName?: string } = {
     serializers.disablePaths(options.disableFields);
     serializers.enablePaths(options.enableFields);
 
-    if (options.sentryDsn) {
-        const sentry = require('@sentry/node')
-        if (typeof options.sentryDsn === 'string') {
-            sentry.init({ dsn: options.sentryDsn });
+    if (options.sentry) {
+        const sentry = require('@sentry/node');
+        if (typeof options.sentry === 'string') {
+            sentry.init({ dsn: options.sentry });
         }
     }
 

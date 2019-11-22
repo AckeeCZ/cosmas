@@ -8,7 +8,7 @@ describe('sentry not available', () => {
     });
     test('without sentry lib works by default, but crashes on provided', () => {
         expect(() => loggerFactory()).not.toThrowError();
-        expect(() => loggerFactory({ sentryDsn: 'DSN' })).toThrowErrorMatchingInlineSnapshot(
+        expect(() => loggerFactory({ sentry: 'DSN' })).toThrowErrorMatchingInlineSnapshot(
             `"Cannot find module '@sentry/node' from 'index.ts'"`
         );
     });

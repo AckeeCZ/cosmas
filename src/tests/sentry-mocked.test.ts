@@ -45,9 +45,9 @@ describe('sentry mocked', () => {
     });
     test('can create logger with options', () => {
         expect(() => loggerFactory()).not.toThrowError();
-        expect(() => loggerFactory({ sentryDsn: true })).not.toThrowError();
+        expect(() => loggerFactory({ sentry: true })).not.toThrowError();
         expect(init).not.toHaveBeenCalled();
-        expect(() => loggerFactory({ sentryDsn: 'dummy' })).not.toThrowError();
+        expect(() => loggerFactory({ sentry: 'dummy' })).not.toThrowError();
         expect(init.mock.calls[0]).toMatchInlineSnapshot(`
             Array [
               Object {
@@ -60,7 +60,7 @@ describe('sentry mocked', () => {
     test('sentry captureMessage is called with correct scope', async () => {
         await new Promise((resolve, reject) => {
             const logger = loggerFactory({
-                sentryDsn: 'DSN',
+                sentry: 'DSN',
             });
             captureMessage.mockImplementation(createCapture(resolve));
             logger.info('Foo');
@@ -92,7 +92,7 @@ describe('sentry mocked', () => {
     test('sentry captureException with stack and correct levels', async () => {
         await new Promise((resolve, reject) => {
             const logger = loggerFactory({
-                sentryDsn: 'DSN',
+                sentry: 'DSN',
             });
             captureException.mockReset();
             captureException.mockImplementation(createCapture(resolve));

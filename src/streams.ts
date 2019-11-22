@@ -73,7 +73,7 @@ const initLoggerStreams = (
 
     streams = decorateStreams(streams, getDefaultTransformStream(options));
 
-    if (options.sentryDsn) {
+    if (options.sentry) {
         streams = decorateStreams(streams, SentryTransformStream);
     }
 

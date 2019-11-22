@@ -21,6 +21,6 @@ export interface AckeeLoggerOptions {
     ignoredHttpMethods?: string[];
     config?: LoggerOptions;
     pretty?: boolean;
-    sentryDsn?: string;
+    sentry?: string | boolean;
     skip?: (req: Request, res?: Response) => boolean;
 }
