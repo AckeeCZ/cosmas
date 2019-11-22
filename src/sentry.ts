@@ -1,5 +1,16 @@
+import { captureException, captureMessage, Severity, withScope } from '@sentry/node';
 import { Transform, TransformCallback } from 'stream';
-import { withScope, captureException, captureMessage, Severity } from '@sentry/node';
+
+const reportToSentry = (obj: any) => {
+    if (!obj.stack) {
+        return captureMessage(obj.message || obj);
+    }
+    const error = new Error(obj.message);
+    error.message = obj.message;
+    error.stack = obj.stack;
+    error.name = obj.name;
+    return captureException(error);
+};
 
 class SentryTransformStream extends Transform {
     // tslint:disable-next-line:function-name
@@ -16,15 +27,7 @@ class SentryTransformStream extends Transform {
         withScope(scope => {
             scope.setLevel(PINO_TO_SENTRY[obj.level]);
             scope.setExtras(obj);
-            if (obj.stack) {
-                const error = new Error(obj.message);
-                error.message = obj.message;
-                error.stack = obj.stack;
-                error.name = obj.name;
-                captureException(error);
-            } else {
-                captureMessage(obj.message || obj);
-            }
+            reportToSentry(obj);
         });
         this.push(chunk);
         callback();
