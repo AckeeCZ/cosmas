@@ -70,8 +70,10 @@ const defaultLogger = (options: AckeeLoggerOptions & { loggerName?: string } = {
     serializers.enablePaths(options.enableFields);
 
     if (options.sentryDsn) {
-        // Check library is available
-        require('@sentry/node');
+        const sentry = require('@sentry/node')
+        if (typeof options.sentryDsn === 'string') {
+            sentry.init({ dsn: options.sentryDsn });
+        }
     }
 
     const isTesting = process.env.NODE_ENV === 'test';

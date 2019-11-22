@@ -18,6 +18,7 @@ const createCapture = (cb = () => {}) => data => {
 
 const captureException = jest.fn(createCapture());
 const captureMessage = jest.fn(createCapture());
+const init = jest.fn();
 
 describe('sentry mocked', () => {
     beforeAll(() => {
@@ -26,6 +27,7 @@ describe('sentry mocked', () => {
                 captureException,
                 captureMessage,
                 withScope,
+                init,
                 Severity: {
                     Debug: 'debug',
                     Info: 'info',
@@ -43,7 +45,16 @@ describe('sentry mocked', () => {
     });
     test('can create logger with options', () => {
         expect(() => loggerFactory()).not.toThrowError();
-        expect(() => loggerFactory({ sentryDsn: 'DSN' })).not.toThrowError();
+        expect(() => loggerFactory({ sentryDsn: true })).not.toThrowError();
+        expect(init).not.toHaveBeenCalled();
+        expect(() => loggerFactory({ sentryDsn: 'dummy' })).not.toThrowError();
+        expect(init.mock.calls[0]).toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "dsn": "dummy",
+              },
+            ]
+        `);
     });
 
     test('sentry captureMessage is called with correct scope', async () => {
