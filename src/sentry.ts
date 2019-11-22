@@ -13,7 +13,6 @@ class SentryTransformStream extends Transform {
             60: Severity.Critical,
         };
         const obj = JSON.parse(chunk);
-        captureException(obj);
         withScope(scope => {
             scope.setLevel(PINO_TO_SENTRY[obj.level]);
             scope.setContext('data', obj);
