@@ -4,6 +4,7 @@ coverage
 docs
 CHANGELOG.md
 src
+dev
 
 # dev files
 jest.config.js
