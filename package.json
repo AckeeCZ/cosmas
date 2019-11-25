@@ -22,6 +22,10 @@
     ]
   },
   "author": "Michal Vlasák <michal.vlasak@ackee.cz>",
+  "contributors": [
+    "Michal Vlasák <michal.vlasak@ackee.cz>",
+    "Jaroslav Šmolík <grissius@gmail.com>"
+  ],
   "license": "ISC",
   "engines": {
     "node": ">=6"
@@ -44,7 +48,11 @@
     "pino": "^5.13.2",
     "pino-multi-stream": "^4.2.0"
   },
+  "peerDependencies": {
+    "@sentry/node": "^5.9.0"
+  },
   "devDependencies": {
+    "@sentry/node": "^5.9.0",
     "@types/jest": "^24.0.13",
     "@types/lodash.foreach": "^4.5.4",
     "@types/lodash.isempty": "^4.4.4",

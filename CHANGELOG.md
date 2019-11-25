@@ -2,6 +2,7 @@
 
 ### Added
 - parent logger name inheritance
+- logging to sentry
 
 ### Changed
 - `pino.pretty` replaced with `util.inspect`

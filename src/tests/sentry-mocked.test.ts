@@ -1,0 +1,111 @@
+let loggerFactory;
+const scope: any = {};
+const withScope = jest.fn(fn =>
+    fn({
+        setContext: (key: string, val: any) => {
+            scope.context = { [key]: val };
+        },
+        setExtras: (val: any) => {
+            scope.extras = val;
+        },
+        setLevel: (level: any) => {
+            scope.level = level;
+        },
+    })
+);
+
+const createCapture = (cb = () => {}) => data => {
+    cb();
+    return { data, scope };
+};
+
+const captureException = jest.fn(createCapture());
+const captureMessage = jest.fn(createCapture());
+const init = jest.fn();
+
+describe('sentry mocked', () => {
+    beforeAll(() => {
+        jest.mock('@sentry/node', () => {
+            return {
+                captureException,
+                captureMessage,
+                withScope,
+                init,
+                Severity: {
+                    Debug: 'debug',
+                    Info: 'info',
+                    Warning: 'warning',
+                    Error: 'error',
+                    Critical: 'critical',
+                },
+            };
+        });
+        loggerFactory = require('..').default;
+    });
+    beforeEach(() => {
+        captureException.mockReset();
+        captureMessage.mockReset();
+    });
+    test('can create logger with options', () => {
+        expect(() => loggerFactory()).not.toThrowError();
+        expect(() => loggerFactory({ sentry: true })).not.toThrowError();
+        expect(init).not.toHaveBeenCalled();
+        expect(() => loggerFactory({ sentry: 'dummy' })).not.toThrowError();
+        expect(init.mock.calls[0]).toMatchInlineSnapshot(`
+            Array [
+              Object {
+                "dsn": "dummy",
+              },
+            ]
+        `);
+    });
+
+    test('sentry captureMessage is called with correct scope', async () => {
+        await new Promise((resolve, reject) => {
+            const logger = loggerFactory({
+                sentry: 'DSN',
+            });
+            captureMessage.mockImplementation(createCapture(resolve));
+            logger.info('Foo');
+        });
+        expect(captureMessage).toHaveBeenCalledTimes(1);
+        expect(captureException).not.toHaveBeenCalled();
+        expect(captureMessage.mock.calls[0]).toMatchInlineSnapshot(`
+            Array [
+              "Foo",
+            ]
+        `);
+        expect(captureMessage.mock.results[0].value).toMatchInlineSnapshot(`
+            Object {
+              "data": "Foo",
+              "scope": Object {
+                "extras": Object {
+                  "level": 30,
+                  "message": "Foo",
+                  "v": 1,
+                },
+                "level": "info",
+              },
+            }
+        `);
+    });
+
+    test('sentry captureException with stack and correct levels', async () => {
+        await new Promise((resolve, reject) => {
+            const logger = loggerFactory({
+                sentry: 'DSN',
+            });
+            captureException.mockReset();
+            captureException.mockImplementation(createCapture(resolve));
+            logger.error(new Error());
+        });
+        expect(captureException).toHaveBeenCalledTimes(1);
+        expect(captureMessage).not.toHaveBeenCalled();
+        expect(captureException.mock.results[0].value).toMatchObject({
+            data: expect.any(Error),
+            scope: {
+                level: 'error',
+            },
+        });
+    });
+});

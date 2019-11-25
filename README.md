@@ -84,6 +84,30 @@ All loglevels up to warning (exclusive) - trace, debug and info - are logged to 
 
 All loglevels from warning up (inclusive) - warning, error, fatal - are logged to `stderr` **only**.
 
+## Using Sentry
+
+Cosmas logs every message to [Sentry](https://sentry.io/) for you, when configured. This feature is disabled by default.
+
+Sentry SDK `@sentry/node` is a peer dependency. If you want cosmas to use it, install it in your project.
+
+```js
+// (1) Let cosmas initialize sentry with provided DSN
+const myLogger = logger({ sentry: 'https://<key>@sentry.io/<project>' })
+
+// (2) Configure sentry yourself and let cosmas use it
+Sentry.init({/*...*/})
+const myLogger = logger({ sentry: true })
+
+// (3) Disable sentry (default, no need to send false option)
+const myLogger = logger({ sentry: false })
+```
+
+When configured, cosmas (additionally to standard logging) captures all logs via Sentry SDK. Logs containing `stack` are logged as exceptions via `captureException` (preserves stack trace) and all other messages via `captureMessage`.
+
+Either way, scope is appropriately set, as well as all payload is passed on in scope's metadata.
+
+
+
 ## Express middleware
 
 `cosmas` contains an express middleware which you can use to log all requests and responses of your express application.
