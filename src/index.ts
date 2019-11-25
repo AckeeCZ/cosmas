@@ -4,25 +4,25 @@ import isString = require('lodash.isstring');
 import * as pino from 'pino';
 import * as pinoms from 'pino-multi-stream';
 import { Writable } from 'stream';
-import { AckeeLoggerExpressMiddleware, expressErrorMiddleware, expressMiddleware } from './express';
-import { AckeeLoggerOptions } from './interfaces';
+import { CosmasExpressMiddleware, expressErrorMiddleware, expressMiddleware } from './express';
+import { CosmasOptions } from './interfaces';
 import * as serializers from './serializers';
 import { initLoggerStreams } from './streams';
 
 export type PinoLogger = pino.BaseLogger;
 export type Level = pino.LevelWithSilent;
 
-export interface AckeeLogger extends PinoLogger {
+export interface Cosmas extends PinoLogger {
     warning: pino.LogFn;
-    options: AckeeLoggerOptions;
-    express: AckeeLoggerExpressMiddleware;
+    options: CosmasOptions;
+    express: CosmasExpressMiddleware;
     expressError: ErrorRequestHandler;
     stream: Writable;
     (childName: string): any;
 }
 
-export interface AckeeLoggerFactory extends AckeeLogger {
-    (data?: string | AckeeLoggerOptions): AckeeLogger;
+export interface CosmasFactory extends Cosmas {
+    (data?: string | CosmasOptions): Cosmas;
 }
 
 // cannot use Symbols, because they aren't JSON.stringifyable
@@ -65,7 +65,7 @@ const maxLevelWrite: pino.WriteFn = function(this: any, data: object): void {
     }
 };
 
-const defaultLogger = (options: AckeeLoggerOptions & { loggerName?: string } = {}): AckeeLogger => {
+const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): Cosmas => {
     serializers.disablePaths(options.disableFields);
     serializers.enablePaths(options.enableFields);
 
@@ -96,7 +96,7 @@ const defaultLogger = (options: AckeeLoggerOptions & { loggerName?: string } = {
             options.config
         ),
         (pinoms as any).multistream(streams)
-    ) as PinoLogger) as AckeeLogger;
+    ) as PinoLogger) as Cosmas;
 
     // Add maxLevel support to pino-multi-stream
     // This could be replaced with custom pass-through stream being passed to multistream, which would filter the messages
@@ -114,9 +114,9 @@ const defaultLogger = (options: AckeeLoggerOptions & { loggerName?: string } = {
     });
 };
 
-const parseLoggerData = (data: string | AckeeLoggerOptions = {}) => {
+const parseLoggerData = (data: string | CosmasOptions = {}) => {
     let loggerName: string | undefined;
-    let options: AckeeLoggerOptions = {};
+    let options: CosmasOptions = {};
     if (data) {
         if (isString(data)) {
             loggerName = data;
@@ -129,7 +129,7 @@ const parseLoggerData = (data: string | AckeeLoggerOptions = {}) => {
     return { loggerName, options };
 };
 
-const loggerFactory = (data: string | AckeeLoggerOptions = {}, loggerOptions: AckeeLoggerOptions = {}): AckeeLogger => {
+const loggerFactory = (data: string | CosmasOptions = {}, loggerOptions: CosmasOptions = {}): Cosmas => {
     const { loggerName, options } = parseLoggerData(data);
     loggerOptions = objEmpty(options) ? loggerOptions : options;
     const logger = defaultLogger(Object.assign({ loggerName }, loggerOptions));

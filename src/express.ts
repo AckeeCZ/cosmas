@@ -1,19 +1,14 @@
 import { ErrorRequestHandler, Request, RequestHandler, Response } from 'express';
 import * as onFinished from 'on-finished';
 import onHeaders = require('on-headers');
-import { AckeeLogger } from '.';
+import { Cosmas } from '.';
 
 const errorSymbol = Symbol.for('error');
 
 type AckeeRequest = Request & { _startAt?: [number, number]; ackId?: string };
 type AckeeResponse = Response & { _startAt?: [number, number]; time?: string; out?: object; [errorSymbol]?: any };
 
-export type AckeeLoggerExpressMiddleware = (
-    this: AckeeLogger,
-    req: AckeeRequest,
-    response: AckeeResponse,
-    next: any
-) => void;
+export type CosmasExpressMiddleware = (this: Cosmas, req: AckeeRequest, response: AckeeResponse, next: any) => void;
 
 const expressOnHeaders = (req: AckeeRequest, res: AckeeResponse) => () => {
     res._startAt = process.hrtime();
@@ -23,11 +18,11 @@ const expressOnHeaders = (req: AckeeRequest, res: AckeeResponse) => () => {
     res.time = ms.toFixed(3);
 };
 
-const shouldSkipLogging = (logger: AckeeLogger, req: AckeeRequest, res?: AckeeResponse) =>
+const shouldSkipLogging = (logger: Cosmas, req: AckeeRequest, res?: AckeeResponse) =>
     (logger.options.skip && logger.options.skip(req, res)) ||
     (logger.options.ignoredHttpMethods && logger.options.ignoredHttpMethods.includes(req.method));
 
-const expressOnFinished = (logger: AckeeLogger, req: AckeeRequest) => (_err: Error | null, res: AckeeResponse) => {
+const expressOnFinished = (logger: Cosmas, req: AckeeRequest) => (_err: Error | null, res: AckeeResponse) => {
     if (shouldSkipLogging(logger, req, res)) {
         return;
     }
@@ -55,7 +50,7 @@ const expressOnFinished = (logger: AckeeLogger, req: AckeeRequest) => (_err: Err
 };
 
 const expressMiddleware: RequestHandler = function(
-    this: AckeeLogger,
+    this: Cosmas,
     req: AckeeRequest,
     response: AckeeResponse,
     next: any

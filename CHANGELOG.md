@@ -6,6 +6,7 @@
 
 ### Changed
 - `pino.pretty` replaced with `util.inspect`
+- rename interfaces
 
 ## [1.1.0] - 2019-08-05
 

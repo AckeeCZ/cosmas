@@ -4,14 +4,14 @@ import * as pino from 'pino';
 import { Transform, TransformCallback } from 'stream';
 import * as util from 'util';
 import { loggerNameKey, pkgVersionKey } from '.';
-import { AckeeLoggerOptions, AckeeLoggerStream } from './interfaces';
+import { CosmasOptions, CosmasStream } from './interfaces';
 import { levels } from './levels';
 import { SentryTransformStream } from './sentry';
 import { StackDriverFormatStream } from './stackdriver';
 
 const pkgJson = JSON.parse(fs.readFileSync(path.resolve(path.join(__dirname, '..', 'package.json')), 'utf8'));
 
-const getDefaultTransformStream = (options: AckeeLoggerOptions & { messageKey: string; loggerName?: string }) => {
+const getDefaultTransformStream = (options: CosmasOptions & { messageKey: string; loggerName?: string }) => {
     class DefaultTransformStream extends Transform {
         // tslint:disable-next-line:function-name
         public _transform(chunk: any, _encoding: string, callback: TransformCallback) {
@@ -42,7 +42,7 @@ const getDefaultTransformStream = (options: AckeeLoggerOptions & { messageKey: s
     return DefaultTransformStream;
 };
 
-const decorateStreams = <T extends Transform>(streams: AckeeLoggerStream[], streamClass: new () => T) => {
+const decorateStreams = <T extends Transform>(streams: CosmasStream[], streamClass: new () => T) => {
     return streams.map(stream => {
         const newStream = new streamClass();
         newStream.pipe(stream.stream);
@@ -56,9 +56,9 @@ const decorateStreams = <T extends Transform>(streams: AckeeLoggerStream[], stre
 
 const initLoggerStreams = (
     defaultLevel: pino.LevelWithSilent,
-    options: AckeeLoggerOptions & { messageKey: string; loggerName?: string }
+    options: CosmasOptions & { messageKey: string; loggerName?: string }
 ) => {
-    let streams: AckeeLoggerStream[];
+    let streams: CosmasStream[];
     if (options.streams) {
         streams = options.streams.map(stream => Object.assign({ level: defaultLevel }, stream));
     } else {

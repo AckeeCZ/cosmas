@@ -6,18 +6,18 @@ interface LoggerOptions extends pino.LoggerOptions {
 }
 
 // this is basically enhanced version of pino-multi-stream.Streams type
-export interface AckeeLoggerStream {
+export interface CosmasStream {
     level?: pino.LevelWithSilent;
     maxLevel?: number; // this is not processed by pino, so we need the number directly
     stream: NodeJS.WritableStream;
 }
 
-export interface AckeeLoggerOptions {
+export interface CosmasOptions {
     disableFields?: string[];
     enableFields?: string[];
     defaultLevel?: pino.LevelWithSilent;
     disableStackdriverFormat?: boolean;
-    streams?: AckeeLoggerStream[];
+    streams?: CosmasStream[];
     ignoredHttpMethods?: string[];
     config?: LoggerOptions;
     pretty?: boolean;
