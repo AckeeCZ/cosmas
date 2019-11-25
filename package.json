@@ -16,11 +16,6 @@
     "prepublishOnly": "npm run build",
     "clean": "rm -rf ./node_modules && npm i && npm t"
   },
-  "lint-staged": {
-    "*.ts": [
-      "npm run pretty"
-    ]
-  },
   "author": "Michal Vlasák <michal.vlasak@ackee.cz>",
   "contributors": [
     "Michal Vlasák <michal.vlasak@ackee.cz>",

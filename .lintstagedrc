@@ -1,13 +1,7 @@
 {
-  "linters": {
-    "*.ts": [
-      "npm run pretty",
-      "npm run lint",
-      "git add"
-    ]
-  },
-  "globOptions": {
-    "matchbase": true,
-    "nonegate": true
-  }
+  "*.ts": [
+    "npm run pretty",
+    "npm run lint",
+    "git add"
+  ]
 }
