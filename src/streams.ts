@@ -6,7 +6,6 @@ import * as util from 'util';
 import { loggerNameKey, pkgVersionKey } from '.';
 import { CosmasOptions, CosmasStream } from './interfaces';
 import { levels } from './levels';
-import { SentryTransformStream } from './sentry';
 import { StackDriverFormatStream } from './stackdriver';
 
 const pkgJson = JSON.parse(fs.readFileSync(path.resolve(path.join(__dirname, '..', 'package.json')), 'utf8'));
@@ -74,6 +73,7 @@ const initLoggerStreams = (
     streams = decorateStreams(streams, getDefaultTransformStream(options));
 
     if (options.sentry) {
+        const { SentryTransformStream } = require('./sentry');
         streams = decorateStreams(streams, SentryTransformStream);
     }
 
