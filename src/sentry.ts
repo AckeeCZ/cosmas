@@ -28,7 +28,7 @@ export const createSentryTransformStream = (options: CosmasOptions): any => {
         // tslint:disable-next-line:function-name
         public _transform(chunk: any, _encoding: string, callback: TransformCallback) {
             const obj = JSON.parse(chunk);
-            if ((options.sentryLevel || levels.warn) <= obj.level) {
+            if (obj.level >= (options.sentryLevel || levels.warn)) {
                 withScope(scope => {
                     scope.setLevel(PINO_TO_SENTRY[obj.level]);
                     scope.setExtras(obj);
