@@ -106,6 +106,7 @@ When configured, cosmas (additionally to standard logging) captures all logs via
 
 Either way, scope is appropriately set, as well as all payload is passed on in scope's metadata.
 
+By default, Cosmas only logs to Sentry logs with `warn` or higher level. You can change this behaviour by setting `sentryLevel` option.
 
 
 ## Express middleware

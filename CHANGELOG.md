@@ -2,7 +2,7 @@
 
 ### Added
 - parent logger name inheritance
-- logging to sentry
+- logging to sentry (option `sentry` and `sentryLevel`)
 
 ### Changed
 - `pino.pretty` replaced with `util.inspect`
