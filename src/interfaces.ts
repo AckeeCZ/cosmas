@@ -22,5 +22,6 @@ export interface CosmasOptions {
     config?: LoggerOptions;
     pretty?: boolean;
     sentry?: string | boolean;
+    sentryLevel?: pino.LevelWithSilent;
     skip?: (req: Request, res?: Response) => boolean;
 }

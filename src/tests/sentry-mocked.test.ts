@@ -1,3 +1,5 @@
+import { levels } from '../levels';
+
 let loggerFactory;
 const scope: any = {};
 const withScope = jest.fn(fn =>
@@ -60,31 +62,38 @@ describe('sentry mocked', () => {
         `);
     });
 
-    test('sentry captureMessage is called with correct scope', async () => {
+    test('sentry captureMessage is called with correct scope (respects sentry level)', async () => {
         await new Promise((resolve, reject) => {
             const logger = loggerFactory({
                 sentry: 'DSN',
+                sentryLevel: levels.fatal,
             });
             captureMessage.mockImplementation(createCapture(resolve));
-            logger.info('Foo');
+            // expect to trigger only fatal
+            logger.trace('trace');
+            logger.debug('debug');
+            logger.info('info');
+            logger.warn('warn');
+            logger.error('error');
+            logger.fatal('fatal');
         });
         expect(captureMessage).toHaveBeenCalledTimes(1);
         expect(captureException).not.toHaveBeenCalled();
         expect(captureMessage.mock.calls[0]).toMatchInlineSnapshot(`
             Array [
-              "Foo",
+              "fatal",
             ]
         `);
         expect(captureMessage.mock.results[0].value).toMatchInlineSnapshot(`
             Object {
-              "data": "Foo",
+              "data": "fatal",
               "scope": Object {
                 "extras": Object {
-                  "level": 30,
-                  "message": "Foo",
+                  "level": 60,
+                  "message": "fatal",
                   "v": 1,
                 },
-                "level": "info",
+                "level": "critical",
               },
             }
         `);
