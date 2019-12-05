@@ -1,5 +1,7 @@
 import { captureException, captureMessage, Severity, withScope } from '@sentry/node';
 import { Transform, TransformCallback } from 'stream';
+import { CosmasOptions } from './interfaces';
+import { levels } from './levels';
 
 const reportToSentry = (obj: any) => {
     if (!obj.stack) {
@@ -21,17 +23,20 @@ const PINO_TO_SENTRY: { [key: number]: Severity } = {
     60: Severity.Critical,
 };
 
-class SentryTransformStream extends Transform {
-    // tslint:disable-next-line:function-name
-    public _transform(chunk: any, _encoding: string, callback: TransformCallback) {
-        const obj = JSON.parse(chunk);
-        withScope(scope => {
-            scope.setLevel(PINO_TO_SENTRY[obj.level]);
-            scope.setExtras(obj);
-            reportToSentry(obj);
-        });
-        this.push(chunk);
-        callback();
-    }
-}
-export { SentryTransformStream };
+export const createSentryTransformStream = (options: CosmasOptions): any => {
+    return class SentryTransformStream extends Transform {
+        // tslint:disable-next-line:function-name
+        public _transform(chunk: any, _encoding: string, callback: TransformCallback) {
+            const obj = JSON.parse(chunk);
+            if (obj.level >= (options.sentryLevel || levels.warn)) {
+                withScope(scope => {
+                    scope.setLevel(PINO_TO_SENTRY[obj.level]);
+                    scope.setExtras(obj);
+                    reportToSentry(obj);
+                });
+            }
+            this.push(chunk);
+            callback();
+        }
+    };
+};
