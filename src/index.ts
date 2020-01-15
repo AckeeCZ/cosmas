@@ -2,6 +2,7 @@ import { ErrorRequestHandler } from 'express';
 import isObject = require('lodash.isobject');
 import isString = require('lodash.isstring');
 import * as pino from 'pino';
+import { levels } from './levels';
 import * as pinoms from 'pino-multi-stream';
 import { Writable } from 'stream';
 import { CosmasExpressMiddleware, expressErrorMiddleware, expressMiddleware } from './express';
@@ -92,6 +93,9 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
                 level: defaultLevel,
                 serializers: serializers.serializers,
                 timestamp: false,
+                customLevels: {
+                    warning: levels.warn,
+                },
             },
             options.config
         ),
@@ -110,7 +114,6 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
         options,
         express: expressMiddleware.bind(logger),
         expressError: expressErrorMiddleware as any,
-        warning: logger.warn,
     });
 };
 
