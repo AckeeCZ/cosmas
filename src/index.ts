@@ -2,11 +2,11 @@ import { ErrorRequestHandler } from 'express';
 import isObject = require('lodash.isobject');
 import isString = require('lodash.isstring');
 import * as pino from 'pino';
-import { levels } from './levels';
 import * as pinoms from 'pino-multi-stream';
 import { Writable } from 'stream';
 import { CosmasExpressMiddleware, expressErrorMiddleware, expressMiddleware } from './express';
 import { CosmasOptions } from './interfaces';
+import { levels } from './levels';
 import * as serializers from './serializers';
 import { initLoggerStreams } from './streams';
 
