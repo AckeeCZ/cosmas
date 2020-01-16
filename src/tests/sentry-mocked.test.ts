@@ -63,6 +63,8 @@ describe('sentry mocked', () => {
     });
 
     test('sentry captureMessage is called with correct scope (respects sentry level)', async () => {
+        const dateNow = Date.now;
+        Date.now = jest.fn(() => 1520343036000);
         await new Promise((resolve, reject) => {
             const logger = loggerFactory({
                 sentry: 'DSN',
@@ -91,12 +93,14 @@ describe('sentry mocked', () => {
                 "extras": Object {
                   "level": 60,
                   "message": "fatal",
+                  "time": "2018-03-06T13:30:36.000Z",
                   "v": 1,
                 },
                 "level": "critical",
               },
             }
         `);
+        Date.now = dateNow;
     });
 
     test('sentry captureException with stack and correct levels', async () => {

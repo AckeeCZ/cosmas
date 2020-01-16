@@ -92,7 +92,7 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
                 base: {},
                 level: defaultLevel,
                 serializers: serializers.serializers,
-                timestamp: false,
+                timestamp: pino.stdTimeFunctions.isoTime,
                 customLevels: {
                     warning: levels.warn,
                 },
