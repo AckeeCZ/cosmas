@@ -106,6 +106,7 @@ When configured, cosmas (additionally to standard logging) captures all logs via
 
 Either way, scope is appropriately set, as well as all payload is passed on in scope's metadata.
 
+By default, Cosmas only logs to Sentry logs with `warn` or higher level. You can change this behaviour by setting `sentryLevel` option.
 
 
 ## Express middleware
@@ -175,6 +176,8 @@ Options override both default logger configuration and environment-specific conf
 - `disableStackdriverFormat` - if set to `false`, logger will add `severity` field to all log objects, so that log levels in Google Stackdriver work as expected. Defaults to `false`
 - `skip` - Function to be used in express middlewares for filtering request and response logs. If the function returns `true` for a given request, no message will be logged. No default value.
 - `config` - object, which will be passed to underlying logger object. Right now, underlying logger is [pino](https://github.com/pinojs/pino), so for available options see [pino API docs](https://github.com/pinojs/pino/blob/master/docs/API.md#pinooptions-stream)
+- `sentry` - `true` to enable without configuring or `<sentry dsn>` to enable and configure with dsn beforehand, `false` to disable (default)
+- `sentryLevel` - set minimum level to log to sentry (default `warn`)
 
 ## Default serializers
 `cosmas` defines some [pino serializers](https://github.com/pinojs/pino/blob/master/docs/API.md#constructor) on its own
