@@ -125,7 +125,7 @@ test('route can be ignored using regexp helper', () => {
     });
 });
 
-test('user-agent is logged', () => {
+test('user-agent is not logged', () => {
     const loggerWrites = jest.fn();
     const logger = loggerFactory({
         streams: [
@@ -133,7 +133,7 @@ test('user-agent is logged', () => {
                 stream: new Writable({
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
-                        expect(json.message).toMatch('dummy agent');
+                        expect(json.message).not.toMatch('dummy agent');
                         loggerWrites();
                         next();
                     },

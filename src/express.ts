@@ -28,11 +28,12 @@ const expressOnFinished = (logger: Cosmas, req: AckeeRequest) => (_err: Error | 
     }
     const error = res[errorSymbol];
     const userAgent = req.headers['user-agent'];
-    const reqOut = `${res.statusCode} ${req.method} ${req.originalUrl} ${res.time} ms ${userAgent ? userAgent : ''}`;
+    const reqOut = `${res.statusCode} ${req.method} ${req.originalUrl}`;
     const standardOutput = {
         data: {
             req,
             res,
+            userAgent,
             ackId: req.ackId,
         },
         message: `${reqOut} - Standard output`,
@@ -55,8 +56,7 @@ const expressMiddleware: RequestHandler = function(
     response: AckeeResponse,
     next: any
 ) {
-    const userAgent = req.headers['user-agent'];
-    const reqIn = `--- ${req.method} ${req.originalUrl} ${userAgent ? userAgent : ''}`;
+    const reqIn = `--- ${req.method} ${req.originalUrl}`;
     if (!shouldSkipLogging(this, req)) {
         this.debug({ req, ackId: req.ackId }, `${reqIn} - Request accepted`);
     }
