@@ -8,6 +8,7 @@
 ### Changed
 - `pino.pretty` replaced with `util.inspect`
 - rename interfaces
+- removed user agent and response time from express middleware logs
 
 ## [1.1.0] - 2019-08-05
 
