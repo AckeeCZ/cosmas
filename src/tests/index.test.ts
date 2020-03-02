@@ -190,7 +190,7 @@ test('Child logger inherits parent name', () => {
     const logger = loggerFactory('parent', { disableStackdriverFormat: true });
     const childLogger = logger('child');
 
-    expect(childLogger.options.loggerName).toBe('parentchild');
+    expect(childLogger.options[loggerNameKey]).toBe('parentchild');
 });
 
 test('Child logger can create another child', () => {
@@ -198,5 +198,5 @@ test('Child logger can create another child', () => {
     const childLogger = logger('child');
     const kid = childLogger('grandkid');
 
-    expect(kid.options.loggerName).toBe('parentchildgrandkid');
+    expect(kid.options[loggerNameKey]).toBe('parentchildgrandkid');
 });
