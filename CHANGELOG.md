@@ -1,5 +1,8 @@
 ## [Unpublished]
 
+### Fixed
+- child logger type
+
 ### Added
 - parent logger name inheritance
 - logging to sentry (option `sentry` and `sentryLevel`)

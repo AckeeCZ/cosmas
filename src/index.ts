@@ -19,7 +19,7 @@ export interface Cosmas extends PinoLogger {
     express: CosmasExpressMiddleware;
     expressError: ErrorRequestHandler;
     stream: Writable;
-    (childName: string): any;
+    (childName: string): Cosmas;
 }
 
 export interface CosmasFactory extends Cosmas {
