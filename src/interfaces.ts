@@ -23,5 +23,6 @@ export interface CosmasOptions {
     pretty?: boolean;
     sentry?: string | boolean;
     sentryLevel?: pino.LevelWithSilent;
+    loggerName?: string;
     skip?: (req: Request, res?: Response) => boolean;
 }
