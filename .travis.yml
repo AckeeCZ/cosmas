@@ -1,14 +1,94 @@
 language: node_js
-node_js:
-- '8'
-- '9'
-- '10'
-- '11'
-- '12'
-- '13'
-script:
-- npm run lint
-- npm run build
-- npm run test
-- npm run test:coverage
-- npm run test:coveralls
+os: linux
+
+stages:
+    - lint
+    - build
+    - test
+
+jobs:
+    include:
+      - stage: lint
+        node_js: '8'
+        script: npm run lint
+      - stage: lint
+        node_js: '9'
+        script: npm run lint
+      - stage: lint
+        node_js: '10'
+        script: npm run lint
+      - stage: lint
+        node_js: '11'
+        script: npm run lint
+      - stage: lint
+        node_js: '12'
+        script: npm run lint
+      - stage: lint
+        node_js: '13'
+        script: npm run lint
+      - stage: build
+        node_js: '8'
+        script: npm run build
+      - stage: build
+        node_js: '9'
+        script: npm run build
+      - stage: build
+        node_js: '10'
+        script: npm run build
+      - stage: build
+        node_js: '11'
+        script: npm run build
+      - stage: build
+        node_js: '12'
+        script: npm run build
+      - stage: build
+        node_js: '13'
+        script: npm run build
+      - stage: test
+        node_js: '6'
+        script: 
+            - npm run test
+            - npm run test:coverage
+            - npm run test:coveralls
+      - stage: test
+        node_js: '7'
+        script: 
+            - npm run test
+            - npm run test:coverage
+            - npm run test:coveralls
+      - stage: test
+        node_js: '8'
+        script: 
+            - npm run test
+            - npm run test:coverage
+            - npm run test:coveralls
+      - stage: test
+        node_js: '9'
+        script: 
+            - npm run test
+            - npm run test:coverage
+            - npm run test:coveralls
+      - stage: test
+        node_js: '10'
+        script: 
+            - npm run test
+            - npm run test:coverage
+            - npm run test:coveralls
+      - stage: test
+        node_js: '11'
+        script: 
+            - npm run test
+            - npm run test:coverage
+            - npm run test:coveralls
+      - stage: test
+        node_js: '12'
+        script: 
+            - npm run test
+            - npm run test:coverage
+            - npm run test:coveralls
+      - stage: test
+        node_js: '13'
+        script: 
+            - npm run test
+            - npm run test:coverage
+            - npm run test:coveralls
