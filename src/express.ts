@@ -1,7 +1,7 @@
 import { ErrorRequestHandler, Request, RequestHandler, Response } from 'express';
 import * as onFinished from 'on-finished';
 import onHeaders = require('on-headers');
-import { Cosmas } from '.';
+import { Cosmas } from './index';
 
 const errorSymbol = Symbol.for('error');
 

@@ -42,7 +42,7 @@ describe('sentry mocked', () => {
                 },
             };
         });
-        loggerFactory = require('..').default;
+        loggerFactory = require('../index').default;
     });
     beforeEach(() => {
         captureException.mockReset();

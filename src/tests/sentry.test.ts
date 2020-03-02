@@ -1,4 +1,4 @@
-import loggerFactory from '..';
+import loggerFactory from '../index';
 
 describe('sentry not available', () => {
     beforeAll(() => {

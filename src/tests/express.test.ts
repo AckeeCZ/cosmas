@@ -9,7 +9,7 @@ let loggerFactory;
 
 beforeEach(() => {
     jest.resetModules();
-    loggerFactory = require('..').default;
+    loggerFactory = require('../index').default;
 });
 
 test('express binds', () => {

@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as pino from 'pino';
 import { Transform, TransformCallback } from 'stream';
 import * as util from 'util';
-import { loggerNameKey, pkgVersionKey } from '.';
+import { loggerNameKey, pkgVersionKey } from './index';
 import { CosmasOptions, CosmasStream } from './interfaces';
 import { levels } from './levels';
 import { StackDriverFormatStream } from './stackdriver';
