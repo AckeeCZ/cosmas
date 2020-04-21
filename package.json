@@ -23,7 +23,7 @@
   ],
   "license": "ISC",
   "engines": {
-    "node": ">= 6"
+    "node": ">= 10"
   },
   "repository": {
     "type": "git",
