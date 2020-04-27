@@ -94,7 +94,6 @@ describe('sentry mocked', () => {
                   "level": 60,
                   "message": "fatal",
                   "time": "2018-03-06T13:30:36.000Z",
-                  "v": 1,
                 },
                 "level": "critical",
               },
