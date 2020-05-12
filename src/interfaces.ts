@@ -18,6 +18,7 @@ export interface CosmasOptions {
     defaultLevel?: pino.LevelWithSilent;
     disableStackdriverFormat?: boolean;
     streams?: CosmasStream[];
+    formatters?: pino.LoggerOptions['formatters'];
     ignoredHttpMethods?: string[];
     config?: LoggerOptions;
     pretty?: boolean;

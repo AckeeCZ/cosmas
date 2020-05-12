@@ -6,7 +6,6 @@ import * as util from 'util';
 import { loggerNameKey, pkgVersionKey } from './index';
 import { CosmasOptions, CosmasStream } from './interfaces';
 import { levels } from './levels';
-import { StackDriverFormatStream } from './stackdriver';
 
 const pkgJson = JSON.parse(fs.readFileSync(path.resolve(path.join(__dirname, '..', 'package.json')), 'utf8'));
 
@@ -65,9 +64,6 @@ const initLoggerStreams = (
             { level: defaultLevel, maxLevel: levels.warn, stream: process.stdout },
             { level: 'warn', stream: process.stderr },
         ];
-    }
-    if (!options.pretty && !options.disableStackdriverFormat) {
-        streams = decorateStreams(streams, StackDriverFormatStream);
     }
 
     streams = decorateStreams(streams, getDefaultTransformStream(options));
