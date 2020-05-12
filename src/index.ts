@@ -91,7 +91,7 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
     const messageKey = 'message'; // best option for Google Stackdriver,
     const streams = initLoggerStreams(defaultLevel, Object.assign({}, options, { messageKey }));
 
-    const formatters: { level?: (label: string, level: number) => object } = {};
+    const formatters: pino.LoggerOptions['formatters'] = {};
 
     if (!options.pretty && !options.disableStackdriverFormat) {
         formatters.level = (_label: string, level: number) => {
