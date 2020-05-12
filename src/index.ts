@@ -30,6 +30,15 @@ export interface CosmasFactory extends Cosmas {
 export const loggerNameKey = 'cosmas.loggerName';
 export const pkgVersionKey = 'cosmas.pkgVersion';
 
+const PINO_TO_STACKDRIVER: { [key: number]: string } = {
+    10: 'DEBUG',
+    20: 'DEBUG',
+    30: 'INFO',
+    40: 'WARNING',
+    50: 'ERROR',
+    60: 'CRITICAL',
+};
+
 const makeCallable = <T extends object, F extends (...args: any[]) => any>(obj: T, fun: F): T & F =>
     new Proxy(fun as any, {
         get: (_target, key) => (obj as any)[key],
@@ -82,13 +91,21 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
     const messageKey = 'message'; // best option for Google Stackdriver,
     const streams = initLoggerStreams(defaultLevel, Object.assign({}, options, { messageKey }));
 
-    options.ignoredHttpMethods = options.ignoredHttpMethods || ['OPTIONS'];
+    const formatters: { level?: (label: string, level: number) => object } = {};
 
+    if (!options.pretty && !options.disableStackdriverFormat) {
+        formatters.level = (_label: string, level: number) => {
+            return { level, severity: PINO_TO_STACKDRIVER[level] || 'UNKNOWN' };
+        };
+    }
+
+    options.ignoredHttpMethods = options.ignoredHttpMethods || ['OPTIONS'];
     const logger = (pino(
         // no deep-merging needed, so assign is OK
         Object.assign(
             {
                 messageKey,
+                formatters,
                 base: {},
                 level: defaultLevel,
                 serializers: serializers.serializers,

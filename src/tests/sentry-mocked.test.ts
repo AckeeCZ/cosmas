@@ -87,18 +87,19 @@ describe('sentry mocked', () => {
             ]
         `);
         expect(captureMessage.mock.results[0].value).toMatchInlineSnapshot(`
-            Object {
-              "data": "fatal",
-              "scope": Object {
-                "extras": Object {
-                  "level": 60,
-                  "message": "fatal",
-                  "time": "2018-03-06T13:30:36.000Z",
-                },
-                "level": "critical",
-              },
-            }
-        `);
+Object {
+  "data": "fatal",
+  "scope": Object {
+    "extras": Object {
+      "level": 60,
+      "message": "fatal",
+      "severity": "CRITICAL",
+      "time": "2018-03-06T13:30:36.000Z",
+    },
+    "level": "critical",
+  },
+}
+`);
         Date.now = dateNow;
     });
 
