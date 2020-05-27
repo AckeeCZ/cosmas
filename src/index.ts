@@ -84,6 +84,21 @@ const initFormatters = (options: CosmasOptions & { loggerName?: string }) => {
     return formatters;
 };
 
+const initHooks = (options: CosmasOptions & { loggerName?: string }) => {
+    const hooks: { logMethod?: (inputArgs: any, method: any) => void } = {};
+    if (!options.loggerName) return hooks;
+
+    // always put logger name to message
+    hooks.logMethod = function(inputArgs, method) {
+        const text = inputArgs[inputArgs.length - 1];
+        if (typeof text === 'string' || text instanceof String) {
+            inputArgs[inputArgs.length - 1] = `[${options.loggerName}] ${text}`;
+        }
+        return method.apply(this, inputArgs);
+    };
+    return hooks;
+};
+
 const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): Cosmas => {
     serializers.disablePaths(options.disableFields);
     serializers.enablePaths(options.enableFields);
@@ -101,6 +116,7 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
     const streams = initLoggerStreams(defaultLevel, Object.assign({}, options, { messageKey }));
 
     const formatters = initFormatters(options);
+    const hooks = initHooks(options);
 
     options.ignoredHttpMethods = options.ignoredHttpMethods || ['OPTIONS'];
     const logger = (pino(
@@ -109,6 +125,7 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
             {
                 messageKey,
                 formatters,
+                hooks,
                 base: {},
                 level: defaultLevel,
                 serializers: serializers.serializers,

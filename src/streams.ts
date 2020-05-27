@@ -16,10 +16,6 @@ const getDefaultTransformStream = (options: CosmasOptions & { messageKey: string
             const obj = JSON.parse(chunk);
             const loggerName = options.loggerName;
             let res;
-            if (loggerName) {
-                // always put logger name to message
-                obj[options.messageKey] = `[${loggerName}] ${obj[options.messageKey]}`;
-            }
             if (loggerName && !options.pretty) {
                 // do not put logger name field to pretty outputs
                 obj[loggerNameKey] = loggerName;
