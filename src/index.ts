@@ -75,6 +75,15 @@ const maxLevelWrite: pino.WriteFn = function(this: any, data: object): void {
     }
 };
 
+const initFormatters = (options: CosmasOptions & { loggerName?: string }) => {
+    const formatters: pino.LoggerOptions['formatters'] = {};
+    if (options.pretty || options.disableStackdriverFormat) return formatters;
+    formatters.level = (_label: string, level: number) => {
+        return { level, severity: PINO_TO_STACKDRIVER[level] || 'UNKNOWN' };
+    };
+    return formatters;
+};
+
 const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): Cosmas => {
     serializers.disablePaths(options.disableFields);
     serializers.enablePaths(options.enableFields);
@@ -91,13 +100,7 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
     const messageKey = 'message'; // best option for Google Stackdriver,
     const streams = initLoggerStreams(defaultLevel, Object.assign({}, options, { messageKey }));
 
-    const formatters: pino.LoggerOptions['formatters'] = {};
-
-    if (!options.pretty && !options.disableStackdriverFormat) {
-        formatters.level = (_label: string, level: number) => {
-            return { level, severity: PINO_TO_STACKDRIVER[level] || 'UNKNOWN' };
-        };
-    }
+    const formatters = initFormatters(options);
 
     options.ignoredHttpMethods = options.ignoredHttpMethods || ['OPTIONS'];
     const logger = (pino(
