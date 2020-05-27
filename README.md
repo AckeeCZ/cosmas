@@ -184,8 +184,8 @@ Options override both default logger configuration and environment-specific conf
 
 - `error` - logs `message`, `code`, `stack` and `data` fields
 - `processEnv` - logs `NODE_PATH` and `NODE_ENV`
-- `req` - logs `body`, `query`, `url`, `method` and omits `password` and `passwordCheck` from `body` and `query`
-- `res` - logs `out`, `time`, `headers.x-deviceid`, `headers.authorization` and `headers.user-agent`
+- `req` - logs `body`, `query`, `url`, `method`, `headers.x-deviceid`, `headers.authorization`, `headers.user-agent` and omits `password` and `passwordCheck` from `body` and `query`
+- `res` - logs `out`, `time`
 
 ## Reserved keys
 Cosmas uses some object keys for its own purposes. Those keys should not be used in data you send to log functions as they may be overwritten by Cosmas. Those keys are:
