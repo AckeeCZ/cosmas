@@ -41,7 +41,7 @@
     "on-headers": "^1.0.1",
     "pick-deep": "^1.0.0",
     "pino": "^6.2.0",
-    "pino-multi-stream": "^4.2.0"
+    "pino-multi-stream": "^5.0.0"
   },
   "peerDependencies": {
     "@sentry/node": "^5.9.0"
