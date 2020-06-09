@@ -1,8 +1,6 @@
 import { ErrorRequestHandler } from 'express';
-import * as fs from 'fs';
 import isObject = require('lodash.isobject');
 import isString = require('lodash.isstring');
-import * as path from 'path';
 import * as pino from 'pino';
 import * as pinoms from 'pino-multi-stream';
 import { Writable } from 'stream';
@@ -78,25 +76,10 @@ const maxLevelWrite: pino.WriteFn = function(this: any, data: object): void {
 };
 
 const initFormatters = (options: CosmasOptions & { loggerName?: string }) => {
-    const pkgJson = JSON.parse(fs.readFileSync(path.resolve(path.join(__dirname, '..', 'package.json')), 'utf8'));
-
     const formatters: pino.LoggerOptions['formatters'] = {};
-    if (!options.pretty && !options.disableStackdriverFormat) {
-        formatters.level = (_label: string, level: number) => {
-            return { level, severity: PINO_TO_STACKDRIVER[level] || 'UNKNOWN' };
-        };
-    }
-
-    // do not put logger name field to pretty outputs
-    formatters.log = (object: { [key: string]: any }) => {
-        if (options.loggerName && !options.pretty) {
-            object[loggerNameKey] = options.loggerName;
-        }
-        // put pkgVersion to non-pretty outputs
-        if (!options.pretty) {
-            object[pkgVersionKey] = pkgJson.version;
-        }
-        return object;
+    if (options.pretty || options.disableStackdriverFormat) return formatters;
+    formatters.level = (_label: string, level: number) => {
+        return { level, severity: PINO_TO_STACKDRIVER[level] || 'UNKNOWN' };
     };
     return formatters;
 };

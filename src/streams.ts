@@ -1,19 +1,31 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import * as pino from 'pino';
 import { Transform, TransformCallback } from 'stream';
 import * as util from 'util';
+import { loggerNameKey, pkgVersionKey } from './index';
 import { CosmasOptions, CosmasStream } from './interfaces';
 import { levels } from './levels';
+
+const pkgJson = JSON.parse(fs.readFileSync(path.resolve(path.join(__dirname, '..', 'package.json')), 'utf8'));
 
 const getDefaultTransformStream = (options: CosmasOptions & { messageKey: string; loggerName?: string }) => {
     class DefaultTransformStream extends Transform {
         // tslint:disable-next-line:function-name
         public _transform(chunk: any, _encoding: string, callback: TransformCallback) {
             const obj = JSON.parse(chunk);
+            const loggerName = options.loggerName;
             let res;
+            if (loggerName && !options.pretty) {
+                // do not put logger name field to pretty outputs
+                obj[loggerNameKey] = loggerName;
+            }
 
             if (options.pretty) {
                 res = util.inspect(obj, { colors: true, showHidden: true, depth: Infinity });
             } else {
+                // do not put pkgVersion to pretty outputs
+                obj[pkgVersionKey] = pkgJson.version;
                 res = JSON.stringify(obj);
             }
 
