@@ -91,6 +91,7 @@ Object {
   "data": "fatal",
   "scope": Object {
     "extras": Object {
+      "cosmas.pkgVersion": "2.0.0-rc.2",
       "level": 60,
       "message": "fatal",
       "severity": "CRITICAL",
