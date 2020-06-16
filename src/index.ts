@@ -1,6 +1,8 @@
 import { ErrorRequestHandler } from 'express';
+import * as fs from 'fs';
 import isObject = require('lodash.isobject');
 import isString = require('lodash.isstring');
+import * as path from 'path';
 import * as pino from 'pino';
 import * as pinoms from 'pino-multi-stream';
 import { Writable } from 'stream';
@@ -48,7 +50,7 @@ const objEmpty = (obj: object) => Object.keys(obj).length === 0;
 
 // This is a custom slightly edited version of pino-multistream's write method, which adds support for maximum log level
 // The original version was pino-multistream 4.2.0 (commit bf7941f) - https://github.com/pinojs/pino-multi-stream/blob/bf7941f77661b6c14dd40840ff4a4db6897f08eb/multistream.js#L43
-const maxLevelWrite: pino.WriteFn = function(this: any, data: object): void {
+const maxLevelWrite: pino.WriteFn = function (this: any, data: object): void {
     let stream;
     const metadata = Symbol.for('pino.metadata');
     const level = this.lastLevel;
@@ -76,10 +78,25 @@ const maxLevelWrite: pino.WriteFn = function(this: any, data: object): void {
 };
 
 const initFormatters = (options: CosmasOptions & { loggerName?: string }) => {
+    const pkgJson = JSON.parse(fs.readFileSync(path.resolve(path.join(__dirname, '..', 'package.json')), 'utf8'));
+
     const formatters: pino.LoggerOptions['formatters'] = {};
-    if (options.pretty || options.disableStackdriverFormat) return formatters;
-    formatters.level = (_label: string, level: number) => {
-        return { level, severity: PINO_TO_STACKDRIVER[level] || 'UNKNOWN' };
+    if (!options.pretty && !options.disableStackdriverFormat) {
+        formatters.level = (_label: string, level: number) => {
+            return { level, severity: PINO_TO_STACKDRIVER[level] || 'UNKNOWN' };
+        };
+    }
+
+    // do not put logger name field to pretty outputs
+    formatters.log = (object: { [key: string]: any }) => {
+        if (options.pretty) return object;
+
+        // put pkgVersion to non-pretty outputs
+        object[pkgVersionKey] = pkgJson.version;
+        if (options.loggerName) {
+            object[loggerNameKey] = options.loggerName;
+        }
+        return object;
     };
     return formatters;
 };
@@ -89,7 +106,7 @@ const initHooks = (options: CosmasOptions & { loggerName?: string }) => {
     if (!options.loggerName) return hooks;
 
     // always put logger name to message
-    hooks.logMethod = function(inputArgs, method) {
+    hooks.logMethod = function (inputArgs, method) {
         const text = inputArgs[inputArgs.length - 1];
         if (typeof text === 'string' || text instanceof String) {
             inputArgs[inputArgs.length - 1] = `[${options.loggerName}] ${text}`;

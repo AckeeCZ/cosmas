@@ -1,8 +1,9 @@
+import omit = require('omit-deep');
 import { levels } from '../levels';
 
 let loggerFactory;
 const scope: any = {};
-const withScope = jest.fn(fn =>
+const withScope = jest.fn((fn) =>
     fn({
         setContext: (key: string, val: any) => {
             scope.context = { [key]: val };
@@ -16,7 +17,7 @@ const withScope = jest.fn(fn =>
     })
 );
 
-const createCapture = (cb = () => {}) => data => {
+const createCapture = (cb = () => {}) => (data) => {
     cb();
     return { data, scope };
 };
@@ -86,7 +87,8 @@ describe('sentry mocked', () => {
               "fatal",
             ]
         `);
-        expect(captureMessage.mock.results[0].value).toMatchInlineSnapshot(`
+        expect(captureMessage.mock.results[0].value.scope.extras['cosmas.pkgVersion']).toBeDefined();
+        expect(omit(captureMessage.mock.results[0].value, 'cosmas.pkgVersion')).toMatchInlineSnapshot(`
 Object {
   "data": "fatal",
   "scope": Object {
