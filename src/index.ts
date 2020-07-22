@@ -78,7 +78,8 @@ const maxLevelWrite: pino.WriteFn = function (this: any, data: object): void {
 };
 
 const initFormatters = (options: CosmasOptions & { loggerName?: string }) => {
-    const pkgJson = JSON.parse(fs.readFileSync(path.resolve(path.join(__dirname, '..', 'package.json')), 'utf8'));
+    const pkgPath = path.resolve(path.join(__dirname, '..', 'package.json'));
+    const pkgJson = fs.existsSync(pkgPath) ? JSON.parse(fs.readFileSync(pkgPath, 'utf8')) : undefined;
 
     const formatters: pino.LoggerOptions['formatters'] = {};
     if (!options.pretty && !options.disableStackdriverFormat) {
@@ -91,8 +92,10 @@ const initFormatters = (options: CosmasOptions & { loggerName?: string }) => {
     formatters.log = (object: { [key: string]: any }) => {
         if (options.pretty) return object;
 
-        // put pkgVersion to non-pretty outputs
-        object[pkgVersionKey] = pkgJson.version;
+        if (pkgJson) {
+            // put pkgVersion to non-pretty outputs
+            object[pkgVersionKey] = pkgJson.version;
+        }
         if (options.loggerName) {
             object[loggerNameKey] = options.loggerName;
         }
