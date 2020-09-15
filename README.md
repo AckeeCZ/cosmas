@@ -180,7 +180,7 @@ Options override both default logger configuration and environment-specific conf
 - `sentryLevel` - set minimum level to log to sentry (default `warn`)
 
 ## Default serializers
-`cosmas` defines some [pino serializers](https://github.com/pinojs/pino/blob/master/docs/API.md#constructor) on its own
+`cosmas` defines some [pino serializers](https://github.com/pinojs/pino/blob/db651a51762e8b043f406a73bb19470bcf6dcff1/docs/api.md#serializers-object) on its own
 
 - `error` - logs `message`, `code`, `stack` and `data` fields
 - `processEnv` - logs `NODE_PATH` and `NODE_ENV`
