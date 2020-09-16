@@ -33,14 +33,13 @@ export const extendSentry = (logger: Cosmas, options: { sentry: string | true; s
     // unfortunately, this is the only place in pino, we can hook onto, where we can be sure all
     // the hooks, formatters and serializers are already applied
     logger[streamSym].write = function (s: string) {
+        originalWrite.call(this, s);
         const obj = JSON.parse(s);
-        if (obj.level >= (options.sentryLevel || levels.warn)) {
-            withScope((scope) => {
-                scope.setLevel(PINO_TO_SENTRY[obj.level]);
-                scope.setExtras(obj);
-                reportToSentry(obj);
-            });
-        }
-        return originalWrite.call(this, s);
+        if (obj.level < (options.sentryLevel || levels.warn)) return;
+        withScope((scope) => {
+            scope.setLevel(PINO_TO_SENTRY[obj.level]);
+            scope.setExtras(obj);
+            reportToSentry(obj);
+        });
     };
 };
