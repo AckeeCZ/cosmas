@@ -1,5 +1,5 @@
 import { captureException, captureMessage, Severity, withScope } from '@sentry/node';
-import { streamSym } from 'pino/lib/symbols';
+import * as pino from 'pino';
 import { Cosmas } from '.';
 import { levels } from './levels';
 
@@ -29,10 +29,10 @@ export const extendSentry = (logger: Cosmas, options: { sentry: string | true; s
         sentry.init({ dsn: options.sentry });
     }
 
-    const originalWrite = logger[streamSym].write;
+    const originalWrite = logger[(pino as any).symbols.streamSym].write; // TODO: update pino types with symbols
     // unfortunately, this is the only place in pino, we can hook onto, where we can be sure all
     // the hooks, formatters and serializers are already applied
-    logger[streamSym].write = function (s: string) {
+    logger[(pino as any).symbols.streamSym].write = function (s: string) {
         originalWrite.call(this, s);
         const obj = JSON.parse(s);
         if (obj.level < (options.sentryLevel || levels.warn)) return;
