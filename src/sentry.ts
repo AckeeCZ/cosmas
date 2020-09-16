@@ -23,10 +23,10 @@ const PINO_TO_SENTRY: { [key: number]: Severity } = {
     60: Severity.Critical,
 };
 
-export const extendSentry = (logger: Cosmas, dsn: string | true) => {
+export const extendSentry = (logger: Cosmas, options: { sentry: string | true; sentryLevel: number }) => {
     const sentry = require('@sentry/node');
-    if (typeof dsn === 'string') {
-        sentry.init({ dsn });
+    if (typeof options.sentry === 'string') {
+        sentry.init({ dsn: options.sentry });
     }
 
     const originalWrite = logger[streamSym].write;
@@ -34,7 +34,7 @@ export const extendSentry = (logger: Cosmas, dsn: string | true) => {
     // the hooks, formatters and serializers are already applied
     logger[streamSym].write = function (s: string) {
         const obj = JSON.parse(s);
-        if (obj.level >= (logger.options.sentryLevel || levels.warn)) {
+        if (obj.level >= (options.sentryLevel || levels.warn)) {
             withScope((scope) => {
                 scope.setLevel(PINO_TO_SENTRY[obj.level]);
                 scope.setExtras(obj);

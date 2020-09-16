@@ -195,6 +195,6 @@ const loggerFactory = (data: string | CosmasOptions = {}, loggerOptions: CosmasO
     return loggerProxy;
 };
 
-const factoryProxy = makeCallable(loggerFactory(), loggerFactory);
+const factoryProxy: CosmasFactory = makeCallable(loggerFactory(), loggerFactory);
 
 export default factoryProxy;

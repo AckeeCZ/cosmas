@@ -1,7 +1,8 @@
 import omit = require('omit-deep');
+import { CosmasFactory } from '../index';
 import { levels } from '../levels';
 
-let loggerFactory;
+let loggerFactory: CosmasFactory;
 let extendSentry;
 const scope: any = {};
 const withScope = jest.fn((fn) =>
@@ -53,9 +54,9 @@ describe('sentry mocked', () => {
     });
     test('can create logger with options', () => {
         expect(() => loggerFactory()).not.toThrowError();
-        expect(() => extendSentry(loggerFactory, true)).not.toThrowError();
+        expect(() => extendSentry(loggerFactory, { sentry: true })).not.toThrowError();
         expect(init).not.toHaveBeenCalled();
-        expect(() => extendSentry(loggerFactory, 'dummy')).not.toThrowError();
+        expect(() => extendSentry(loggerFactory, { sentry: 'dummy' })).not.toThrowError();
         expect(init.mock.calls[0]).toMatchInlineSnapshot(`
             Array [
               Object {
@@ -69,11 +70,11 @@ describe('sentry mocked', () => {
         const dateNow = Date.now;
         Date.now = jest.fn(() => 1520343036000);
         await new Promise((resolve, reject) => {
-            const logger = loggerFactory({
+            const logger = loggerFactory();
+            extendSentry(logger, {
                 sentry: 'DSN',
                 sentryLevel: levels.fatal,
             });
-            extendSentry(logger);
             captureMessage.mockImplementation(createCapture(resolve));
             // expect to trigger only fatal
             logger.trace('trace');
@@ -110,10 +111,8 @@ Object {
 
     test('sentry captureException with stack and correct levels', async () => {
         await new Promise((resolve, reject) => {
-            const logger = loggerFactory({
-                sentry: 'DSN',
-            });
-            extendSentry(logger);
+            const logger = loggerFactory();
+            extendSentry(logger, { sentry: 'DSN' });
             captureException.mockReset();
             captureException.mockImplementation(createCapture(resolve));
             logger.error(new Error());
