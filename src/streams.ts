@@ -52,11 +52,6 @@ const initLoggerStreams = (
 
     streams = decorateStreams(streams, getDefaultTransformStream(options));
 
-    if (options.sentry) {
-        const { createSentryTransformStream } = require('./sentry');
-        streams = decorateStreams(streams, createSentryTransformStream(options));
-    }
-
     return streams;
 };
 

@@ -3,13 +3,14 @@ import loggerFactory from '../index';
 describe('sentry not available', () => {
     beforeAll(() => {
         jest.mock('@sentry/node', () => {
-            throw new Error("Cannot find module '@sentry/node' from 'index.ts'");
+            throw new Error("Cannot find module '@sentry/node' from 'sentry.ts'");
         });
     });
     test('without sentry lib works by default, but crashes on provided', () => {
         expect(() => loggerFactory()).not.toThrowError();
-        expect(() => loggerFactory({ sentry: 'DSN' })).toThrowErrorMatchingInlineSnapshot(
-            `"Cannot find module '@sentry/node' from 'index.ts'"`
-        );
+        expect(() => {
+            const extendSentry = require('../sentry').extendSentry;
+            extendSentry(loggerFactory);
+        }).toThrowErrorMatchingInlineSnapshot(`"Cannot find module '@sentry/node' from 'sentry.ts'"`);
     });
 });

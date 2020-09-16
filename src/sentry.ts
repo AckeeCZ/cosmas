@@ -1,6 +1,6 @@
 import { captureException, captureMessage, Severity, withScope } from '@sentry/node';
-import { Transform, TransformCallback } from 'stream';
-import { CosmasOptions } from './interfaces';
+import { streamSym } from 'pino/lib/symbols';
+import { Cosmas } from '.';
 import { levels } from './levels';
 
 const reportToSentry = (obj: any) => {
@@ -23,20 +23,24 @@ const PINO_TO_SENTRY: { [key: number]: Severity } = {
     60: Severity.Critical,
 };
 
-export const createSentryTransformStream = (options: CosmasOptions): any => {
-    return class SentryTransformStream extends Transform {
-        // tslint:disable-next-line:function-name
-        public _transform(chunk: any, _encoding: string, callback: TransformCallback) {
-            const obj = JSON.parse(chunk);
-            if (obj.level >= (options.sentryLevel || levels.warn)) {
-                withScope((scope) => {
-                    scope.setLevel(PINO_TO_SENTRY[obj.level]);
-                    scope.setExtras(obj);
-                    reportToSentry(obj);
-                });
-            }
-            this.push(chunk);
-            callback();
+export const extendSentry = (logger: Cosmas, dsn: string | true) => {
+    const sentry = require('@sentry/node');
+    if (typeof dsn === 'string') {
+        sentry.init({ dsn });
+    }
+
+    const originalWrite = logger[streamSym].write;
+    // unfortunately, this is the only place in pino, we can hook onto, where we can be sure all
+    // the hooks, formatters and serializers are already applied
+    logger[streamSym].write = function (s: string) {
+        const obj = JSON.parse(s);
+        if (obj.level >= (logger.options.sentryLevel || levels.warn)) {
+            withScope((scope) => {
+                scope.setLevel(PINO_TO_SENTRY[obj.level]);
+                scope.setExtras(obj);
+                reportToSentry(obj);
+            });
         }
+        return originalWrite.call(this, s);
     };
 };

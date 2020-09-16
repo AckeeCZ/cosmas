@@ -2,6 +2,7 @@ import omit = require('omit-deep');
 import { levels } from '../levels';
 
 let loggerFactory;
+let extendSentry;
 const scope: any = {};
 const withScope = jest.fn((fn) =>
     fn({
@@ -44,6 +45,7 @@ describe('sentry mocked', () => {
             };
         });
         loggerFactory = require('../index').default;
+        extendSentry = require('../sentry').extendSentry;
     });
     beforeEach(() => {
         captureException.mockReset();
@@ -51,9 +53,9 @@ describe('sentry mocked', () => {
     });
     test('can create logger with options', () => {
         expect(() => loggerFactory()).not.toThrowError();
-        expect(() => loggerFactory({ sentry: true })).not.toThrowError();
+        expect(() => extendSentry(loggerFactory, true)).not.toThrowError();
         expect(init).not.toHaveBeenCalled();
-        expect(() => loggerFactory({ sentry: 'dummy' })).not.toThrowError();
+        expect(() => extendSentry(loggerFactory, 'dummy')).not.toThrowError();
         expect(init.mock.calls[0]).toMatchInlineSnapshot(`
             Array [
               Object {
@@ -71,6 +73,7 @@ describe('sentry mocked', () => {
                 sentry: 'DSN',
                 sentryLevel: levels.fatal,
             });
+            extendSentry(logger);
             captureMessage.mockImplementation(createCapture(resolve));
             // expect to trigger only fatal
             logger.trace('trace');
@@ -110,6 +113,7 @@ Object {
             const logger = loggerFactory({
                 sentry: 'DSN',
             });
+            extendSentry(logger);
             captureException.mockReset();
             captureException.mockImplementation(createCapture(resolve));
             logger.error(new Error());

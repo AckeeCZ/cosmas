@@ -123,13 +123,6 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
     serializers.disablePaths(options.disableFields);
     serializers.enablePaths(options.enableFields);
 
-    if (options.sentry) {
-        const sentry = require('@sentry/node');
-        if (typeof options.sentry === 'string') {
-            sentry.init({ dsn: options.sentry });
-        }
-    }
-
     const isTesting = process.env.NODE_ENV === 'test';
     const defaultLevel: Level = options.defaultLevel || (isTesting ? 'silent' : 'debug');
     const messageKey = 'message'; // best option for Google Stackdriver,
