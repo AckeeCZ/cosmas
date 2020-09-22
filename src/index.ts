@@ -14,7 +14,7 @@ import { initLoggerStreams } from './streams';
 
 export type PinoLogger = pino.BaseLogger;
 export type Level = pino.LevelWithSilent;
-type PinoHooks = { logMethod?: (inputArgs: any, method: any) => void };
+type PinoHooks = { logMethod: (inputArgs: any, method: any) => void };
 
 export interface Cosmas extends PinoLogger {
     warning: pino.LogFn;
@@ -22,7 +22,7 @@ export interface Cosmas extends PinoLogger {
     express: CosmasExpressMiddleware;
     expressError: ErrorRequestHandler;
     stream: Writable;
-    realHooks?: PinoHooks;
+    realHooks: PinoHooks;
     (childName: string): Cosmas;
 }
 
