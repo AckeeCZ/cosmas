@@ -25,7 +25,7 @@ const getDefaultTransformStream = (options: CosmasOptions & { messageKey: string
 };
 
 const decorateStreams = <T extends Transform>(streams: CosmasStream[], streamClass: new () => T) => {
-    return streams.map(stream => {
+    return streams.map((stream) => {
         const newStream = new streamClass();
         newStream.pipe(stream.stream);
         return {
@@ -42,7 +42,7 @@ const initLoggerStreams = (
 ) => {
     let streams: CosmasStream[];
     if (options.streams) {
-        streams = options.streams.map(stream => Object.assign({ level: defaultLevel }, stream));
+        streams = options.streams.map((stream) => Object.assign({ level: defaultLevel }, stream));
     } else {
         streams = [
             { level: defaultLevel, maxLevel: levels.warn, stream: process.stdout },

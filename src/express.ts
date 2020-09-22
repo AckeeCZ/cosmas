@@ -50,7 +50,7 @@ const expressOnFinished = (logger: Cosmas, req: AckeeRequest) => (_err: Error | 
     logFunction.call(logger, output.data, output.message);
 };
 
-const expressMiddleware: RequestHandler = function(
+const expressMiddleware: RequestHandler = function (
     this: Cosmas,
     req: AckeeRequest,
     response: AckeeResponse,

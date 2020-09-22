@@ -28,7 +28,7 @@ const serializers: Dictionary<SerializerFn> = {
     },
     req(obj: Dictionary<any>): Dictionary<any> {
         const pickHeaders = ['x-deviceid', 'authorization', 'user-agent'];
-        const [body, query] = ['body', 'query'].map(name => {
+        const [body, query] = ['body', 'query'].map((name) => {
             const source = obj[name];
             if (source) {
                 const rest = Object.assign({}, source);
@@ -55,7 +55,7 @@ const serializers: Dictionary<SerializerFn> = {
 };
 
 const sliceByPrefix = (prefix: string, paths?: string[]) =>
-    (paths || []).filter(field => field.startsWith(prefix)).map(field => field.slice(prefix.length));
+    (paths || []).filter((field) => field.startsWith(prefix)).map((field) => field.slice(prefix.length));
 
 const disablePaths = (paths?: string[]) => {
     forEach(serializers, (value, key) => {
