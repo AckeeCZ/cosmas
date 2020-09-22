@@ -14,6 +14,7 @@ import { initLoggerStreams } from './streams';
 
 export type PinoLogger = pino.BaseLogger;
 export type Level = pino.LevelWithSilent;
+type PinoHooks = { logMethod?: (inputArgs: any, method: any) => void };
 
 export interface Cosmas extends PinoLogger {
     warning: pino.LogFn;
@@ -21,6 +22,7 @@ export interface Cosmas extends PinoLogger {
     express: CosmasExpressMiddleware;
     expressError: ErrorRequestHandler;
     stream: Writable;
+    realHooks?: PinoHooks;
     (childName: string): Cosmas;
 }
 
@@ -52,7 +54,7 @@ const objEmpty = (obj: object) => Object.keys(obj).length === 0;
 // The original version was pino-multistream 4.2.0 (commit bf7941f) - https://github.com/pinojs/pino-multi-stream/blob/bf7941f77661b6c14dd40840ff4a4db6897f08eb/multistream.js#L43
 const maxLevelWrite: pino.WriteFn = function (this: any, data: object): void {
     let stream;
-    const metadata = Symbol.for('pino.metadata');
+    const metadata = pino.symbols.needsMetadataGsym;
     const level = this.lastLevel;
     const streams = this.streams;
     for (const dest of streams) {
@@ -105,18 +107,26 @@ const initFormatters = (options: CosmasOptions & { loggerName?: string }) => {
 };
 
 const initHooks = (options: CosmasOptions & { loggerName?: string }) => {
-    const hooks: { logMethod?: (inputArgs: any, method: any) => void } = {};
-    if (!options.loggerName) return hooks;
-
+    const realHooks: PinoHooks = {
+        logMethod(inputArgs, method) {
+            return method.apply(this, inputArgs);
+        },
+    };
+    const hooks: PinoHooks = {
+        logMethod(inputArgs, method) {
+            return realHooks.logMethod.call(this, inputArgs, method);
+        },
+    };
+    if (!options.loggerName) return { hooks, realHooks };
     // always put logger name to message
-    hooks.logMethod = function (inputArgs, method) {
+    realHooks.logMethod = function (inputArgs, method) {
         const text = inputArgs[inputArgs.length - 1];
         if (typeof text === 'string' || text instanceof String) {
             inputArgs[inputArgs.length - 1] = `[${options.loggerName}] ${text}`;
         }
         return method.apply(this, inputArgs);
     };
-    return hooks;
+    return { hooks, realHooks };
 };
 
 const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): Cosmas => {
@@ -129,7 +139,7 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
     const streams = initLoggerStreams(defaultLevel, Object.assign({}, options, { messageKey }));
 
     const formatters = initFormatters(options);
-    const hooks = initHooks(options);
+    const { hooks, realHooks } = initHooks(options);
 
     options.ignoredHttpMethods = options.ignoredHttpMethods || ['OPTIONS'];
     const logger = (pino(
@@ -154,7 +164,7 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
 
     // Add maxLevel support to pino-multi-stream
     // This could be replaced with custom pass-through stream being passed to multistream, which would filter the messages
-    const loggerStream = (logger as any)[(pino as any).symbols.streamSym] as any;
+    const loggerStream = (logger as any)[pino.symbols.streamSym];
     const streamMaxLevelWrite = maxLevelWrite.bind(loggerStream);
     loggerStream.write = (chunk: any) => {
         streamMaxLevelWrite(chunk);
@@ -162,6 +172,7 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
     };
     return Object.assign(logger, {
         options,
+        realHooks,
         express: expressMiddleware.bind(logger),
         expressError: expressErrorMiddleware as any,
     });
