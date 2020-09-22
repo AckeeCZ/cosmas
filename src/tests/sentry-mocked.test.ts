@@ -1,3 +1,4 @@
+import { Scope } from '@sentry/node';
 import omit = require('omit-deep');
 import { CosmasFactory } from '../index';
 import { levels } from '../levels';
@@ -15,6 +16,9 @@ const withScope = jest.fn((fn) =>
         },
         setLevel: (level: any) => {
             scope.level = level;
+        },
+        setTags: (val: any) => {
+            scope.tags = val;
         },
     })
 );
@@ -93,19 +97,19 @@ describe('sentry mocked', () => {
         `);
         expect(captureMessage.mock.results[0].value.scope.extras['cosmas.pkgVersion']).toBeDefined();
         expect(omit(captureMessage.mock.results[0].value, 'cosmas.pkgVersion')).toMatchInlineSnapshot(`
-Object {
-  "data": "fatal",
-  "scope": Object {
-    "extras": Object {
-      "level": 60,
-      "message": "fatal",
-      "severity": "CRITICAL",
-      "time": "2018-03-06T13:30:36.000Z",
-    },
-    "level": "critical",
-  },
-}
-`);
+            Object {
+              "data": "fatal",
+              "scope": Object {
+                "extras": Object {
+                  "level": 60,
+                  "message": "fatal",
+                  "severity": "CRITICAL",
+                  "time": "2018-03-06T13:30:36.000Z",
+                },
+                "level": "critical",
+              },
+            }
+        `);
         Date.now = dateNow;
     });
 
@@ -125,5 +129,47 @@ Object {
                 level: 'error',
             },
         });
+    });
+
+    test('can pass sentry tags', async () => {
+        const dateNow = Date.now;
+        Date.now = jest.fn(() => 1520343036000);
+        await new Promise((resolve, reject) => {
+            const logger = loggerFactory();
+            extendSentry(logger, { sentry: 'DSN' });
+            captureMessage.mockImplementation(createCapture(resolve));
+            logger.fatal('sentryfatal', (scope: Scope) => {
+                scope.setContext('dummyContext', { foo: 'bar' });
+                scope.setTags({ first: 'firstTag' });
+                scope.setExtras({ extra: 'extraValue' });
+            });
+        });
+        expect(captureMessage).toHaveBeenCalledTimes(1);
+        expect(captureException).not.toHaveBeenCalled();
+        expect(captureMessage.mock.calls[0]).toMatchInlineSnapshot(`
+            Array [
+              "sentryfatal",
+            ]
+        `);
+        expect(omit(captureMessage.mock.results[0].value, 'cosmas.pkgVersion')).toMatchInlineSnapshot(`
+            Object {
+              "data": "sentryfatal",
+              "scope": Object {
+                "context": Object {
+                  "dummyContext": Object {
+                    "foo": "bar",
+                  },
+                },
+                "extras": Object {
+                  "extra": "extraValue",
+                },
+                "level": "critical",
+                "tags": Object {
+                  "first": "firstTag",
+                },
+              },
+            }
+        `);
+        Date.now = dateNow;
     });
 });

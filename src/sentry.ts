@@ -1,7 +1,12 @@
-import { captureException, captureMessage, Severity, withScope } from '@sentry/node';
+import { captureException, captureMessage, Scope, Severity, withScope } from '@sentry/node';
+import { createNamespace } from 'cls-hooked';
 import * as pino from 'pino';
 import { Cosmas } from '.';
 import { levels } from './levels';
+
+const clsNamespace = createNamespace('cosmas.sentryExtend');
+
+type SentryCallback = (scope: Scope) => void;
 
 const reportToSentry = (obj: any) => {
     if (!obj.stack) {
@@ -36,10 +41,27 @@ export const extendSentry = (logger: Cosmas, options: { sentry: string | true; s
         originalWrite.call(this, s);
         const obj = JSON.parse(s);
         if (obj.level < (options.sentryLevel || levels.warn)) return;
+        const sentryCallback: SentryCallback | undefined = clsNamespace.get('sentryCallback');
         withScope((scope) => {
             scope.setLevel(PINO_TO_SENTRY[obj.level]);
             scope.setExtras(obj);
+            if (sentryCallback) sentryCallback(scope);
             reportToSentry(obj);
+        });
+    };
+
+    logger.realHooks.logMethod = function (inputArgs, method) {
+        // 2nd argument is Sentry options
+        const sentryCallback: SentryCallback | undefined = inputArgs[1];
+        // TODO: automatic type for 2nd log method arg
+
+        if (!sentryCallback) {
+            return method.apply(this, inputArgs);
+        }
+
+        clsNamespace.runAndReturn(() => {
+            clsNamespace.set('sentryCallback', sentryCallback);
+            return method.apply(this, inputArgs);
         });
     };
 };
