@@ -29,10 +29,10 @@ export const extendSentry = (logger: Cosmas, options: { sentry: string | true; s
         sentry.init({ dsn: options.sentry });
     }
 
-    const originalWrite = logger[pino.symbols.streamSym].write;
+    const originalWrite = (logger as any)[pino.symbols.streamSym].write;
     // unfortunately, this is the only place in pino, we can hook onto, where we can be sure all
     // the hooks, formatters and serializers are already applied
-    logger[pino.symbols.streamSym].write = function (s: string) {
+    (logger as any)[pino.symbols.streamSym].write = function (s: string) {
         originalWrite.call(this, s);
         const obj = JSON.parse(s);
         if (obj.level < (options.sentryLevel || levels.warn)) return;
