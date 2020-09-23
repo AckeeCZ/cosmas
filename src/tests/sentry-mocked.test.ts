@@ -1,10 +1,10 @@
 import { Scope } from '@sentry/node';
 import omit = require('omit-deep');
-import { CosmasFactory } from '../index';
+import { Cosmas, CosmasFactory, CosmasSentry } from '../index';
 import { levels } from '../levels';
 
 let loggerFactory: CosmasFactory;
-let extendSentry;
+let extendSentry: (logger: Cosmas, options: { sentry: string | true; sentryLevel?: number }) => CosmasSentry;
 const scope: any = {};
 const withScope = jest.fn((fn) =>
     fn({
@@ -115,8 +115,8 @@ describe('sentry mocked', () => {
 
     test('sentry captureException with stack and correct levels', async () => {
         await new Promise((resolve, reject) => {
-            const logger = loggerFactory();
-            extendSentry(logger, { sentry: 'DSN' });
+            const originalLogger = loggerFactory();
+            const logger = extendSentry(originalLogger, { sentry: 'DSN' });
             captureException.mockReset();
             captureException.mockImplementation(createCapture(resolve));
             logger.error(new Error());
@@ -132,11 +132,12 @@ describe('sentry mocked', () => {
     });
 
     test('can pass sentry tags, context and extras', async () => {
+      console.log('thist trest');
         const dateNow = Date.now;
         Date.now = jest.fn(() => 1520343036000);
         await new Promise((resolve, reject) => {
-            const logger = loggerFactory();
-            extendSentry(logger, { sentry: 'DSN' });
+            const originalLogger = loggerFactory();
+            const logger = extendSentry(originalLogger, { sentry: 'DSN' });
             captureMessage.mockImplementation(createCapture(resolve));
             logger.fatal({ name: 'John Doe' }, 'sentryData', (scope: Scope) => {
                 scope.setContext('dummyContext', { foo: 'bar' });
@@ -177,8 +178,8 @@ describe('sentry mocked', () => {
         const dateNow = Date.now;
         Date.now = jest.fn(() => 1520343036000);
         await new Promise((resolve, reject) => {
-            const logger = loggerFactory();
-            extendSentry(logger, { sentry: 'DSN' });
+            const originalLogger = loggerFactory();
+            const logger = extendSentry(originalLogger, { sentry: 'DSN' });
             captureMessage.mockImplementation(createCapture(resolve));
             logger.fatal('sentryfatal', (scope: Scope) => {
                 scope.setContext('dummyContext', { foo: 'bar' });

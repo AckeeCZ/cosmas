@@ -1,3 +1,4 @@
+import { Scope } from '@sentry/node';
 import { ErrorRequestHandler } from 'express';
 import * as fs from 'fs';
 import isObject = require('lodash.isobject');
@@ -14,7 +15,7 @@ import { initLoggerStreams } from './streams';
 
 export type PinoLogger = pino.BaseLogger;
 export type Level = pino.LevelWithSilent;
-type PinoHooks = { logMethod: (inputArgs: any, method: any) => void };
+export type PinoHooks = { logMethod: (inputArgs: any, method: any) => void };
 
 export interface Cosmas extends PinoLogger {
     warning: pino.LogFn;
@@ -24,6 +25,23 @@ export interface Cosmas extends PinoLogger {
     stream: Writable;
     realHooks: PinoHooks;
     (childName: string): Cosmas;
+}
+
+export interface LogFnSentry {
+    (msg: string, sentryCallback?: (scope: Scope) => void, ...args: any[]): void;
+    (obj: object, sentryCallback?: (scope: Scope) => void, ...args: any[]): void;
+    (obj: object, msg?: string, sentryCallback?: (scope: Scope) => void, ...args: any[]): void;
+}
+
+export interface CosmasSentry extends Cosmas {
+    fatal: LogFnSentry;
+    error: LogFnSentry;
+    warning: LogFnSentry;
+    warn: LogFnSentry;
+    info: LogFnSentry;
+    debug: LogFnSentry;
+    trace: LogFnSentry;
+    silent: LogFnSentry;
 }
 
 export interface CosmasFactory extends Cosmas {

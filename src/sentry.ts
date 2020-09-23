@@ -1,7 +1,7 @@
 import { captureException, captureMessage, Scope, Severity, withScope } from '@sentry/node';
 import { createNamespace } from 'cls-hooked';
 import * as pino from 'pino';
-import { Cosmas } from '.';
+import { Cosmas, CosmasSentry } from '.';
 import { levels } from './levels';
 
 const clsNamespace = createNamespace('cosmas.sentryExtend');
@@ -28,7 +28,7 @@ const PINO_TO_SENTRY: { [key: number]: Severity } = {
     60: Severity.Critical,
 };
 
-export const extendSentry = (logger: Cosmas, options: { sentry: string | true; sentryLevel: number }) => {
+export const extendSentry = (logger: Cosmas, options: { sentry: string | true; sentryLevel?: number }) => {
     const sentry = require('@sentry/node');
     if (typeof options.sentry === 'string') {
         sentry.init({ dsn: options.sentry });
@@ -77,4 +77,6 @@ export const extendSentry = (logger: Cosmas, options: { sentry: string | true; s
             return method.apply(this, newArgs);
         });
     };
+
+    return logger as CosmasSentry;
 };
