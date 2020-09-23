@@ -51,9 +51,9 @@ export const extendSentry = (logger: Cosmas, options: { sentry: string | true; s
     };
 
     logger.realHooks.logMethod = function (inputArgs, method) {
-        // 2nd argument is Sentry options
-        const sentryCallback: SentryCallback | undefined = inputArgs[1];
-        // TODO: automatic type for 2nd log method arg
+        // TODO: automatic types for logFn calls
+        const sentryCallback: SentryCallback | undefined =
+            typeof inputArgs[0] === 'object' ? inputArgs[2] : inputArgs[1];
 
         if (!sentryCallback) {
             return method.apply(this, inputArgs);

@@ -131,7 +131,49 @@ describe('sentry mocked', () => {
         });
     });
 
-    test('can pass sentry tags', async () => {
+    test('can pass sentry tags, context and extras', async () => {
+        const dateNow = Date.now;
+        Date.now = jest.fn(() => 1520343036000);
+        await new Promise((resolve, reject) => {
+            const logger = loggerFactory();
+            extendSentry(logger, { sentry: 'DSN' });
+            captureMessage.mockImplementation(createCapture(resolve));
+            logger.fatal({ name: 'John Doe' }, 'sentryData', (scope: Scope) => {
+                scope.setContext('dummyContext', { foo: 'bar' });
+                scope.setTags({ first: 'firstTag' });
+                scope.setExtras({ extra: 'extraValue' });
+            });
+        });
+        expect(captureMessage).toHaveBeenCalledTimes(1);
+        expect(captureException).not.toHaveBeenCalled();
+        expect(captureMessage.mock.calls[0]).toMatchInlineSnapshot(`
+            Array [
+              "sentryData",
+            ]
+        `);
+        expect(omit(captureMessage.mock.results[0].value, 'cosmas.pkgVersion')).toMatchInlineSnapshot(`
+            Object {
+              "data": "sentryData",
+              "scope": Object {
+                "context": Object {
+                  "dummyContext": Object {
+                    "foo": "bar",
+                  },
+                },
+                "extras": Object {
+                  "extra": "extraValue",
+                },
+                "level": "critical",
+                "tags": Object {
+                  "first": "firstTag",
+                },
+              },
+            }
+        `);
+        Date.now = dateNow;
+    });
+
+    test('can pass sentry tags, context and extras with 3 params', async () => {
         const dateNow = Date.now;
         Date.now = jest.fn(() => 1520343036000);
         await new Promise((resolve, reject) => {
