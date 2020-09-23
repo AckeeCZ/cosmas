@@ -52,8 +52,21 @@ export const extendSentry = (logger: Cosmas, options: { sentry: string | true; s
 
     logger.realHooks.logMethod = function (inputArgs, method) {
         // TODO: automatic types for logFn calls
-        const sentryCallback: SentryCallback | undefined =
-            typeof inputArgs[0] === 'object' ? inputArgs[2] : inputArgs[1];
+        let sentryCallback: SentryCallback | undefined;
+        let obj: object;
+        let rest: any;
+        let msg: string;
+        let newArgs: any;
+        if (typeof inputArgs[0] === 'string') {
+            [msg, sentryCallback, ...rest] = inputArgs;
+            newArgs = [msg, ...rest];
+        } else if (typeof inputArgs[1] === 'string') {
+            [obj, msg, sentryCallback, ...rest] = inputArgs;
+            newArgs = [obj, msg, ...rest];
+        } else {
+            [obj, sentryCallback, ...rest] = inputArgs;
+            newArgs = [obj, ...rest];
+        }
 
         if (!sentryCallback) {
             return method.apply(this, inputArgs);
@@ -61,7 +74,7 @@ export const extendSentry = (logger: Cosmas, options: { sentry: string | true; s
 
         clsNamespace.runAndReturn(() => {
             clsNamespace.set('sentryCallback', sentryCallback);
-            return method.apply(this, inputArgs);
+            return method.apply(this, newArgs);
         });
     };
 };
