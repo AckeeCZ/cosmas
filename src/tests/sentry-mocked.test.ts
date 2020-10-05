@@ -132,7 +132,6 @@ describe('sentry mocked', () => {
     });
 
     test('can pass sentry tags, context and extras', async () => {
-      console.log('thist trest');
         const dateNow = Date.now;
         Date.now = jest.fn(() => 1520343036000);
         await new Promise((resolve, reject) => {

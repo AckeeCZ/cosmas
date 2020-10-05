@@ -44,6 +44,8 @@ export interface CosmasSentry extends Cosmas {
     silent: LogFnSentry;
 }
 
+export * from './sentry';
+
 export interface CosmasFactory extends Cosmas {
     (data?: string | CosmasOptions): Cosmas;
 }
