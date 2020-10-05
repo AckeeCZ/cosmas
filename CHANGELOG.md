@@ -1,5 +1,13 @@
 ## [Unpublished]
 
+### Added
+- change Sentry scope per message
+
+### Changed
+- initializing Sentry support in logger
+
+## [2.0.0] - 2020-06-22
+
 ### Fixed
 - child logger type
 

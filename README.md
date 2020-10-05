@@ -86,20 +86,48 @@ All loglevels from warning up (inclusive) - warning, error, fatal - are logged t
 
 ## Using Sentry
 
-Cosmas logs every message to [Sentry](https://sentry.io/) for you, when configured. This feature is disabled by default.
+You can enhance cosmas logger with automatic [Sentry](https://sentry.io/) logging functionality.
 
 Sentry SDK `@sentry/node` is a peer dependency. If you want cosmas to use it, install it in your project.
 
 ```js
+import extendSentry from 'cosmas'
+
 // (1) Let cosmas initialize sentry with provided DSN
-const myLogger = logger({ sentry: 'https://<key>@sentry.io/<project>' })
+const myLogger = loggerFactory();
+extendSentry(myLogger, { sentry: 'https://<key>@sentry.io/<project>' }); // this will CHANGE the logger instance and returns it
+// or
+const sentryLogger = extendSentry(myLogger, { sentry: 'https://<key>@sentry.io/<project>' });
 
 // (2) Configure sentry yourself and let cosmas use it
 Sentry.init({/*...*/})
-const myLogger = logger({ sentry: true })
+const myLogger = loggerFactory();
+extendSentry(myLogger, { sentry: true });
+```
 
-// (3) Disable sentry (default, no need to send false option)
-const myLogger = logger({ sentry: false })
+After sentry extension, the interface of log methods will change.
+
+```js
+const myLogger = loggerFactory();
+myLogger.fatal('message');
+myLogger.fatal({ foo: 'bar' }, 'message');
+
+const sentryLogger = extendSentry(myLogger);
+sentryLogger.fatal('message', sentryCallback);
+sentryLogger.fatal({ foo: 'bar' }, sentryCallback);
+sentryLogger.fatal({ foo: 'bar' }, 'message', sentryCallback);
+```
+
+All log methods accept an optional `sentryCallback` argument. You can use it to pass a function which will obtain a [Sentry `scope`](https://docs.sentry.io/platforms/node/enriching-events/scopes/) which can be edited that way.
+
+```js
+import { Scope } from '@sentry/node';
+
+sentryLogger.fatal('message', (scope: Scope) => {
+    // scope.setContext
+    // scope.setTags
+    // scope.setExtras
+});
 ```
 
 When configured, cosmas (additionally to standard logging) captures all logs via Sentry SDK. Logs containing `stack` are logged as exceptions via `captureException` (preserves stack trace) and all other messages via `captureMessage`.

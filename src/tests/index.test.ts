@@ -187,14 +187,14 @@ test('Child logger takes parent config', () => {
 });
 
 test('Child logger inherits parent name', () => {
-    const logger = loggerFactory('parent', { disableStackdriverFormat: true });
+    const logger = loggerFactory('parent');
     const childLogger = logger('child');
 
     expect(childLogger.options.loggerName).toBe('parentchild');
 });
 
 test('Child logger can create another child', () => {
-    const logger = loggerFactory('parent', { disableStackdriverFormat: true });
+    const logger = loggerFactory('parent');
     const childLogger = logger('child');
     const kid = childLogger('grandkid');
 
