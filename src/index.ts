@@ -29,8 +29,8 @@ export interface Cosmas extends PinoLogger {
 
 export interface LogFnSentry {
     (msg: string, sentryCallback?: (scope: Scope) => void, ...args: any[]): void;
-    (obj: object, sentryCallback?: (scope: Scope) => void, ...args: any[]): void;
-    (obj: object, msg?: string, sentryCallback?: (scope: Scope) => void, ...args: any[]): void;
+    <T extends object>(obj: T, sentryCallback?: (scope: Scope) => void, ...args: any[]): void;
+    <T extends object>(obj: T, msg?: string, sentryCallback?: (scope: Scope) => void, ...args: any[]): void;
 }
 
 export interface CosmasSentry extends Cosmas {

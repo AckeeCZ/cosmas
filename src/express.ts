@@ -46,8 +46,8 @@ const expressOnFinished = (logger: Cosmas, req: AckeeRequest) => (_err: Error | 
 
     const logFunction = error || serverError ? logger.error : res.out ? logger.info : logger.debug;
     const output = error ? errorOutput : standardOutput;
-
-    logFunction.call(logger, output.data, output.message);
+    const logFunctionTyped = logFunction as <T extends object>(obj: T, msg?: string, ...args: any[]) => void;
+    logFunctionTyped.call(logger, output.data, output.message);
 };
 
 const expressMiddleware: RequestHandler = function (
