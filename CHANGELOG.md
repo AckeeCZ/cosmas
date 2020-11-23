@@ -1,5 +1,7 @@
 ## [Unpublished]
 
+## [3.0.0] - 2020-11-23
+
 ### Added
 - change Sentry scope per message
 
