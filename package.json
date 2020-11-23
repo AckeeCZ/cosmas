@@ -14,7 +14,8 @@
     "lint": "tslint -p . --force --format codeFrame",
     "pretty": "prettier --parser typescript --write 'src/*.ts'",
     "prepublishOnly": "npm run build",
-    "clean": "rm -rf ./node_modules && npm i && npm t"
+    "clean": "rm -rf ./node_modules && npm i && npm t",
+    "semantic-release": "semantic-release"
   },
   "author": "Michal Vlasák <michal.vlasak@ackee.cz>",
   "contributors": [
@@ -65,6 +66,7 @@
     "jest-extended": "^0.11.2",
     "lint-staged": "^10.0.8",
     "prettier": "^2.0.5",
+    "semantic-release": "^17.3.0",
     "supertest": "^5.0.0",
     "ts-jest": "^26.1.0",
     "tslint": "^6.0.0",

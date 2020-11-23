@@ -10,3 +10,9 @@ script:
 - npm run build
 - npm run test:coverage
 - npm run test:coveralls
+
+jobs:
+  include:
+    - stage: release
+      if: branch = master
+      script: npx semantic-release
