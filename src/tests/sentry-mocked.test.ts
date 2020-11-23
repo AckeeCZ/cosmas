@@ -23,8 +23,8 @@ const withScope = jest.fn((fn) =>
     })
 );
 
-const createCapture = (cb = () => {}) => (data) => {
-    cb();
+const createCapture = (cb = (_value: unknown) => {}) => (data) => {
+    cb(data);
     return { data, scope };
 };
 
