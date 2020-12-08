@@ -22,6 +22,13 @@ test('can create logger with options', () => {
     expect(logger.options.pretty).toBe(true);
 });
 
+test('can create logger with name and options', () => {
+    const logger = loggerFactory('baseLogger', { pretty: true });
+    expect(logger).toBeDefined();
+    expect((logger.options as any).loggerName).toBe('baseLogger');
+    expect(logger.options.pretty).toBe(true);
+});
+
 test('can use custom stream', () =>
     new Promise((resolve, reject) => {
         const logger = loggerFactory({

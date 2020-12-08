@@ -47,7 +47,7 @@ export interface CosmasSentry extends Cosmas {
 export * from './sentry';
 
 export interface CosmasFactory extends Cosmas {
-    (data?: string | CosmasOptions): Cosmas;
+    (data?: string | CosmasOptions, loggerOptions?: CosmasOptions): Cosmas;
 }
 
 // cannot use Symbols, because they aren't JSON.stringifyable
