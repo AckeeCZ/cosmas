@@ -73,8 +73,9 @@ const groupPrefixes = (paths: string[] = []): Map<string, string[] | null> => {
             value = null;
         }
 
-        if (prefix !== null && prefixes.has(prefix)) {
-            if (prefixes.get(prefix) !== null) prefixes.get(prefix).push(value);
+        if (value !== null && prefixes.has(prefix)) {
+            const prefixValues = prefixes.get(prefix);
+            if (prefixValues) prefixValues.push(value);
         } else {
             if (value === null) prefixes.set(prefix, null);
             else prefixes.set(prefix, [value]);
