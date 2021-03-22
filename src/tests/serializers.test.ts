@@ -147,6 +147,92 @@ test('Disable custom path', () => {
     expect(loggerWrites).toBeCalled();
 });
 
+test('Disable path without default serializer', () => {
+    const loggerWrites = jest.fn();
+    const data = {
+        customData: 'Some server data',
+        test: 'test',
+    };
+
+    const logger = loggerFactory({
+        disableFields: ['data.customData'],
+        streams: [
+            {
+                stream: new Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.data).toEqual(pick(data, 'test'));
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+
+    logger.info({ data });
+    expect(loggerWrites).toBeCalled();
+});
+
+test('Disable field without default serializer', () => {
+    const loggerWrites = jest.fn();
+    const data = {
+        customData: {
+            test: 'Some server data',
+        },
+        test: 'test',
+    };
+
+    const logger = loggerFactory({
+        disableFields: ['data'],
+        streams: [
+            {
+                stream: new Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.data).toEqual({});
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+
+    logger.info({ data });
+    expect(loggerWrites).toBeCalled();
+});
+
+test('Disable fields without default serializer from 1 object', () => {
+    const loggerWrites = jest.fn();
+    const data = {
+        customData: {
+            test: 'Some server data',
+        },
+        customData2: 'Some another data',
+        test: 'test',
+    };
+
+    const logger = loggerFactory({
+        disableFields: ['data.customData', 'data.customData2'],
+        streams: [
+            {
+                stream: new Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.data).toEqual(pick(data, 'test'));
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+
+    logger.info({ data });
+    expect(loggerWrites).toBeCalled();
+});
+
 test('Enable custom path', () => {
     const loggerWrites = jest.fn();
     const req = {
@@ -184,10 +270,8 @@ test('Some express headers are enabled by default', () => {
                     write: (chunk, encoding, next) => {
                         const json = JSON.parse(chunk);
                         const validHeaders = ['x-deviceid', 'authorization', 'user-agent'];
-                        validHeaders.forEach(header =>
-                            expect(json.req.headers[header]).toBeDefined()
-                        );
-                        Object.keys(json.req.headers).forEach(header =>
+                        validHeaders.forEach((header) => expect(json.req.headers[header]).toBeDefined());
+                        Object.keys(json.req.headers).forEach((header) =>
                             expect(validHeaders.includes(header)).toBe(true)
                         );
                         loggerWrites();
