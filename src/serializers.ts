@@ -61,24 +61,12 @@ const groupPrefixes = (paths: string[] = []): Map<string, string[] | null> => {
     const prefixes = new Map<string, string[] | null>();
 
     paths.forEach((path) => {
-        const keys = path.split(/\.(.+)/);
-        let value;
-        let prefix;
-
-        if (keys.length > 1) {
-            prefix = keys[0];
-            value = path.slice(prefix.length + 1); // +1 for dot
-        } else {
-            prefix = path;
-            value = null;
-        }
-
-        if (value !== null && prefixes.has(prefix)) {
+        const [prefix, value] = path.split(/\.(.+)/);
+        if (value && prefixes.has(prefix)) {
             const prefixValues = prefixes.get(prefix);
             if (prefixValues) prefixValues.push(value);
         } else {
-            if (value === null) prefixes.set(prefix, null);
-            else prefixes.set(prefix, [value]);
+            prefixes.set(prefix, value ? [value] : null);
         }
     });
     return prefixes;
