@@ -57,15 +57,44 @@ const serializers: Dictionary<SerializerFn> = {
 const sliceByPrefix = (prefix: string, paths?: string[]) =>
     (paths || []).filter((field) => field.startsWith(prefix)).map((field) => field.slice(prefix.length));
 
+const groupPrefixes = (paths: string[] = []): Map<string, string[] | null> => {
+    const prefixes = new Map<string, string[] | null>();
+
+    paths.forEach((path) => {
+        const [prefix, value] = path.split(/\.(.+)/);
+        if (value && prefixes.has(prefix)) {
+            const prefixValues = prefixes.get(prefix);
+            if (prefixValues) prefixValues.push(value);
+        } else {
+            prefixes.set(prefix, value ? [value] : null);
+        }
+    });
+    return prefixes;
+};
+
 const disablePaths = (paths?: string[]) => {
+    const notDisabled = new Map<string, boolean>(paths?.map((path) => [path, true]) || []);
+
     forEach(serializers, (value, key) => {
         const affectedFields = sliceByPrefix(`${key}.`, paths);
 
         if (affectedFields.length === 0) return;
+        affectedFields.forEach((path) => notDisabled.delete(`${key}.${path}`));
+
         const newSerializer: SerializerFn = (obj: Dictionary<any>) => {
             return omit(value(obj), affectedFields);
         };
         serializers[key] = newSerializer;
+    });
+
+    if (!notDisabled.size) return;
+
+    const prefixGroups = groupPrefixes(Array.from(notDisabled.keys()));
+
+    prefixGroups.forEach((fields, prefix) => {
+        serializers[prefix] = (obj: Dictionary<any>) => {
+            return fields === null ? {} : omit(obj, fields);
+        };
     });
 };
 
