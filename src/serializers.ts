@@ -100,6 +100,10 @@ const disablePaths = (paths?: string[]) => {
 
 const enablePaths = (paths?: string[]) => {
     forEach(serializers, (value, key) => {
+        if (paths && paths.includes(key)) {
+            delete serializers[key];
+            return;
+        }
         const affectedFields = sliceByPrefix(`${key}.`, paths);
 
         if (affectedFields.length === 0) return;

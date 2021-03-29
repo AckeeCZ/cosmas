@@ -261,6 +261,33 @@ test('Enable custom path', () => {
     expect(loggerWrites).toBeCalled();
 });
 
+test('Enable all from response', () => {
+    const loggerWrites = jest.fn();
+    const res = {
+        out: 'out data',
+        test: 'test',
+    };
+
+    const logger = loggerFactory({
+        enableFields: ['res'],
+        streams: [
+            {
+                stream: new Writable({
+                    write: (chunk, encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.res).toEqual(res);
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+
+    logger.info({ res });
+    expect(loggerWrites).toBeCalled();
+})
+
 test('Some express headers are enabled by default', () => {
     const loggerWrites = jest.fn();
     const logger = loggerFactory({
