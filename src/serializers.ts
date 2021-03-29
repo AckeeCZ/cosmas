@@ -100,6 +100,14 @@ const disablePaths = (paths?: string[]) => {
 
 const enablePaths = (paths?: string[]) => {
     forEach(serializers, (value, key) => {
+        if (paths && paths.includes(key)) {
+            const enabledSerializer: SerializerFn = (obj: Dictionary<any>) => {
+                const originalResult = value(obj);
+                return Object.assign({}, originalResult, obj);
+            };
+            serializers[key] = enabledSerializer;
+            return;
+        }
         const affectedFields = sliceByPrefix(`${key}.`, paths);
 
         if (affectedFields.length === 0) return;
