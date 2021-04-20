@@ -15,7 +15,8 @@
     "pretty": "prettier --parser typescript --write 'src/*.ts'",
     "prepublishOnly": "npm run build",
     "clean": "rm -rf ./node_modules && npm i && npm t",
-    "semantic-release": "semantic-release"
+    "semantic-release": "semantic-release",
+    "prepare": "husky install"
   },
   "author": "Michal Vlasák <michal.vlasak@ackee.cz>",
   "contributors": [
@@ -62,7 +63,7 @@
     "@types/pino-multi-stream": "^5.1.1",
     "coveralls": "^3.0.2",
     "express": "^4.16.3",
-    "husky": "^4.2.3",
+    "husky": "^6.0.0",
     "jest": "^26.0.1",
     "jest-extended": "^0.11.2",
     "lint-staged": "^10.0.8",
@@ -75,10 +76,5 @@
     "tslint-config-ackee": "^0.3.0",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^4.0.3"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged && npm test"
-    }
   }
 }
