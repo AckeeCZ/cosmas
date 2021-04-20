@@ -179,7 +179,7 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
             },
             options.config
         ),
-        (pinoms as any).multistream(streams)
+        pinoms.multistream(streams)
     ) as PinoLogger) as Cosmas;
 
     // Add maxLevel support to pino-multi-stream

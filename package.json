@@ -59,6 +59,7 @@
     "@types/node": "^14.0.9",
     "@types/on-finished": "^2.3.1",
     "@types/on-headers": "^1.0.0",
+    "@types/pino-multi-stream": "^5.1.1",
     "coveralls": "^3.0.2",
     "express": "^4.16.3",
     "husky": "^4.2.3",
