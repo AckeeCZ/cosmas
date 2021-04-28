@@ -1,7 +1,8 @@
 import { Scope } from '@sentry/node';
 import omit = require('omit-deep');
-import { Cosmas, CosmasFactory, CosmasSentry } from '../index';
+import { Cosmas, CosmasFactory } from '../index';
 import { levels } from '../levels';
+import { CosmasSentry } from '../sentry';
 
 let loggerFactory: CosmasFactory;
 let extendSentry: (logger: Cosmas, options: { sentry: string | true; sentryLevel?: number }) => CosmasSentry;

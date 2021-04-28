@@ -1,4 +1,3 @@
-import { Scope } from '@sentry/node';
 import { ErrorRequestHandler } from 'express';
 import * as fs from 'fs';
 import isObject = require('lodash.isobject');
@@ -26,25 +25,6 @@ export interface Cosmas extends PinoLogger {
     realHooks: PinoHooks;
     (childName: string): Cosmas;
 }
-
-export interface LogFnSentry {
-    (msg: string, sentryCallback?: (scope: Scope) => void, ...args: any[]): void;
-    <T extends object>(obj: T, sentryCallback?: (scope: Scope) => void, ...args: any[]): void;
-    <T extends object>(obj: T, msg?: string, sentryCallback?: (scope: Scope) => void, ...args: any[]): void;
-}
-
-export interface CosmasSentry extends Cosmas {
-    fatal: LogFnSentry;
-    error: LogFnSentry;
-    warning: LogFnSentry;
-    warn: LogFnSentry;
-    info: LogFnSentry;
-    debug: LogFnSentry;
-    trace: LogFnSentry;
-    silent: LogFnSentry;
-}
-
-export * from './sentry';
 
 export interface CosmasFactory extends Cosmas {
     (data?: string | CosmasOptions, loggerOptions?: CosmasOptions): Cosmas;
