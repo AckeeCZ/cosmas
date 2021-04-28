@@ -23,7 +23,7 @@ const withScope = jest.fn((fn) =>
     })
 );
 
-const createCapture = (cb = (_value: unknown) => {}) => (data) => {
+const createCapture = (cb = (_value: unknown) => {}) => (data: unknown) => {
     cb(data);
     return { data, scope };
 };
@@ -73,7 +73,7 @@ describe('sentry mocked', () => {
     test('sentry captureMessage is called with correct scope (respects sentry level)', async () => {
         const dateNow = Date.now;
         Date.now = jest.fn(() => 1520343036000);
-        await new Promise((resolve, reject) => {
+        await new Promise((resolve, _reject) => {
             const logger = loggerFactory();
             extendSentry(logger, {
                 sentry: 'DSN',
@@ -114,7 +114,7 @@ describe('sentry mocked', () => {
     });
 
     test('sentry captureException with stack and correct levels', async () => {
-        await new Promise((resolve, reject) => {
+        await new Promise((resolve, _reject) => {
             const originalLogger = loggerFactory();
             const logger = extendSentry(originalLogger, { sentry: 'DSN' });
             captureException.mockReset();
@@ -134,7 +134,7 @@ describe('sentry mocked', () => {
     test('can pass sentry tags, context and extras', async () => {
         const dateNow = Date.now;
         Date.now = jest.fn(() => 1520343036000);
-        await new Promise((resolve, reject) => {
+        await new Promise((resolve, _reject) => {
             const originalLogger = loggerFactory();
             const logger = extendSentry(originalLogger, { sentry: 'DSN' });
             captureMessage.mockImplementation(createCapture(resolve));
@@ -176,7 +176,7 @@ describe('sentry mocked', () => {
     test('can pass sentry tags, context and extras with 3 params', async () => {
         const dateNow = Date.now;
         Date.now = jest.fn(() => 1520343036000);
-        await new Promise((resolve, reject) => {
+        await new Promise((resolve, _reject) => {
             const originalLogger = loggerFactory();
             const logger = extendSentry(originalLogger, { sentry: 'DSN' });
             captureMessage.mockImplementation(createCapture(resolve));

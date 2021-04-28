@@ -2,10 +2,11 @@ import * as express from 'express';
 import 'jest-extended';
 import { Writable } from 'stream';
 import * as supertest from 'supertest';
+import { CosmasFactory } from '..';
 import { levels } from '../levels';
-import { testWriteStream } from './utils';
+import { LogObject, testWriteStream } from './utils';
 
-let loggerFactory;
+let loggerFactory: CosmasFactory;
 
 beforeEach(() => {
     jest.resetModules();
@@ -21,9 +22,9 @@ test('express binds', () => {
 });
 
 test('GET requests are logged by default', () =>
-    new Promise((resolve, reject) => {
+    new Promise((resolve, _reject) => {
         const logger = loggerFactory({
-            streams: [testWriteStream(resolve, json => expect(json.req.method).toBe('GET'))],
+            streams: [testWriteStream(resolve, (json: LogObject) => expect(json.req.method).toBe('GET'))],
         });
         const app = express();
         const request = supertest(app);
@@ -37,7 +38,7 @@ test('OPTIONS requests are ignored by default', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (_chunk, _encoding, next) => {
                         loggerWrites();
                         next();
                     },
@@ -53,7 +54,7 @@ test('OPTIONS requests are ignored by default', () => {
     });
 });
 
-['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'].forEach(method => {
+['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'].forEach((method) => {
     test(`${method} HTTP method can be ignored by options`, () => {
         const loggerWrites = jest.fn();
         const logger = loggerFactory({
@@ -61,7 +62,7 @@ test('OPTIONS requests are ignored by default', () => {
             streams: [
                 {
                     stream: new Writable({
-                        write: (chunk, encoding, next) => {
+                        write: (_chunk, _encoding, next) => {
                             loggerWrites();
                             next();
                         },
@@ -72,7 +73,7 @@ test('OPTIONS requests are ignored by default', () => {
         const app = express();
         const request = supertest(app);
         app.use(logger.express);
-        return request[method.toLowerCase()]('/').then(() => {
+        return ((request as any)[method.toLowerCase()] as Function)('/').then(() => {
             expect(loggerWrites).not.toBeCalled();
         });
     });
@@ -84,7 +85,7 @@ test('route can be ignored by logger options', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (_chunk, _encoding, next) => {
                         loggerWrites();
                         next();
                     },
@@ -108,7 +109,7 @@ test('route can be ignored using regexp helper', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (_chunk, _encoding, next) => {
                         loggerWrites();
                         next();
                     },
@@ -131,7 +132,7 @@ test('user-agent is not logged', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (chunk, _encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.message).not.toMatch('dummy agent');
                         loggerWrites();
@@ -159,7 +160,7 @@ test('missing user-agent is not logged', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (chunk, _encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.message).not.toMatch('undefined');
                         loggerWrites();
@@ -187,7 +188,7 @@ test('response 5xx is logged at error level', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (chunk, _encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.level).toBe(levels.error);
                         loggerWrites();
@@ -196,12 +197,12 @@ test('response 5xx is logged at error level', () => {
                 }),
             },
         ],
-        skip: (_req, res) => !res, // do not log request - log only response
+        skip: (_req: any, res: any) => !res, // do not log request - log only response
     });
 
     const app = express();
     app.use(logger.express);
-    app.get('/', (req, res) => {
+    app.get('/', (_req, res) => {
         res.statusCode = 503;
         return res.send();
     });

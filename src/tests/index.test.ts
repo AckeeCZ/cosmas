@@ -3,7 +3,7 @@ import isString = require('lodash.isstring');
 import { Writable } from 'stream';
 import loggerFactory, { pkgVersionKey, loggerNameKey } from '../index';
 import { levels } from '../levels';
-import { testWriteStream } from './utils';
+import { LogObject, testWriteStream } from './utils';
 
 test('can create default logger', () => {
     const logger = loggerFactory();
@@ -30,19 +30,19 @@ test('can create logger with name and options', () => {
 });
 
 test('can use custom stream', () =>
-    new Promise((resolve, reject) => {
+    new Promise((resolve, _reject) => {
         const logger = loggerFactory({
-            streams: [testWriteStream(resolve, json => expect(json.message).toBe('Hello'))],
+            streams: [testWriteStream(resolve, (json: LogObject) => expect(json.message).toBe('Hello'))],
         });
 
         logger.info('Hello');
     }));
 
 test('can use warning level', () =>
-    new Promise((resolve, reject) => {
+    new Promise((resolve, _reject) => {
         const logger = loggerFactory({
             streams: [
-                testWriteStream(resolve, json => {
+                testWriteStream(resolve, (json: LogObject) => {
                     expect(json.message).toBe('Hello');
                     expect(json.level).toBe(levels.warn);
                 }),
@@ -53,10 +53,10 @@ test('can use warning level', () =>
     }));
 
 test('child logger has warning level', () =>
-    new Promise((resolve, reject) => {
+    new Promise((resolve, _reject) => {
         const rootLogger = loggerFactory({
             streams: [
-                testWriteStream(resolve, json => {
+                testWriteStream(resolve, (json: LogObject) => {
                     expect(json.message).toContain('Hello');
                     expect(json.level).toBe(levels.warn);
                 }),
@@ -68,28 +68,28 @@ test('child logger has warning level', () =>
     }));
 
 test('severity field is automatically added to log object', () =>
-    new Promise((resolve, reject) => {
+    new Promise((resolve, _reject) => {
         const logger = loggerFactory({
-            streams: [testWriteStream(resolve, json => expect(json.severity).toBe('CRITICAL'))],
+            streams: [testWriteStream(resolve, (json: LogObject) => expect(json.severity).toBe('CRITICAL'))],
         });
 
         logger.fatal('Hello');
     }));
 
 test('automatic severity field can be disabled by options', () =>
-    new Promise((resolve, reject) => {
+    new Promise((resolve, _reject) => {
         const logger = loggerFactory({
             disableStackdriverFormat: true,
-            streams: [testWriteStream(resolve, json => expect(json.severity).toBe(undefined))],
+            streams: [testWriteStream(resolve, (json: LogObject) => expect(json.severity).toBe(undefined))],
         });
 
         logger.fatal('Hello');
     }));
 
 test('logger version is logged', () =>
-    new Promise((resolve, reject) => {
+    new Promise((resolve, _reject) => {
         const logger = loggerFactory({
-            streams: [testWriteStream(resolve, json => expect(json[pkgVersionKey]).not.toBe(undefined))],
+            streams: [testWriteStream(resolve, (json: LogObject) => expect(json[pkgVersionKey]).not.toBe(undefined))],
         });
 
         logger.fatal('Hello');
@@ -101,7 +101,7 @@ test('silent stream does not write', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (_chunk, _encoding, next) => {
                         loggerWrites();
                         next();
                     },
@@ -121,14 +121,14 @@ const exampleMessages = [
     { type: 'msg-key', logData: { msg: 'Mirror, mirror, on the wall', name: 'Sleeping Beauty' } },
 ];
 
-exampleMessages.forEach(data => {
+exampleMessages.forEach((data) => {
     test(`logger name is shown in non-pretty ${data.type} message`, () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
             const loggerName = 'database';
             const rootLogger = loggerFactory({
                 pretty: false,
                 streams: [
-                    testWriteStream(resolve, json => {
+                    testWriteStream(resolve, (json: LogObject) => {
                         expect(json.message).toStartWith(`[${loggerName}] `);
                         expect(json[loggerNameKey]).toBe(loggerName);
                         if ((data.logData as any).name) {
@@ -147,16 +147,16 @@ exampleMessages.forEach(data => {
         }));
 });
 
-exampleMessages.forEach(data => {
+exampleMessages.forEach((data) => {
     test(`logger name is propagated to pretty object with ${data.type} message`, () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
             const loggerName = 'database';
             const rootLogger = loggerFactory({
                 pretty: true,
                 streams: [
                     testWriteStream(
                         resolve,
-                        message => {
+                        (message: LogObject) => {
                             expect(message).toContain(loggerName);
                             if ((data.logData as any).name) {
                                 expect(message).toContain((data.logData as any).name);

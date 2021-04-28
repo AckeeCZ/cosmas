@@ -3,12 +3,13 @@ import omitDeep = require('omit-deep');
 import pick = require('pick-deep');
 import { Writable } from 'stream';
 import * as supertest from 'supertest';
+import { CosmasFactory } from '..';
 
-let loggerFactory;
+let loggerFactory: CosmasFactory;
 
 beforeEach(() => {
     jest.resetModules();
-    loggerFactory = require('../index').default;
+    loggerFactory = require('..').default;
 });
 
 test('Default serializers', () => {
@@ -49,7 +50,7 @@ test('Default serializers', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (chunk, _encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.error).toEqual(pick(error, ['message', 'code', 'stack', 'data']));
                         expect(json.process.env).toEqual({
@@ -101,7 +102,7 @@ test('No extra fields are added in default serializers', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (chunk, _encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.error).toEqual({});
                         expect(json.res).toEqual({});
@@ -132,7 +133,7 @@ test('Disable custom path', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (chunk, _encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.req).toEqual(pick(req, ['body', 'query', 'method']));
                         loggerWrites();
@@ -159,7 +160,7 @@ test('Disable path without default serializer', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (chunk, _encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.data).toEqual(pick(data, 'test'));
                         loggerWrites();
@@ -188,7 +189,7 @@ test('Disable field without default serializer', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (chunk, _encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.data).toEqual({});
                         loggerWrites();
@@ -218,7 +219,7 @@ test('Disable fields without default serializer from 1 object', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (chunk, _encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.data).toEqual(pick(data, 'test'));
                         loggerWrites();
@@ -246,7 +247,7 @@ test('Enable custom path', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (chunk, _encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.req).toEqual(pick(req, ['body', 'query', 'method', 'url', 'extraData']));
                         loggerWrites();
@@ -273,7 +274,7 @@ test('Enable all from response', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (chunk, _encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.res).toEqual(res);
                         loggerWrites();
@@ -286,7 +287,7 @@ test('Enable all from response', () => {
 
     logger.info({ res });
     expect(loggerWrites).toBeCalled();
-})
+});
 
 test('Some express headers are enabled by default', () => {
     const loggerWrites = jest.fn();
@@ -294,7 +295,7 @@ test('Some express headers are enabled by default', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (chunk, _encoding, next) => {
                         const json = JSON.parse(chunk);
                         const validHeaders = ['x-deviceid', 'authorization', 'user-agent'];
                         validHeaders.forEach((header) => expect(json.req.headers[header]).toBeDefined());
@@ -316,7 +317,7 @@ test('Some express headers are enabled by default', () => {
         .set('x-deviceid', '12345abcde')
         .set('Authorization', 'Basic pass')
         .set('User-Agent', 'Jest tests')
-        .set('Age', 100)
+        .set('Age', '100')
         .then(() => {
             expect(loggerWrites).toBeCalled();
         });
@@ -329,7 +330,7 @@ test('Express fields and headers can be enabled', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (chunk, _encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.req.protocol).toBe('http');
                         expect(json.req.headers.host).toBe('localhost');
@@ -358,7 +359,7 @@ test('Default express headers can be disabled', () => {
         streams: [
             {
                 stream: new Writable({
-                    write: (chunk, encoding, next) => {
+                    write: (chunk, _encoding, next) => {
                         const json = JSON.parse(chunk);
                         expect(json.req.headers['user-agent']).toBeUndefined();
                         loggerWrites();
