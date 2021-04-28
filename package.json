@@ -47,10 +47,10 @@
     "pino-multi-stream": "^5.0.0"
   },
   "peerDependencies": {
-    "@sentry/node": "^5.9.0"
+    "@sentry/node": "^6.3.3"
   },
   "devDependencies": {
-    "@sentry/node": "^5.9.0",
+    "@sentry/node": "6",
     "@types/cls-hooked": "^4.3.1",
     "@types/jest": "^26.0.14",
     "@types/lodash.foreach": "^4.5.4",
