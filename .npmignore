@@ -14,3 +14,6 @@ tslint.json
 .prettierrc
 .lintstagedrc
 .editorconfig
+.vscode
+.husky
+release.config.js
