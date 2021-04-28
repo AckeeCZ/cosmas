@@ -91,7 +91,7 @@ You can enhance cosmas logger with automatic [Sentry](https://sentry.io/) loggin
 Sentry SDK `@sentry/node` is a peer dependency. If you want cosmas to use it, install it in your project.
 
 ```js
-import extendSentry from 'cosmas'
+import extendSentry from 'cosmas/sentry'
 
 // (1) Let cosmas initialize sentry with provided DSN
 const myLogger = loggerFactory();

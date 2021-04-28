@@ -1,12 +1,29 @@
 import { captureException, captureMessage, Scope, Severity, withScope } from '@sentry/node';
 import { createNamespace } from 'cls-hooked';
 import * as pino from 'pino';
-import { Cosmas, CosmasSentry } from '.';
+import { Cosmas } from '.';
 import { levels } from './levels';
 
 const clsNamespace = createNamespace('cosmas.sentryExtend');
 
 type SentryCallback = (scope: Scope) => void;
+
+export interface LogFnSentry {
+    (msg: string, sentryCallback?: (scope: Scope) => void, ...args: any[]): void;
+    <T extends object>(obj: T, sentryCallback?: (scope: Scope) => void, ...args: any[]): void;
+    <T extends object>(obj: T, msg?: string, sentryCallback?: (scope: Scope) => void, ...args: any[]): void;
+}
+
+export interface CosmasSentry extends Cosmas {
+    fatal: LogFnSentry;
+    error: LogFnSentry;
+    warning: LogFnSentry;
+    warn: LogFnSentry;
+    info: LogFnSentry;
+    debug: LogFnSentry;
+    trace: LogFnSentry;
+    silent: LogFnSentry;
+}
 
 const reportToSentry = (obj: any) => {
     if (!obj.stack) {
