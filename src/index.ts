@@ -13,7 +13,7 @@ import * as serializers from './serializers';
 import { initLoggerStreams } from './streams';
 
 export type PinoLogger = pino.BaseLogger;
-export type Level = pino.LevelWithSilent;
+export type Level = pinoms.Level;
 export type PinoHooks = { logMethod: (inputArgs: any, method: any) => void };
 
 export interface Cosmas extends PinoLogger {

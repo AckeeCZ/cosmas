@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import * as pino from 'pino';
+import * as pinoms from 'pino-multi-stream';
 
 interface LoggerOptions extends pino.LoggerOptions {
     streams?: Array<{ stream: NodeJS.WritableStream; level?: pino.Level }>;
@@ -7,7 +8,7 @@ interface LoggerOptions extends pino.LoggerOptions {
 
 // this is basically enhanced version of pino-multi-stream.Streams type
 export interface CosmasStream {
-    level?: pino.LevelWithSilent;
+    level?: pinoms.Level;
     maxLevel?: number; // this is not processed by pino, so we need the number directly
     stream: NodeJS.WritableStream;
 }
@@ -15,7 +16,7 @@ export interface CosmasStream {
 export interface CosmasOptions {
     disableFields?: string[];
     enableFields?: string[];
-    defaultLevel?: pino.LevelWithSilent;
+    defaultLevel?: pinoms.Level;
     disableStackdriverFormat?: boolean;
     streams?: CosmasStream[];
     formatters?: pino.LoggerOptions['formatters'];
