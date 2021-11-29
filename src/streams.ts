@@ -8,16 +8,12 @@ const getDefaultTransformStream = (options: CosmasOptions & { messageKey: string
     class DefaultTransformStream extends Transform {
         // tslint:disable-next-line:function-name
         public _transform(chunk: any, _encoding: string, callback: TransformCallback) {
-            const obj = JSON.parse(chunk);
-            let res;
-
             if (options.pretty) {
-                res = util.inspect(obj, { colors: true, showHidden: true, depth: Infinity });
+                const res = util.inspect(JSON.parse(chunk), { colors: true, showHidden: true, depth: Infinity });
+                this.push(`${res}\n`);
             } else {
-                res = JSON.stringify(obj);
+                this.push(chunk);
             }
-
-            this.push(`${res}\n`);
             callback();
         }
     }
