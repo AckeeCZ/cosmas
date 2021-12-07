@@ -16,7 +16,8 @@
     "prepublishOnly": "npm run build",
     "clean": "rm -rf ./node_modules && npm i && npm t",
     "semantic-release": "semantic-release",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "changelog": "gitmoji-changelog"
   },
   "author": "Michal Vlasák <michal.vlasak@ackee.cz>",
   "contributors": [
@@ -64,6 +65,7 @@
     "@types/supertest": "^2.0.11",
     "coveralls": "^3.0.2",
     "express": "^4.16.3",
+    "gitmoji-changelog": "^2.2.1",
     "husky": "^6.0.0",
     "jest": "^26.0.1",
     "jest-extended": "^0.11.2",
