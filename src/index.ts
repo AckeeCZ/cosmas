@@ -142,7 +142,7 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
     const { hooks, realHooks } = initHooks(options);
 
     options.ignoredHttpMethods = options.ignoredHttpMethods || ['OPTIONS'];
-    const logger = (pino(
+    const logger = pino(
         // no deep-merging needed, so assign is OK
         Object.assign(
             {
@@ -160,7 +160,7 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
             options.config
         ),
         pinoms.multistream(streams)
-    ) as PinoLogger) as Cosmas;
+    ) as PinoLogger as Cosmas;
 
     // Add maxLevel support to pino-multi-stream
     // This could be replaced with custom pass-through stream being passed to multistream, which would filter the messages
