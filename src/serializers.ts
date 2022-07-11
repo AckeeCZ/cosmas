@@ -1,4 +1,5 @@
 import { Dictionary } from 'lodash';
+import cloneDeep = require('lodash.clonedeep');
 import forEach = require('lodash.foreach');
 import omit = require('omit-deep');
 import pick = require('pick-deep');
@@ -93,7 +94,7 @@ const disablePaths = (paths?: string[]) => {
 
     prefixGroups.forEach((fields, prefix) => {
         serializers[prefix] = (obj: Dictionary<any>) => {
-            return fields === null ? {} : omit(obj, fields);
+            return fields === null ? {} : omit(cloneDeep(obj), fields);
         };
     });
 };

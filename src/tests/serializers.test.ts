@@ -146,6 +146,11 @@ test('Disable custom path', () => {
 
     logger.info({ req });
     expect(loggerWrites).toBeCalled();
+    expect(req).toMatchObject({
+        extraData: 'Some server data',
+        method: 'GET',
+        url: 'www.example.com',
+    });
 });
 
 test('Disable path without default serializer', () => {
@@ -173,6 +178,10 @@ test('Disable path without default serializer', () => {
 
     logger.info({ data });
     expect(loggerWrites).toBeCalled();
+    expect(data).toMatchObject({
+        customData: 'Some server data',
+        test: 'test',
+    });
 });
 
 test('Disable field without default serializer', () => {
