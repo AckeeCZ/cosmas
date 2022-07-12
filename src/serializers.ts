@@ -31,7 +31,7 @@ const serializers: Dictionary<SerializerFn> = {
         const pickHeaders = ['x-deviceid', 'authorization', 'user-agent'];
         const [body, query] = ['body', 'query'].map((name) => {
             const source = obj[name];
-            if (source) {
+            if (source && typeof source === 'object' && !Array.isArray(source)) {
                 const rest = Object.assign({}, source);
                 omit(rest, ['password', 'passwordCheck']);
                 return rest;

@@ -4,6 +4,7 @@ import pick = require('pick-deep');
 import { Writable } from 'stream';
 import * as supertest from 'supertest';
 import { CosmasFactory } from '..';
+import { serializers } from '../serializers';
 
 let loggerFactory: CosmasFactory;
 
@@ -387,4 +388,40 @@ test('Default express headers can be disabled', () => {
         .then(() => {
             expect(loggerWrites).toBeCalled();
         });
+});
+
+test('req body string serialization', () => {
+    const loggerWrites = jest.fn();
+    const req = {
+        method: 'GET',
+        url: 'www.example.com',
+    };
+
+    const logger = loggerFactory({
+        config: {
+            serializers: {
+                req(req) {
+                    req.body = 'mystring';
+                    return serializers.req(req);
+                },
+                res(res) {
+                    return serializers.res(res);
+                },
+            },
+        },
+        streams: [
+            {
+                stream: new Writable({
+                    write: (chunk, _encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.req.body).toBe('mystring');
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+
+    logger.info({ req });
 });
