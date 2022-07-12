@@ -211,3 +211,35 @@ test('response 5xx is logged at error level', () => {
         expect(loggerWrites).toBeCalled();
     });
 });
+
+test('response headers', () => {
+    const loggerWrites = jest.fn();
+    const partialHeader = {
+        'x-powered-by': 'Express',
+    };
+
+    const logger = loggerFactory({
+        enableFields: ['res.headers'],
+        streams: [
+            {
+                stream: new Writable({
+                    write: (chunk, _encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.res.headers).not.toBeEmpty();
+                        expect(json.res.headers).toMatchObject(partialHeader);
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+        skip: (_req: any, res: any) => !res, // do not log request - log only response
+    });
+
+    const app = express();
+    app.use(logger.express);
+    const request = supertest(app);
+    return request.get('/').then(() => {
+        expect(loggerWrites).toBeCalled();
+    });
+});
