@@ -1,4 +1,5 @@
 import { ErrorRequestHandler, Request, RequestHandler, Response } from 'express';
+import { OutgoingHttpHeaders } from 'http';
 import * as onFinished from 'on-finished';
 import onHeaders = require('on-headers');
 import { Cosmas } from './index';
@@ -6,7 +7,13 @@ import { Cosmas } from './index';
 const errorSymbol = Symbol.for('error');
 
 type AckeeRequest = Request & { _startAt?: [number, number]; ackId?: string };
-type AckeeResponse = Response & { _startAt?: [number, number]; time?: string; out?: object; [errorSymbol]?: any };
+type AckeeResponse = Response & {
+    _startAt?: [number, number];
+    time?: string;
+    out?: object;
+    [errorSymbol]?: any;
+    headers?: OutgoingHttpHeaders;
+};
 
 export type CosmasExpressMiddleware = (this: Cosmas, req: AckeeRequest, response: AckeeResponse, next: any) => void;
 
@@ -26,6 +33,7 @@ const expressOnFinished = (logger: Cosmas, req: AckeeRequest) => (_err: Error | 
     if (shouldSkipLogging(logger, req, res)) {
         return;
     }
+    res.headers = res.getHeaders();
     const error = res[errorSymbol];
     const userAgent = req.headers['user-agent'];
     const reqOut = `${res.statusCode} ${req.method} ${req.originalUrl}`;
