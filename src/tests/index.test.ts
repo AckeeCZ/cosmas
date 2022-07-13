@@ -207,3 +207,39 @@ test('Child logger can create another child', () => {
 
     expect(kid.options.loggerName).toBe('parentchildgrandkid');
 });
+
+test('Pass redact config to pino', () => {
+    const loggerWrites = jest.fn();
+    const toRedact = {
+        password: 'sensitiveInformation',
+        somethingSecret: {
+            password: 'secretInformation',
+        },
+        message: 'visible',
+    };
+
+    const logger = loggerFactory({
+        config: {
+            redact: ['*.password', 'toRedact.somethingSecret.password'],
+        },
+        streams: [
+            {
+                stream: new Writable({
+                    write: (chunk, _encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.toRedact).toMatchObject({
+                            password: '[Redacted]',
+                            somethingSecret: { password: '[Redacted]' },
+                            message: 'visible',
+                        });
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+
+    logger.info({ toRedact });
+    expect(loggerWrites).toBeCalled();
+});
