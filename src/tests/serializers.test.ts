@@ -425,3 +425,57 @@ test('req body string serialization', () => {
 
     logger.info({ req });
 });
+
+const nonEmptyValues = [42, 0, 42.69, false, 'hello', { a: 'b' }, [1]];
+test.each(nonEmptyValues)('req body serialization - nonempty values: %s', (value) => {
+    const loggerWrites = jest.fn();
+    const req = {
+        method: 'GET',
+        url: 'www.example.com',
+        body: value,
+    };
+
+    const logger = loggerFactory({
+        streams: [
+            {
+                stream: new Writable({
+                    write: (chunk, _encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.req.body).toEqual(value);
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+
+    logger.info({ req });
+});
+
+const emptyValues = [null, undefined, {}, [], ''];
+test.each(emptyValues)('req body serialization - empty values: %s', (value) => {
+    const loggerWrites = jest.fn();
+    const req = {
+        method: 'GET',
+        url: 'www.example.com',
+        body: value,
+    };
+
+    const logger = loggerFactory({
+        streams: [
+            {
+                stream: new Writable({
+                    write: (chunk, _encoding, next) => {
+                        const json = JSON.parse(chunk);
+                        expect(json.req.body).toBe(undefined);
+                        loggerWrites();
+                        next();
+                    },
+                }),
+            },
+        ],
+    });
+
+    logger.info({ req });
+});
