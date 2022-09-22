@@ -26,7 +26,7 @@ export interface CosmasSentry extends Cosmas {
 }
 
 const reportToSentry = (obj: any) => {
-    if (!obj.stack) {
+    if (!obj.err) {
         return captureMessage(obj.message || obj);
     }
     const error = new Error(obj.message);

@@ -120,10 +120,10 @@ describe('sentry mocked', () => {
         await new Promise((resolve, _reject) => {
             const originalLogger = loggerFactory();
             const logger = extendSentry(originalLogger, { sentry: 'DSN' });
-            captureException.mockReset();
             captureException.mockImplementation(createCapture(resolve));
             logger.error(new Error());
         });
+        console.log('Promise resolved');
         expect(captureException).toHaveBeenCalledTimes(1);
         expect(captureMessage).not.toHaveBeenCalled();
         expect(captureException.mock.results[0].value).toMatchObject({
