@@ -7,6 +7,8 @@ module.exports = {
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     collectCoverage: true,
     // testURL because of problems with jsdom https://github.com/jsdom/jsdom/issues/2304
-    testURL: "http://localhost",
-    setupFilesAfterEnv: ['jest-extended'],
+    testEnvironmentOptions: {
+        url: "http://localhost",
+    },
+    setupFilesAfterEnv: ['jest-extended/all'],
 };

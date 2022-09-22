@@ -24,10 +24,12 @@ const withScope = jest.fn((fn) =>
     })
 );
 
-const createCapture = (cb = (_value: unknown) => {}) => (data: unknown) => {
-    cb(data);
-    return { data, scope };
-};
+const createCapture =
+    (cb = (_value: unknown) => {}) =>
+    (data: unknown) => {
+        cb(data);
+        return { data, scope };
+    };
 
 const captureException = jest.fn(createCapture());
 const captureMessage = jest.fn(createCapture());
@@ -63,8 +65,8 @@ describe('sentry mocked', () => {
         expect(init).not.toHaveBeenCalled();
         expect(() => extendSentry(loggerFactory, { sentry: 'dummy' })).not.toThrowError();
         expect(init.mock.calls[0]).toMatchInlineSnapshot(`
-            Array [
-              Object {
+            [
+              {
                 "dsn": "dummy",
               },
             ]
@@ -92,22 +94,22 @@ describe('sentry mocked', () => {
         expect(captureMessage).toHaveBeenCalledTimes(1);
         expect(captureException).not.toHaveBeenCalled();
         expect(captureMessage.mock.calls[0]).toMatchInlineSnapshot(`
-            Array [
+            [
               "fatal",
             ]
         `);
         expect(captureMessage.mock.results[0].value.scope.extras['cosmas.pkgVersion']).toBeDefined();
         expect(omit(captureMessage.mock.results[0].value, 'cosmas.pkgVersion')).toMatchInlineSnapshot(`
-            Object {
+            {
               "data": "fatal",
-              "scope": Object {
-                "extras": Object {
+              "scope": {
+                "extras": {
                   "level": 60,
                   "message": "fatal",
                   "severity": "CRITICAL",
                   "time": "2018-03-06T13:30:36.000Z",
                 },
-                "level": "critical",
+                "level": "fatal",
               },
             }
         `);
@@ -148,24 +150,24 @@ describe('sentry mocked', () => {
         expect(captureMessage).toHaveBeenCalledTimes(1);
         expect(captureException).not.toHaveBeenCalled();
         expect(captureMessage.mock.calls[0]).toMatchInlineSnapshot(`
-            Array [
+            [
               "sentryData",
             ]
         `);
         expect(omit(captureMessage.mock.results[0].value, 'cosmas.pkgVersion')).toMatchInlineSnapshot(`
-            Object {
+            {
               "data": "sentryData",
-              "scope": Object {
-                "context": Object {
-                  "dummyContext": Object {
+              "scope": {
+                "context": {
+                  "dummyContext": {
                     "foo": "bar",
                   },
                 },
-                "extras": Object {
+                "extras": {
                   "extra": "extraValue",
                 },
-                "level": "critical",
-                "tags": Object {
+                "level": "fatal",
+                "tags": {
                   "first": "firstTag",
                 },
               },
@@ -190,24 +192,24 @@ describe('sentry mocked', () => {
         expect(captureMessage).toHaveBeenCalledTimes(1);
         expect(captureException).not.toHaveBeenCalled();
         expect(captureMessage.mock.calls[0]).toMatchInlineSnapshot(`
-            Array [
+            [
               "sentryfatal",
             ]
         `);
         expect(omit(captureMessage.mock.results[0].value, 'cosmas.pkgVersion')).toMatchInlineSnapshot(`
-            Object {
+            {
               "data": "sentryfatal",
-              "scope": Object {
-                "context": Object {
-                  "dummyContext": Object {
+              "scope": {
+                "context": {
+                  "dummyContext": {
                     "foo": "bar",
                   },
                 },
-                "extras": Object {
+                "extras": {
                   "extra": "extraValue",
                 },
-                "level": "critical",
-                "tags": Object {
+                "level": "fatal",
+                "tags": {
                   "first": "firstTag",
                 },
               },

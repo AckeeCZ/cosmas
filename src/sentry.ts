@@ -1,4 +1,4 @@
-import { captureException, captureMessage, Scope, Severity, withScope } from '@sentry/node';
+import { captureException, captureMessage, Scope, SeverityLevel, withScope } from '@sentry/node';
 import { createNamespace } from 'cls-hooked';
 import * as pino from 'pino';
 import { Cosmas } from '.';
@@ -36,13 +36,13 @@ const reportToSentry = (obj: any) => {
     return captureException(error);
 };
 
-const PINO_TO_SENTRY: { [key: number]: Severity } = {
-    10: Severity.Debug,
-    20: Severity.Debug,
-    30: Severity.Info,
-    40: Severity.Warning,
-    50: Severity.Error,
-    60: Severity.Critical,
+const PINO_TO_SENTRY: { [key: number]: SeverityLevel } = {
+    10: 'debug',
+    20: 'debug',
+    30: 'info',
+    40: 'warning',
+    50: 'error',
+    60: 'fatal',
 };
 
 export const extendSentry = (logger: Cosmas, options: { sentry: string | true; sentryLevel?: number }) => {

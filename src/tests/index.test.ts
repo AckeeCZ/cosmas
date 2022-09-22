@@ -1,4 +1,3 @@
-import 'jest-extended';
 import isString = require('lodash.isstring');
 import { Writable } from 'stream';
 import loggerFactory, { pkgVersionKey, loggerNameKey } from '../index';
