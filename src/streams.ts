@@ -1,4 +1,4 @@
-import * as pinoms from 'pino-multi-stream';
+import pino from 'pino';
 import { Transform, TransformCallback } from 'stream';
 import * as util from 'util';
 import { CosmasOptions, CosmasStream } from './interfaces';
@@ -33,7 +33,7 @@ const decorateStreams = <T extends Transform>(streams: CosmasStream[], streamCla
 };
 
 const initLoggerStreams = (
-    defaultLevel: pinoms.Level,
+    defaultLevel: pino.Level,
     options: CosmasOptions & { messageKey: string; loggerName?: string }
 ) => {
     let streams: CosmasStream[];

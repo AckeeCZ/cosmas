@@ -3,8 +3,7 @@ import * as fs from 'fs';
 import isObject = require('lodash.isobject');
 import isString = require('lodash.isstring');
 import * as path from 'path';
-import * as pino from 'pino';
-import * as pinoms from 'pino-multi-stream';
+import { pino } from 'pino';
 import { Writable } from 'stream';
 import { CosmasExpressMiddleware, expressErrorMiddleware, expressMiddleware } from './express';
 import { CosmasOptions } from './interfaces';
@@ -13,7 +12,6 @@ import * as serializers from './serializers';
 import { initLoggerStreams } from './streams';
 
 export type PinoLogger = pino.BaseLogger;
-export type Level = pinoms.Level;
 export type PinoHooks = { logMethod: (inputArgs: any, method: any) => void };
 
 export interface Cosmas extends PinoLogger {
@@ -133,8 +131,7 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
     serializers.disablePaths(options.disableFields);
     serializers.enablePaths(options.enableFields);
 
-    const isTesting = process.env.NODE_ENV === 'test';
-    const defaultLevel: Level = options.defaultLevel || (isTesting ? 'silent' : 'debug');
+    const defaultLevel: pino.Level = options.defaultLevel || 'debug';
     const messageKey = 'message'; // best option for Google Stackdriver,
     const streams = initLoggerStreams(defaultLevel, Object.assign({}, options, { messageKey }));
 
@@ -159,7 +156,7 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
             },
             options.config
         ),
-        pinoms.multistream(streams)
+        pino.multistream(streams)
     ) as PinoLogger as Cosmas;
 
     // Add maxLevel support to pino-multi-stream

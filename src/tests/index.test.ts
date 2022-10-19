@@ -1,5 +1,5 @@
-import 'jest-extended';
 import isString = require('lodash.isstring');
+import pino from 'pino';
 import { Writable } from 'stream';
 import loggerFactory, { pkgVersionKey, loggerNameKey } from '../index';
 import { levels } from '../levels';
@@ -106,7 +106,7 @@ test('silent stream does not write', () => {
                         next();
                     },
                 }),
-                level: 'silent',
+                level: 'silent' as pino.Level,
             },
         ],
     });
