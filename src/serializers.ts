@@ -1,6 +1,7 @@
 import { Dictionary } from 'lodash';
 import cloneDeep = require('lodash.clonedeep');
 import forEach = require('lodash.foreach');
+import merge = require('lodash.merge');
 import omit = require('omit-deep');
 import pick = require('pick-deep');
 import { removeEmpty } from './utils';
@@ -115,7 +116,7 @@ const enablePaths = (paths?: string[]) => {
         const newSerializer: SerializerFn = (obj: Dictionary<any>) => {
             const newFields = pick(obj, affectedFields);
             const originalResult = value(obj);
-            return Object.assign({}, originalResult, newFields);
+            return merge(originalResult, newFields);
         };
         serializers[key] = newSerializer;
     });
