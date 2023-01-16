@@ -48,35 +48,6 @@ const makeCallable = <T extends object, F extends (...args: any[]) => any>(obj: 
 
 const objEmpty = (obj: object) => Object.keys(obj).length === 0;
 
-// This is a custom slightly edited version of pino-multistream's write method, which adds support for maximum log level
-// The original version was pino-multistream 4.2.0 (commit bf7941f) - https://github.com/pinojs/pino-multi-stream/blob/bf7941f77661b6c14dd40840ff4a4db6897f08eb/multistream.js#L43
-const maxLevelWrite: pino.WriteFn = function (this: any, data: object): void {
-    let stream;
-    const metadata = pino.symbols.needsMetadataGsym;
-    const level = this.lastLevel;
-    const streams = this.streams;
-    for (const dest of streams) {
-        stream = dest.stream;
-        // tslint:disable-next-line:early-exit
-        if (dest.level <= level) {
-            if (!dest.maxLevel || (dest.maxLevel && level < dest.maxLevel)) {
-                if (stream[metadata]) {
-                    // tslint:disable-next-line:no-this-assignment
-                    const { lastTime, lastMsg, lastObj, lastLogger } = this;
-                    stream.lastLevel = level;
-                    stream.lastTime = lastTime;
-                    stream.lastMsg = lastMsg;
-                    stream.lastObj = lastObj;
-                    stream.lastLogger = lastLogger;
-                }
-                stream.write(data);
-            }
-        } else {
-            break;
-        }
-    }
-};
-
 const initFormatters = (options: CosmasOptions & { loggerName?: string }) => {
     const pkgPath = path.resolve(path.join(__dirname, '..', 'package.json'));
     const pkgJson = fs.existsSync(pkgPath) ? JSON.parse(fs.readFileSync(pkgPath, 'utf8')) : undefined;
@@ -156,17 +127,9 @@ const defaultLogger = (options: CosmasOptions & { loggerName?: string } = {}): C
             },
             options.config
         ),
-        pino.multistream(streams)
+        pino.multistream(streams, { dedupe: true })
     ) as PinoLogger as Cosmas;
 
-    // Add maxLevel support to pino-multi-stream
-    // This could be replaced with custom pass-through stream being passed to multistream, which would filter the messages
-    const loggerStream = (logger as any)[pino.symbols.streamSym];
-    const streamMaxLevelWrite = maxLevelWrite.bind(loggerStream);
-    loggerStream.write = (chunk: any) => {
-        streamMaxLevelWrite(chunk);
-        return true;
-    };
     return Object.assign(logger, {
         options,
         realHooks,
