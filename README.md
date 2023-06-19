@@ -1,8 +1,14 @@
 # Cosmas
 
+> With pino integrating pino multistream this package is no longer needed and may not be maintained in the future.
+
+>See [pino multistream](https://github.com/pinojs/pino/releases/tag/v7.0.0)
+
+---
+
 <div align="center">
 
-![Cosmas](https://i.imgur.com/EFe3wOa.png)
+![Cosmas](https://i.imgur.com/gmfRMXy.png)
 
 [![Node Version](https://img.shields.io/node/v/cosmas?style=flat-square)](https://www.npmjs.com/package/cosmas)
 [![Npm](https://img.shields.io/npm/v/cosmas.svg?style=flat-square)](https://www.npmjs.com/package/cosmas)
