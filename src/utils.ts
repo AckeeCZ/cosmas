@@ -1,7 +1,16 @@
 import { Request } from 'express';
 import { Dictionary } from 'lodash';
-import isEmpty = require('lodash.isempty');
+import isEmptyObject = require('lodash.isempty');
 import omit = require('omit-deep');
+
+const isPrimitive = (val: any) => val !== Object(val);
+
+const isEmpty = (val: any) => {
+    if (isPrimitive(val)) {
+        return val === null || val === undefined || val === '';
+    }
+    return isEmptyObject(val);
+};
 
 const removeEmpty = (obj: Dictionary<any>): object =>
     omit(
